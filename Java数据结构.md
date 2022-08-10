@@ -6,7 +6,14 @@
 # 链表leetcode笔记
     虚拟头节点 86
         如果不使用 dummy 虚拟节点，代码会复杂很多，而有了 dummy 节点这个占位符，可以避免处理空指针的情况，在最后只需要返回 dummy,next 降低代码的复杂性
-    ```
     
+    ``` java
+    ListNode dummy = new ListNode(-1);
+    ListNode l = dummy;
+    ---
+    return dummy.next;//就是返回l；
+    ```
+
+
 
 
