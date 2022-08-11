@@ -1,7 +1,8 @@
 from pynput.keyboard import Key, Controller
 import time
 keyboard = Controller()
-# 需要安装pynput pip3 install pynput
+# 需要安装pynput 
+# pip3 install pynput
 
 a=input('内容：')
 b=eval(input('次数：'))
