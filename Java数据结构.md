@@ -1,4 +1,30 @@
 # 基础知识
+
+## 类继承树
+
+![](https://gcore.jsdelivr.net/gh/mcxen/image@main/20220815143113.png)
+由继承树看出，三者都是Collection的间接实现类。
+
+ArrayDeque实现Deque接口，Stack继承于Vector，LinkedList实现Deque与List接口。
+方法参照表
+
+| Stack	|ArrayDeque	|LinkedList|
+|----|----|----|
+| push(e)	|addFirst(e)/offerFirst(e)	|addFirst(e)/offerFirst(e)|
+| pop()	|removeFirst()/pollFirst()	|removeFirst()/pollFirst()|
+| peek()	|getFirst()/peekFirst()	|getFirst()/peekFirst()|
+
+```java
+LinkedList<Integer> stack = new LinkedList<>();
+
+stack.addLast(1);   // 元素 1 入栈
+stack.addLast(2);   // 元素 2 入栈
+stack.removeLast(); // 出栈 -> 元素 2
+stack.removeLast(); // 出栈 -> 元素 1
+
+```
+
+
 ## 位 bit 
 
 原码：第一位表示符号，其余表示值
