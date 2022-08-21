@@ -1,3 +1,13 @@
+# OOP基础知识
+类只允许继承一个对象，不允许继承多个对象，
+public class a extends c,d(){}
+
+这是错误的，继承关系也最好在三层以内。
+
+java多态
+ - 方法的多态：重载OverLoading 和 覆写 override
+ - 对象的多态：向上转型，向下转型，
+
 # 反射
 常用函数代码
 ```java
@@ -47,6 +57,20 @@ System.out.println(st1==st2);//true!!
 //对于引用类型，==是对于地址的比较
 ```
 ![](https://gcore.jsdelivr.net/gh/mcxen/image@main/20220816190356.png)
+
+### 对于String的方法：equals
+
+- 区分大小写的
+- equalsIgnoreCase就可以胡咧
+
+建议使用"hello".equals(str2);这种的，不建议str2.equals("hello");这样可以避免str2没有初始化的时候java编译器报错NullPointerException。
+### concat 拼接字符串
+
+### charAt
+
+### indexOf(String str)
+查找参数字符串在本字符串首次出现的索引位置，如果没有就返回-1值。
+
 
 ## ArrayList-- 可变长度数组
 ArrayList的范型必须是引用类型比如类类型，不能是基本类型，比如ArrayList<int>这样是错的。

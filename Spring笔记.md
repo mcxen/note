@@ -9,6 +9,145 @@ AOP 不修改源代码进行功能增强
 
 beans+context+core+expression 这四个jar包
 
+## 依赖注入
+实际就是属性赋值，
+```xml
+<bean id="book" class="com.atguigu.spring5.Book">
+        <!--使用property完成属性注入
+            name：类里面属性名称
+            value：向属性注入的值
+        -->
+        <property name="bname" value="易筋经"></property>
+        <property name="bauthor" value="达摩老祖"></property>
+        <!--null值-->
+        <!--<property name="address">
+            <null/>
+        </property>-->
+
+        <!--属性值包含特殊符号
+            1 把<>进行转义 &lt; &gt;
+            2 把带特殊符号内容写到CDATA
+        -->
+
+
+```
+
+带参数函数进行注入
+
+
+## JDBC外部属性文件
+```xml
+<!--user类对象的创建-->
+    <bean id="myBean" class="testdemo.myBean" scope="prototype" >
+    </bean>
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${prop.driverClass}"></property>
+        <property name="url" value="${prop.url}"></property>
+        <property name="username" value="${prop.userName}"></property>
+        <property name="password" value="${prop.password}"></property>
+    </bean>
+
+    <context:property-placeholder location="pro.properties"></context:property-placeholder>
+
+```
+
+
+## 注解IOC
+IOC:创建对象，属性注入
+
+### 创建对象
+
+
+Spring 针对 Bean 管理中创建对象提供注解 
+
+- (1)@Component
+- (2)@Service
+- (3)@Controller
+- (4)@Repository
+* 上面四个注解功能是一样的，都可以用来创建 bean 实例
+
+component-scan 这个组件
+
+```xml
+    <!--示例 1
+use-default-filters="false" 表示现在不使用默认 filter，自己配置 filter context:include-filter ，设置扫描哪些内容
+-->
+<context:component-scan base-package="com.atguigu" use-default-
+filters="false">
+ <context:include-filter type="annotation"
+expression="org.springframework.stereotype.Controller"/>
+</context:component-scan>
+<!--示例 2
+下面配置扫描包所有内容 context:exclude-filter: 设置哪些内容不进行扫描
+-->
+<context:component-scan base-package="com.atguigu">
+ <context:exclude-filter type="annotation"
+expression="org.springframework.stereotype.Controller"/>
+</context:component-scan>
+```
+
+```java
+
+@Component(value = "userId")
+//<bean id="userId" class=""></bean>
+//这里的id和上面的value是一样的
+//默认是将类名字小写，这是默认取的可以不填写value
+public class User {
+```
+
+### 属性
+
+@Autowired \ @Qualifier \ @Value
+
+
+# AOP
+有接口 使用JDK动态代理，使用Proxy类里面的方法代理 *java.lang.Proxy * newProxyInstance实现功能
+
+```java
+public class JDKProxy {
+    public static void main(String[] args) {
+        Class[] interfaces={userdao.class};
+        userdaoImp imp = new userdaoImp();
+        userdao dao = (userdao) Proxy.newProxyInstance(JDKProxy.class.getClassLoader(), interfaces, new UserDaoProxy(imp));
+        int add = dao.add(3, 4);
+        System.out.println("result"+add);
+    }
+}
+//创建代理对象
+class UserDaoProxy implements InvocationHandler{
+    private Object ob;
+    //把被代理的传进来，有参构造来实现
+    public UserDaoProxy(Object ob){
+        this.ob=ob;
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        //这里描述增强的逻辑
+        System.out.println("方法之前执行。。。。"+method.getName()+"  ; "+ Arrays.toString(args));
+
+        method.invoke(ob,args);
+        System.out.println("方法之后执行。。。。"+ob);
+
+        return null;
+    }
+}
+
+```
+结果：
+
+```
+方法之前执行。。。。add  ; [3, 4]
+add执行。。。
+方法之后执行。。。。dao.userdaoImp@24d46ca6
+```
+
+## AOP术语
+- 连接点
+- 切入点
+- 通知
+- 切面
+
 
 
 
@@ -25,23 +164,26 @@ Spring注入：是指在启动Spring容器加载Bean配置的时候，完成对�
 2、构造注入:
 通过构造方法注入Bean 的属性值或依赖的对象，它保证了 Bean 实例在实例化后就可以使用。
 构造器注入在 <constructor-arg> 元素里声明属性, <constructor-arg> 中没有 name 属性.
+```xml
+
 <bean id="car2" class="com.lskyo.spring.beans.Car">
 	<constructor-arg value="Baoma" index="0" type="String"/>
 	<constructor-arg value="Beijing" index="1" type="String"/>
 	<constructor-arg value="240" index="2" type="int"/>
 </bean>
+```
 如果有重载的构造器，可以用index及type属性区分构造器。
 
 
 Bean配置项
-Id, 唯一标识,若 id 没有指定，Spring 自动将权限定性类名作为 Bean 的名字
-Class, 要实例化的类
-Scope, 作用域
-Constructor arguments, 构造参数
-Properties, 属性
-Autowiring mode, 自动装备的模式
-lazy-initialization mode, 加载模式
-Initialization/destruction method, 加载/销毁的方式
+- Id, 唯一标识,若 id 没有指定，Spring 自动将权限定性类名作为 Bean 的名字
+- Class, 要实例化的类
+- Scope, 作用域
+- Constructor arguments, 构造参数
+- Properties, 属性
+- Autowiring mode, 自动装备的模式
+- lazy-initialization mode, 加载模式
+- Initialization/destruction method, 加载/销毁的方式
 
 Spring 容器
 在 Spring IOC 容器读取 Bean 配置创建 Bean 实例之前, 必须对它进行实例化. 
