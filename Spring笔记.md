@@ -145,10 +145,64 @@ add执行。。。
 ## AOP术语
 - 连接点
 - 切入点
-- 通知
+- 通知 
+  前置通知，后置通知，环绕通知，异常通知，最终通知
 - 切面
 
 
+```xml
+
+
+<!--  开启组件扫描-->
+    <context:component-scan base-package="testdemo"></context:component-scan>
+<!--  开启aspect 生成代理对象会自动寻找@asect的查找 -->
+    <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+
+```
+
+```java
+//UserProxy.java
+
+@Component
+@Aspect //生成代理对象
+public class UserProxy {
+    //前置同时，增强方法的前面，制定了
+    @Before(value = "execution(* testdemo.User.add(..))")
+    public void before() {
+        System.out.println("Aspect 注解方式，直接进行了前置通知 before ");
+    }
+}
+```
+
+# 调用数据库
+
+```java
+@Override
+    public void add(Book book) {
+        String sql="insert into t_book values(?,?,?)";
+        jdbcTemplate.update(sql,book.getUserId(),book.getUsername(),book.getUstatus());
+        System.out.println("///  ADDED OVER  ///");
+
+    }
+
+    @Override
+    public void updateBook(Book book) {
+        String sql="update t_book set username = ?, ustatus = ? where user_id= ?";
+        Object[] args={book.getUsername(),book.getUstatus(),book.getUserId()};
+        jdbcTemplate.update(sql,args);
+        System.out.println("///  UPDATED OVER  ///");
+
+    }
+
+    @Override
+    public void deleteBook(String s) {
+        String sql="DELETE FROM t_book  WHERE user_id= ?";
+        Object[] args={s};
+        jdbcTemplate.update(sql,args);
+        System.out.println("///  DELETED OVER  ///");
+    }
+
+```
 
 
 # 附录笔记
