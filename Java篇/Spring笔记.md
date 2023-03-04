@@ -1,0 +1,416 @@
+
+# Spring框架简介
+Spring方便程序测试，简化开发，支持其他框架一起整合。
+## spring核心部分
+IOC  控制反转，创建对象交给spring
+AOP 不修改源代码进行功能增强
+
+## hello、
+
+beans+context+core+expression 这四个jar包
+
+## 依赖注入
+实际就是属性赋值，
+```xml
+<bean id="book" class="com.atguigu.spring5.Book">
+        <!--使用property完成属性注入
+            name：类里面属性名称
+            value：向属性注入的值
+        -->
+        <property name="bname" value="易筋经"></property>
+        <property name="bauthor" value="达摩老祖"></property>
+        <!--null值-->
+        <!--<property name="address">
+            <null/>
+        </property>-->
+
+        <!--属性值包含特殊符号
+            1 把<>进行转义 &lt; &gt;
+            2 把带特殊符号内容写到CDATA
+        -->
+
+
+```
+
+带参数函数进行注入
+
+
+## JDBC外部属性文件
+```xml
+<!--user类对象的创建-->
+    <bean id="myBean" class="testdemo.myBean" scope="prototype" >
+    </bean>
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${prop.driverClass}"></property>
+        <property name="url" value="${prop.url}"></property>
+        <property name="username" value="${prop.userName}"></property>
+        <property name="password" value="${prop.password}"></property>
+    </bean>
+
+    <context:property-placeholder location="pro.properties"></context:property-placeholder>
+
+```
+
+
+## 注解IOC
+IOC:创建对象，属性注入
+
+### 创建对象
+
+
+Spring 针对 Bean 管理中创建对象提供注解 
+
+- (1)@Component
+- (2)@Service
+- (3)@Controller
+- (4)@Repository
+* 上面四个注解功能是一样的，都可以用来创建 bean 实例
+
+component-scan 这个组件
+
+```xml
+    <!--示例 1
+use-default-filters="false" 表示现在不使用默认 filter，自己配置 filter context:include-filter ，设置扫描哪些内容
+-->
+<context:component-scan base-package="com.atguigu" use-default-
+filters="false">
+ <context:include-filter type="annotation"
+expression="org.springframework.stereotype.Controller"/>
+</context:component-scan>
+<!--示例 2
+下面配置扫描包所有内容 context:exclude-filter: 设置哪些内容不进行扫描
+-->
+<context:component-scan base-package="com.atguigu">
+ <context:exclude-filter type="annotation"
+expression="org.springframework.stereotype.Controller"/>
+</context:component-scan>
+```
+
+```java
+
+@Component(value = "userId")
+//<bean id="userId" class=""></bean>
+//这里的id和上面的value是一样的
+//默认是将类名字小写，这是默认取的可以不填写value
+public class User {
+```
+
+### 属性
+
+@Autowired \ @Qualifier \ @Value
+
+
+# AOP
+有接口 使用JDK动态代理，使用Proxy类里面的方法代理 *java.lang.Proxy * newProxyInstance实现功能
+
+```java
+public class JDKProxy {
+    public static void main(String[] args) {
+        Class[] interfaces={userdao.class};
+        userdaoImp imp = new userdaoImp();
+        userdao dao = (userdao) Proxy.newProxyInstance(JDKProxy.class.getClassLoader(), interfaces, new UserDaoProxy(imp));
+        int add = dao.add(3, 4);
+        System.out.println("result"+add);
+    }
+}
+//创建代理对象
+class UserDaoProxy implements InvocationHandler{
+    private Object ob;
+    //把被代理的传进来，有参构造来实现
+    public UserDaoProxy(Object ob){
+        this.ob=ob;
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        //这里描述增强的逻辑
+        System.out.println("方法之前执行。。。。"+method.getName()+"  ; "+ Arrays.toString(args));
+
+        method.invoke(ob,args);
+        System.out.println("方法之后执行。。。。"+ob);
+
+        return null;
+    }
+}
+
+```
+结果：
+
+```
+方法之前执行。。。。add  ; [3, 4]
+add执行。。。
+方法之后执行。。。。dao.userdaoImp@24d46ca6
+```
+
+## AOP术语
+- 连接点
+- 切入点
+- 通知 
+  前置通知，后置通知，环绕通知，异常通知，最终通知
+- 切面
+
+
+```xml
+
+
+<!--  开启组件扫描-->
+    <context:component-scan base-package="testdemo"></context:component-scan>
+<!--  开启aspect 生成代理对象会自动寻找@asect的查找 -->
+    <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+
+```
+
+```java
+//UserProxy.java
+
+@Component
+@Aspect //生成代理对象
+public class UserProxy {
+    //前置同时，增强方法的前面，制定了
+    @Before(value = "execution(* testdemo.User.add(..))")
+    public void before() {
+        System.out.println("Aspect 注解方式，直接进行了前置通知 before ");
+    }
+}
+```
+
+# 调用数据库
+
+```java
+@Override
+    public void add(Book book) {
+        String sql="insert into t_book values(?,?,?)";
+        jdbcTemplate.update(sql,book.getUserId(),book.getUsername(),book.getUstatus());
+        System.out.println("///  ADDED OVER  ///");
+
+    }
+
+    @Override
+    public void updateBook(Book book) {
+        String sql="update t_book set username = ?, ustatus = ? where user_id= ?";
+        Object[] args={book.getUsername(),book.getUstatus(),book.getUserId()};
+        jdbcTemplate.update(sql,args);
+        System.out.println("///  UPDATED OVER  ///");
+
+    }
+
+    @Override
+    public void deleteBook(String s) {
+        String sql="DELETE FROM t_book  WHERE user_id= ?";
+        Object[] args={s};
+        jdbcTemplate.update(sql,args);
+        System.out.println("///  DELETED OVER  ///");
+    }
+
+```
+
+
+# 附录笔记
+
+Spring 是一个 IOC(DI) 和 AOP 容器框架.
+IOC：控制反转，控制权的转移，应用程序本身不负责依赖对象的创建和维护，而是由外部容器负责创建和维护。
+DI(依赖注入)是其一种实现方式。
+Spring注入：是指在启动Spring容器加载Bean配置的时候，完成对变量的赋值行为，常用的有两种注入方法：
+1、属性注入：
+通过 setter 方法注入Bean 的属性值或依赖的对象
+属性注入使用 <property> 元素, 使用 name 属性指定 Bean 的属性名称，value 属性或 <value> 子节点指定属性值
+<property name="name" value="value"/>
+2、构造注入:
+通过构造方法注入Bean 的属性值或依赖的对象，它保证了 Bean 实例在实例化后就可以使用。
+构造器注入在 <constructor-arg> 元素里声明属性, <constructor-arg> 中没有 name 属性.
+```xml
+
+<bean id="car2" class="com.lskyo.spring.beans.Car">
+	<constructor-arg value="Baoma" index="0" type="String"/>
+	<constructor-arg value="Beijing" index="1" type="String"/>
+	<constructor-arg value="240" index="2" type="int"/>
+</bean>
+```
+如果有重载的构造器，可以用index及type属性区分构造器。
+
+
+Bean配置项
+- Id, 唯一标识,若 id 没有指定，Spring 自动将权限定性类名作为 Bean 的名字
+- Class, 要实例化的类
+- Scope, 作用域
+- Constructor arguments, 构造参数
+- Properties, 属性
+- Autowiring mode, 自动装备的模式
+- lazy-initialization mode, 加载模式
+- Initialization/destruction method, 加载/销毁的方式
+
+Spring 容器
+在 Spring IOC 容器读取 Bean 配置创建 Bean 实例之前, 必须对它进行实例化. 
+只有在容器实例化后, 才可以从 IOC 容器里获取 Bean 实例并使用.
+Spring 提供了两种类型的 IOC 容器实现:
+BeanFactory: IOC 容器的基本实现.
+ApplicationContext: 提供了更多的高级特性. 是 BeanFactory 的子接口.
+BeanFactory 是 Spring 框架的基础设施，面向 Spring 本身；
+ApplicationContext 面向使用 Spring 框架的开发者，几乎所有的应用场合都直接使
+用 ApplicationContext 而非底层的 BeanFactory
+
+ApplicationContext的主要实现类：
+ClassPathXmlApplicationContext：从 类路径下加载配置文件
+FileSystemXmlApplicationContext: 从文件系统中加载配置文件
+ApplicationContext 在初始化上下文时就实例化所有单例的 Bean。
+WebApplicationContext 是专门为 WEB 应用而准备的，它允许从相对于 WEB 根目录的路径中完成初始化工作
+
+Bean之间的关系：继承，依赖；
+Bean的作用域
+singletion: 默认，单例，指一个Bean容器中只存在一份
+prototype: 每次请求(getBean)都会创建新的实例，destroy方式不生效
+request: 每次http请求创建一个实例且仅在当前request内有效，仅适用于WebApplicationContext环境。
+session: 同上，每次http请求创建，当前session内有效
+global session: 基于protelet的web中有效，如果是在web中，同session
+
+使用外部属性文件：
+Spring 提供了一个 PropertyPlaceholderConfigurer 的 BeanFactory 后置处理器, 
+这个处理器允许用户将 Bean 配置的部分内容外移到属性文件中. 可以在 Bean 配置
+文件里使用形式为 ${var} 的变量, PropertyPlaceholderConfigurer 从属性文件里
+加载属性, 并使用这些属性来替换变量.
+
+
+在 classpath 中扫描组件
+组件扫描(component scanning):  Spring 能够从 classpath 下自动扫描, 侦测和实例化具有特定注解的组件. 
+特定组件包括:
+@Component: 基本注解, 标识了一个受 Spring 管理的组件
+@Respository: 标识持久层组件
+@Service: 标识服务层(业务层)组件
+@Controller: 标识表现层组件
+对于扫描到的组件, Spring 有默认的命名策略: 使用非限定类名, 第一个字母小写. 也可以在注解中通过 value 属性值标识组件的名称
+当在组件类上使用了特定的注解之后, 还需要在 Spring 的配置文件中声明 <context:component-scan> ：
+base-package 属性指定一个需要扫描的基类包，Spring 容器将会扫描这个基类包里及其子包中的所有类. 
+当需要扫描多个包时, 可以使用逗号分隔.
+如果仅希望扫描特定的类而非基包下的所有类，可使用 resource-pattern 属性过滤特定的类
+<context:include-filter> 子节点表示要包含的目标类
+<context:exclude-filter> 子节点表示要排除在外的目标类
+
+<context:component-scan> 元素还会自动注册 AutowiredAnnotationBeanPostProcessor 实例, 
+该实例可以自动装配具有 @Autowired 和 @Resource 、@Inject注解的属性.
+@Autowired 注解自动装配具有兼容类型的单个 Bean属性
+构造器, 普通字段(即使是非 public), 一切具有参数的方法都可以应用@Authwired 注解
+默认情况下, 所有使用 @Authwired 注解的属性都需要被设置. 当 Spring 找不到匹配的 Bean 装配属性时, 
+会抛出异常, 若某一属性允许不被设置, 可以设置 @Authwired 注解的 required 属性为 false
+默认情况下, 当 IOC 容器里存在多个类型兼容的 Bean 时, 通过类型的自动装配将无法工作. 此时可以
+在 @Qualifier 注解里提供 Bean 的名称. Spring 允许对方法的入参标注 @Qualifiter 已指定注入 Bean 的名称
+ @Authwired 注解也可以应用在数组类型的属性上, 此时 Spring 将会把所有匹配的 Bean 进行自动装配.
+@Authwired 注解也可以应用在集合属性上, 此时 Spring 读取该集合的类型信息, 然后自动装配所有与之兼容的 Bean. 
+@Authwired 注解用在 java.util.Map 上时, 若该 Map 的键值为 String, 那么 Spring 将自动装配与之 Map 值
+类型兼容的 Bean, 此时 Bean 的名称作为键值
+
+
+Bean的生命周期
+-定义
+-初始化
+	-法1：实现org.springframework.beans.factory.InitializingBean接口，实现afterPropertiesSet方法
+	-法2：配置init-method属性
+-使用
+-销毁
+	-法1：实现org.springframework.beans.factory.DisposableBean接口，实现destroy方法
+	-法2：配置destroy-method属性
+
+AOP
+AOP(Aspect-Oriented Programming, 面向切面编程): 是一种新的方法论, 是对传统 OOP(Object-Oriented Programming, 面向对象编程) 的补充.
+AOP 的主要编程对象是切面(aspect), 而切面模块化横切关注点.
+在应用 AOP 编程时, 仍然需要定义公共功能, 但可以明确的定义这个功能在哪里, 以什么方式应用, 并且不必修改受影响的类. 这样一来横切关注
+点就被模块化到特殊的对象(切面)里.
+AOP 的好处:
+每个事物逻辑位于一个位置, 代码不分散, 便于维护和升级
+业务模块更简洁, 只包含核心业务代码.
+
+
+AOP 术语
+切面(Aspect):  横切关注点(跨越应用程序多个模块的功能)被模块化的特殊对象
+通知(Advice):  切面必须要完成的工作
+目标(Target): 被通知的对象
+代理(Proxy): 向目标对象应用通知之后创建的对象
+连接点（Joinpoint）：程序执行的某个特定位置：如类某个方法调用前、调用后、方法抛出异常后等。连接点由两个信息确定：方法表示的程序执行点；
+相对点表示的方位。例如 ArithmethicCalculator#add() 方法执行前的连接点，执行点为 ArithmethicCalculator#add()； 方位为该方法执行前的位置
+切点（pointcut）：每个类都拥有多个连接点：例如 ArithmethicCalculator 的所有方法实际上都是连接点，即连接点是程序类中客观存在的事务。
+AOP 通过切点定位到特定的连接点。类比：连接点相当于数据库中的记录，切点相当于查询条件。切点和连接点不是一对一的关系，一个切点匹配多个连
+接点，切点通过 org.springframework.aop.Pointcut 接口进行描述，它使用类和方法作为连接点的查询条件。
+
+
+AspectJ
+Java 社区里最完整最流行的 AOP 框架.
+在 Spring2.0 以上版本中, 可以使用基于 AspectJ 注解或基于 XML 配置的 AOP
+
+
+在 Spring 中启用 AspectJ 注解支持
+要在 Spring 应用中使用 AspectJ 注解, 必须在 classpath 下包含 AspectJ 类库: 
+aopalliance.jar、aspectj.weaver.jar 和 spring-aspects.jar
+将 aop Schema 添加到 <beans> 根元素中.
+要在 Spring IOC 容器中启用 AspectJ 注解支持, 只要在 Bean 配置文件中定义一个空的 XML 元素 <aop:aspectj-autoproxy>
+当 Spring IOC 容器侦测到 Bean 配置文件中的 <aop:aspectj-autoproxy> 元素时, 会自动为与 AspectJ 切面匹配的 Bean 创建代理.
+
+
+用 AspectJ 注解声明切面
+要在 Spring 中声明 AspectJ 切面, 只需要在 IOC 容器中将切面声明为 Bean 实例. 当在 Spring IOC 容器中初始化 AspectJ 切面之后, 
+Spring IOC 容器就会为那些与 AspectJ 切面相匹配的 Bean 创建代理.
+在 AspectJ 注解中, 切面只是一个带有 @Aspect 注解的 Java 类. 
+通知是标注有某种注解的简单的 Java 方法.
+AspectJ 支持 5 种类型的通知注解: 
+@Before: 前置通知, 在方法执行之前执行
+@After: 后置通知, 在方法执行之后执行 
+@AfterRunning: 返回通知, 在方法返回结果之后执行
+@AfterThrowing: 异常通知, 在方法抛出异常之后
+@Around: 环绕通知, 围绕着方法执行
+
+
+JdbcTemplate简介
+　　Spring对数据库的操作在jdbc上面做了深层次的封装，使用spring的注入功能，可以把DataSource注册到JdbcTemplate之中。
+　　JdbcTemplate位于spring-jdbc-4.3.0.RELEASE.jar中。其全限定命名为org.springframework.jdbc.core.JdbcTemplate。
+    要使用JdbcTemlate还需一个spring-tx-4.3.0.RELEASE.jar这个包包含了一下事务和异常控制
+
+
+JdbcTemplate主要提供以下五类方法：
+1. execute方法：可以用于执行任何SQL语句，一般用于执行DDL语句；
+2. update方法及batchUpdate方法：update方法用于执行新增、修改、删除等语句；
+3. batchUpdate方法用于执行批处理相关语句；
+4. query方法及queryForXXX方法：用于执行查询相关语句；
+5. call方法：用于执行存储过程、函数相关语句。
+
+
+用 @Transactional 注解声明式地管理事务
+1. 为了将方法定义为支持事务处理的, 可以为方法添加 @Transactional 注解。根据 Spring AOP 基于代理机制, 只能标注公有方法。
+2. 可以在方法或者类级别上添加 @Transactional 注解. 当把这个注解应用到类上时, 这个类中的所有公共方法都会被定义成支持事务处理的。
+3. 在 Bean 配置文件中只需要启用 <tx:annotation-driven> 元素, 并为之指定事务管理器就可以了。
+4. 如果事务处理器的名称是 transactionManager, 就可以在<tx:annotation-driven> 元素中省略 transaction-manager 属性。这个元素会自动检测该名称的事务处理器。
+
+
+事务传播属性
+1. 当事务方法被另一个事务方法调用时, 必须指定事务应该如何传播. 例如: 方法可能继续在现有事务中运行, 也可能开启一个新事务, 并在自己的事务中运行.
+2. 事务的传播行为可以由传播属性指定. Spring 定义了 7  种类传播行为:
+REQUIRED：如果有事务在运行，当前的这个方法就在事务内运行，否则，就开启一个新的事务，并在自己的事务内运行。
+REQUIRED_NEW：当前的方法必须开启新事务，并在它自己的事务内运行。如果有事务正在运行，应该将它挂起。
+SUPPORTS：如果有事务在运行，当前的方法就在这个事务内运行。否则它可以不运行在事务中。
+NOT_SUPPORTED：当前的方法不应该运行在事务中。如果有运行的事务，应该将它挂起。
+MANDATORY：当前的方法必须运行在事务内部，如果没有正在运行的事务，就抛出异常。
+NEVER：当前的方法不应该运行在十五中，如果有运行的事务，就抛出异常。
+NESTED：如果有事务在运行，当前的方法就应该在这个事务的嵌套事务内运行，否则，就开启一个新的事务，并在它自己的事务内运行。
+
+
+
+并发事务所导致的问题
+1. 当同一个应用程序或者不同应用程序中的多个事务在同一个数据集上并发执行时, 可能会出现许多意外的问题
+2. 并发事务所导致的问题可以分为下面三种类型:
+  脏读: 对于两个事物 T1, T2, T1  读取了已经被 T2 更新但 还没有被提交的字段. 之后, 若 T2 回滚, T1读取的内容就是临时且无效的。
+  不可重复读:对于两个事物 T1, T2, T1  读取了一个字段, 然后 T2 更新了该字段. 之后, T1再次读取同一个字段, 值就不同了。
+  幻读:对于两个事物 T1, T2, T1  从一个表中读取了一个字段, 然后 T2 在该表中插入了一些新的行. 之后, 如果 T1 再次读取同一个表, 就会多出几行。
+
+
+事务的隔离级别
+从理论上来说, 事务应该彼此完全隔离, 以避免并发事务所导致的问题. 然而, 那样会对性能产生极大的影响, 因为事务必须按顺序运行。
+在实际开发中, 为了提升性能, 事务会以较低的隔离级别运行。
+事务的隔离级别可以通过隔离事务属性指定。
+
+
+Spring 支持的事务隔离级别
+DEFAULT：使用底层数据库的默认隔离级别。对于大多数数据库来说，默认隔离级别都是READ_COMMITED。
+READ_UNCOMMITTED：允许事务读取未被其他事务提交的变更。脏读，不可重复读和幻读的问题都会出现。
+READ_COMMITED：只允许事务读取已经被其他事务提交的变更。可以避免脏读，但不可重复读和幻读的问题仍然可能出现。
+REPEATABLE_READ：确保事务可以多次从一个字段中读取相同的值，在这个事务持续期间，禁止其他事务对这个字段进行更新。可以避免脏读和不可重复读，但幻读的问题仍然存在。
+SERIALIZABLE：确保事务可以从一个表中读取相同的行。在这个事务持续期间，禁止其他事务对该表执行插入，更新和删除操作，所有的并发问题都可以避免，但性能十分低下。
+提醒：事务的隔离级别要得到底层数据库引擎的支持，而不是应用应用程序或者框架的支持。
+Oracle 支持的 2 种事务隔离级别：READ_COMMITED , SERIALIZABLE。
+Mysql 支持 4 中事务隔离级别。
