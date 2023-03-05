@@ -139,12 +139,26 @@ ls /
 
 ![截屏2023-03-04 16.47.11](https://gcore.jsdelivr.net/gh/mcxen/image@main/uPic/%E6%88%AA%E5%B1%8F2023-03-04%2016.47.11.png)
 
-#### 这些目录的解释
-
 - /bin ：bin 是 Binary的缩写，这个目录存放着最经常使用的命令
 - /boot：这里存放着是启动Linux是使用的一些核心文件，包括一些核心文件和镜像文件
 - /dev：dev是Device（设备）的缩写。存放的是Linux的外部设备，在Linux中访问设备的方式和访问文件的方式是相同的
 - **/etc：这个目录用来存放所有系统管理所需要的配置文件和子目录，redis、Tomcat、JDK**
+
+#### /etc的文件结构：
+
+- /etc/resolv.conf  是DNS配置文件。在网卡配置文件中进行配置，默认情况下 网卡配置文件DNS优先于/etc/resolv.conf。
+- /etc/hostname 在Centos 7，配置主机名，查看修改。
+- /etc/hosts  ip与域名对应关系 ，解析域名（主机名），用/etc/hosts搭建网站的测试环境 (虚拟机)。不同服务器之间相互访问。
+- /etc/fstab   file system table ：文件系统挂载表，开机的时候设备与入口对应关系 开机自动挂载列表。
+- /etc/rc.local  开机自启
+- /etc/inittab（centos 6）运行级别的配置文件
+- /etc/profile  环境变量配置文件
+- /etc/bashrc  命令别名
+- /etc/motd   文件中的内容 会在用户登录系统之后显示出来
+- /etc/issue /etc/issue.net 文件中的内容 会在用户登录系统之前显示出来
+
+
+
 - **/home：用户的主目录，在Linux中，每个用户都有自己的目录，一般目录名是以用户的账户名命名的**
 - /lib：这个目录存放着系统最基本的动态连接共享库，其作用类似于Windows里面的DLL文件
 - /lost+found：这个目录一般情况下是空的，当系统非法关机之后，这里就存放了一些文件
@@ -165,9 +179,59 @@ ls /
 - /run：是一个临时文件系统，存储系统启动以来的信息。当系统重启。这个目录下的文件应该被删除或者清除
 - /www：存放服务器网站相关的资源，环境，网站的项目
 
-### 常用的基本命令
+## 常用的基本命令
 
-#### 目录管理
+### 基本的命令在哪里？
+
+在终端键入下面的命令来查找 `ls` 的位置：
+
+```
+whereis ls
+
+# 结果
+ls: /bin/ls /usr/share/man/man1/ls.1.gz
+```
+
+可以看到有一条 `/bin/ls`，说明这个命令在这个目录下，我们 ls 一下 `/bin`：
+
+```
+ls /bin
+# 结果：包含绿色的可执行文件
+```
+
+这些绿色的可执行文件其实有许多就是我们经常使用的命令，现在知道命令在哪里了吧。
+
+**ls 等命令是谁写得？**
+
+Linux 发展到现在，它上面有很多很常用的命令，这些**命令是一些大牛用 C 语言写的**，而且都是开源的，为了方便安装，业界将这些命令整理成一个软件包可供用户使用：[ Coreutils](https://directory.fsf.org/wiki/Coreutils)，该软件包里面就是一些比较常用的命令的源代码，后面我会带着大家一起编译它。
+
+**什么是 Linux 的 Shell 解释器**？
+
+`Shell` 的概念源自 `UNIX` 的命令解释器，它**解释用户输入的命令，然后调用内核相应的类库来执行相应的功能**。在linux系统中，当我们输入用户名和密码登陆之后，我们就开始执行一个shell解释器程序，通常是 /bin/bash，当然也可以是别的，比如/bin/sh。
+
+常用的 Linux 下的解释器有，`bash`，`sh`，`csh`，`ksh`，在 `ubuntu` 下使用的是 `bash`，这里就以 `bash` 来作为解释器来介绍。centos也是bash。
+
+`bash` 其实也是一个程序，那么它在哪里呢？键入下面的命令：
+
+```
+whereis bash
+
+# 机器不同结果可能有些不同
+bash: /bin/bash /etc/bash.bashrc /usr/share/man/man1/bash.1.gz
+```
+
+可见，`bash` 也在 `/bin` 目录下。
+
+了解了什么是 Shell 解释器， ls 命令的执行原理也就差不多清楚了：**当我们在终端键入 ls 命令，系统会去当前环境变量下查找 ls 这个命令对应的可执行文件 `/bin/ls`，然后由当前终端对应的解释器 bash 来解析 ls 这个命令，并由 bash 解释器调用内核功能来列出当前目录下的内容**。
+
+ Linux Shell 的命令机制，它主要由下面两部分组成：
+
+1. **`Coreutils` 提供具体的命令功能的实现**，就是一个个的 C 语言写的工具，例如：`ls.c`，你自己也可以写这些工具。
+2. **`Bash` 等命令解释器来解释具体的命令**，例如：`ls` 命令，由 `Bash` 来解析 `Coreutils` 提供的 `ls.c` 的功能，**解析过程其实就是调用 Linux 系统底层类库来在屏幕上列出当前目录下的内容**。
+
+
+
+### 目录管理
 
 > 绝对路径、相对路径
 >
@@ -244,7 +308,7 @@ apache-tomcat-7.0.75.tar.gz
 jdk-8u121-linux-x64.tar.gz  test2
 ```
 
-#### 基本属性
+### 基本属性
 
 > 看懂文件属性
 
@@ -364,7 +428,7 @@ chmod 770 filename
 
 
 
-#### 文件内容查看
+### 文件内容查看
 
 > 概述
 
@@ -403,6 +467,10 @@ more /etc/profile 以分页方式显示/etc目录下的profile文件内容
 ---
 
 
+
+`head`
+
+- `head -n 10 spring.ini`，查看当前文件的前 10 行内容
 
 ##### tail
 
@@ -444,7 +512,7 @@ grep hello *.java		查找当前目录中所有.java结尾的文件中包含hello
 
 
 
-#### 文件目录管理
+### 文件目录管理
 
 ##### mkdir
 
@@ -624,7 +692,7 @@ quit：一般用于图形界面的退出
 
 
 
-#### 其他命令
+### 其他命令
 
 ##### 不挂断地运行指定命令nohup
 
@@ -644,9 +712,665 @@ Arg：一些参数，可以指定输出文件
 
 nohup java -jar boot工程.jar &> hello.log & 后台运行java -jar命令，并将日志输出到hello.log文件
 
+##### Bash输入输出>
+
+首先，bash中0，1，2三个数字分别代表STDIN_FILENO、STDOUT_FILENO、STDERR_FILENO，即标准输入（一般是键盘），标准输出（一般是显示屏，准确的说是用户终端控制台），标准错误（出错信息输出）。
+
+输入输出可以重定向，所谓重定向输入就是在命令中指定具体的输入来源，譬如 cat < test.c
+将test.c重定向为cat命令的输入源。输出重定向是指定具体的输出目标以替换默认的标准输出，譬如ls >1.txt将ls的结果从标准输出重定向为1.txt文本。
+
+有时候会看到如 ls >> 1.txt这类的写法，> 和的区别在于：> 用于新建而>>用于追加。即ls >1.txt会新建一个1.txt文件并且将ls的内容输出到新建的1.txt中，
+
+而ls >>1.txt则用在1.txt已经存在，而我们只是想将ls的内容追加到1.txt文本中的时候。如果这个时候会覆盖
+
+&就是为了让bash将2解释成标准错误而不是文件2。
+
+<img src="https://gcore.jsdelivr.net/gh/mcxen/image@main/uPic/image-20230305131552618.png" alt="image-20230305131552618" style="zoom:50%;" />
 
 
-#### Vim编辑器
+
+##### echo
+
+`echo`
+
+- `echo $JAVA_HOME`，查看指定系统变量的值，这里查看的是自己配置的 JAVA_HOME。
+
+- `echo "字符串内容"`，输出 "字符串内容"
+
+- `echo > aa.txt`，清空 aa.txt 文件内容（类似的还有：`: > aa.txt`，其中 : 是一个占位符, 不产生任何输出）
+
+  
+
+## Shell编程
+
+
+
+在 Linux 下有一门脚本语言叫做：**Shell 脚本**，这个脚本语言可以帮助我们简化很多工作，例如编写自定义命令等，所以还是很有必要学习它的基本用法的，一个简单的 `hello.sh` 脚本像下面这样，**第一行 `#!/bin/bash` 标识该 Shell 脚本由哪个 Shell 解释**：
+
+```
+#!/bin/bash 
+
+echo "Hello World!"
+```
+
+**赋予权限才可以执行**：
+
+```
+# 赋予可执行权限
+chmod a+x hello.sh
+
+# 执行
+./hello.sh
+
+# 结果
+Hello World!
+```
+
+Shell 的编写流程：
+
+1. 编写 Shell 脚本
+2. 赋予可执行权限
+3. 执行，调试
+
+下面来介绍具体的语法。
+
+### Shell 关键字
+
+常用的关键字如下：
+
+1. echo：打印文字到屏幕
+2. exec：执行另一个 Shell 脚本
+3. read：读标准输入
+4. expr：对整数型变量进行算术运算
+5. test：用于测试变量是否相等、 是否为空、文件类型等
+6. exit：退出
+
+看个例子：
+
+```
+#!/bin/bash 
+
+echo "Hello Shell"
+
+# 读入变量
+read VAR
+echo "VAR is $VAR"
+
+# 计算变量
+expr $VAR - 5
+
+# 测试字符串
+test "Hello"="HelloWorld"
+
+# 测试整数
+test $VAR -eq 10
+
+# 测试目录
+test -d ./Android
+
+# 执行其他 Shell 脚本
+exec ./othershell.sh
+
+# 退出
+exit
+```
+
+运行前，你需要新建一个 `othershell.sh` 的文件，让它输出 `I'm othershell`，并且中途需要一次输入，我这里输入的是 10：
+
+```
+Hello Shell
+10
+VAR is 10
+5
+I'm othershell
+```
+
+学习任何一门语言都要了解它的变量定义方法，Shell 也不例外。
+
+### Shell 变量
+
+Shell 变量分为 3 种：
+
+1. 用户自定义变量
+2. 预定义变量
+3. 环境变量
+
+定义变量需要注意下面 2 点：
+
+1. 等号前后不要有空格：`NUM=10`
+2. 一般变量名用大写：`M=1`
+
+使用 `$VAR` 调用变量：
+
+```
+echo $VAR
+```
+
+#### 1. 用户自定义变量
+
+这种变量**只支持字符串类型**，不支持其他字符，浮点等类型，常见有这 3 个前缀：
+
+1. `unset`：删除变量
+2. `readonly`：标记只读变量
+3. `export`：指定全局变量
+
+一个例子：
+
+```
+#!/bin/bash 
+
+# 定义普通变量
+CITY=SHENZHEN
+
+# 定义全局变量
+export NAME=cdeveloper
+
+# 定义只读变量
+readonly AGE=21
+
+# 打印变量的值
+echo $CITY
+echo $NAME
+echo $AGE
+
+# 删除 CITY 变量
+unset CITY
+# 不会输出 SHENZHEN
+echo $CITY
+```
+
+运行结果：
+
+```
+SHENZHEN
+cdeveloper
+21
+```
+
+#### 2. 预定义变量
+
+**预定义变量常用来获取命令行的输入**，有下面这些：
+
+1. $0 ：脚本文件名
+2. $1-9 ：第 1-9 个命令行参数名
+3. $# ：命令行参数个数
+4. $@ ：所有命令行参数
+5. $* ：所有命令行参数
+6. $? ：前一个命令的退出状态，**可用于获取函数返回值**
+7. $$ ：执行的进程 ID
+
+一个例子：
+
+```
+#!/bin/bash 
+
+echo "print $"
+echo "\$0 = $0"
+echo "\$1 = $1"
+echo "\$2 = $2"
+echo "\$# = $#"
+echo "\$@ = $@"
+echo "\$* = $*"
+echo "\$$ = $$"
+echo "\$? = $?"
+```
+
+执行`./hello.sh 1 2 3 4 5` 的结果：
+
+```
+print $
+
+# 程序名
+$0 = ./hello.sh
+
+# 第一个参数
+$1 = 1
+
+# 第二个参数
+$2 = 2
+
+# 一共有 5 个参数
+$# = 5
+
+# 打印出所有参数
+$@ = 1 2 3 4 5
+
+# 打印出所有参数
+$* = 1 2 3 4 5
+
+# 进程 ID
+$$ = 9450
+
+# 之前没有执行其他命令或者函数
+$? = 0
+```
+
+#### 3. 环境变量
+
+环境变量默认就存在，常用的有下面这几个：
+
+1. HOME：用户主目录
+2. PATH：系统环境变量 PATH
+3. TERM：当前终端
+4. UID：当前用户 ID
+5. PWD：当前工作目录，绝对路径
+
+还是看例子：
+
+```
+#!/bin/bash
+
+echo "print env"
+
+echo $HOME
+echo $PATH
+echo $TERM
+echo $PWD
+echo $UID
+```
+
+运行结果：
+
+```
+print env
+
+# 当前主目录
+/home/orange
+
+# PATH 环境变量
+/home/orange/anaconda2/bin:后面还有很多
+
+# 当前终端
+xterm-256color
+
+# 当前目录
+/home/orange
+
+# 用户 ID
+1000
+```
+
+Shell 变量就介绍到这里，下面来介绍 Shell 的变量运算。
+
+### Shell 变量运算
+
+我们经常需要在 Shell 脚本中计算，掌握基本的运算方法很有必要，下面就是 4 种比较常见的运算方法，功能都是将 m + 1：
+
+1. m=$[ m + 1 ]
+2. m=`expr $m + 1` # 用 `` 字符包起来
+3. let m=m+1
+4. m=$(( m + 1 ))
+
+来看一个实际的例子：
+
+```
+#!/bin/bash 
+
+m=1
+m=$[ m + 1 ]
+echo $m
+
+m=`expr $m + 1`
+echo $m
+
+# 注意：+ 号左右不要加空格
+let m=m+1
+echo $m
+
+m=$(( m + 1 ))
+echo $m
+```
+
+运行结果：
+
+```
+2
+3
+4
+5
+```
+
+了解了基本的运算方法，下面进一步来学习 Shell 的语句。
+
+### Shell 语句
+
+Shell 语句跟高级语言有些类似，也包括分支，跳转，循环，下面就带着大家一个一个突破。
+
+1. if 语句
+
+这个跟高级语言的 `if - else - if` 类似，只是格式有些不同而已，也来看个例子吧：
+
+```
+#!/bin/bash 
+
+read VAR
+
+# 下面这两种判断方法都可以，使用 [] 注意左右加空格
+#if test $VAR -eq 10
+if [ $VART -eq 10 ]
+then
+	echo "true"
+else
+	echo "false"
+fi	
+```
+
+2. case 语句
+
+case 语句有些复杂，要注意格式：
+
+```
+#!/bin/bash 
+
+read NAME
+# 格式有点复杂，一定要注意
+case $NAME in
+	"Linux")
+		echo "Linux"
+		;;
+	"cdeveloper")
+		echo "cdeveloper"
+		;;
+	*)
+		echo "other"
+		;;
+esac
+```
+
+运行结果：
+
+```
+# 输入 Linux
+Linux
+Linux
+
+# 输入 cdeveloper
+cdeveloper
+cdeveloper
+
+# 输入其他的字符串
+hello
+other
+```
+
+3. for 循环
+
+这是一个 for 循环基本使用例子，挺简单的，有点类似 Python：
+
+```
+#!/bin/bash 
+
+# 普通 for 循环
+for ((i = 1; i <= 3; i++))
+do
+	echo $i
+done
+
+
+# VAR 依次代表每个元素 
+for VAR in 1 2 3
+do
+	echo $VAR
+done
+```
+
+运行结果：
+
+```
+1
+2
+3
+```
+
+4. while 循环
+
+注意与 for 循环的区别：
+
+```
+#!/bin/bash 
+
+VAR=1
+
+# 如果 VAR 小于 10，就打印出来
+while [ $VAR -lt 10 ]
+do
+	echo $VAR
+#	VAR 自增 1
+	VAR=$[ $VAR + 1 ]
+done
+```
+
+运行结果：
+
+```
+1
+2
+3
+4
+5
+6
+7
+8
+9
+```
+
+5. until 循环
+
+until 语句与上面的循环的**不同点是它的结束条件为 1**：
+
+```
+#!/bin/bash 
+
+i=0  
+
+# i 大于 5 时，循环结束 
+until [[ "$i" -gt 5 ]]     
+do  
+	echo $i
+	i=$[ $i + 1 ]
+done
+```
+
+6. break
+
+Shell 中的 `break` 用法与高级语言相同，都是**跳出循环**，来看个例子：
+
+```
+#!/bin/bash 
+
+for VAR in 1 2 3
+do
+#	如何 VAR 等于 2 就跳出循环
+	if [ $VAR -eq 2 ]
+	then
+		break
+	fi
+
+	echo $VAR
+done
+```
+
+运行结果：
+
+```
+1
+```
+
+7. continue
+
+`continue` 用来**跳过本次循环**，进入下一次循环，再来看看上面的例子：
+
+```
+#!/bin/bash 
+
+for VAR in 1 2 3
+do
+#	如果 VAR 等于 2，就跳过，直接进入下一次 VAR = 3 的循环	
+	if [ $VAR -eq 2 ]
+	then
+		continue	
+	fi
+	
+	echo $VAR
+done
+```
+
+运行结果：
+
+```
+1
+3
+```
+
+下面介绍 Shell 编程中比较重要的函数，好像每种编程语言的函数都很重要。
+
+### Shell 函数
+
+函数可以用一句话解释：**带有输入输出的具有一定功能的黑盒子**，相信有过编程经验的同学不会陌生。那么，我们先来看看 Shell 中函数定义的格式。
+
+#### 1. 定义函数
+
+有 2 种常见格式：
+
+```
+function fun_name()
+{
+		
+}
+
+fun_name()
+{
+	
+}
+```
+
+例如：
+
+```
+#!/bin/bash 
+
+function hello_world()
+{
+	echo "hello world fun"
+	echo $1 $2
+	return 1
+}
+
+hello()
+{
+	echo "hello fun"
+}
+```
+
+#### 2. 调用函数
+
+如何调用上面的 2 个函数呢？
+
+```
+# 1. 直接用函数名调用 hello 函数
+hello
+
+# 2. 使用「函数名 函数参数」来传递参数
+hello_world 1 2
+
+# 3. 使用「FUN=`函数名 函数参数`」 来间接调用
+FUN=`hello_world 1 2`
+echo $FUN
+```
+
+#### 3. 获取返回值
+
+如何获取 `hello_world` 函数的返回值呢？还记得 `$?` 吗？
+
+```
+hello_world 1 2
+# $? 可用于获取前一个函数的返回值，这里结果是 1 
+echo $?
+```
+
+#### 4. 定义本地变量
+
+使用 `local` 来在函数中定义本地变量：
+
+```
+fun()
+{
+	local x=1
+	echo $x
+}
+```
+
+俗话说，**程序 3 分靠写，7 分靠调**，下面我们就来看看如何调试 Shell 程序。
+
+### Shell 调试
+
+使用下面的命令来**检查是否有语法错误**：
+
+```
+sh -n script_name.sh
+```
+
+使用下面的命令来**执行并调试 Shell 脚本**：
+
+```
+sh -x script_name.sh
+```
+
+来看个实际的例子，我们来调试下面这个 `test.sh` 程序：
+
+```
+#!/bin/bash
+
+for VAR in 1 2 3
+do
+	if [ $VAR -eq 2 ]
+	then
+		continue	
+	fi
+	echo $VAR
+done
+```
+
+首先检查有无语法错误：
+
+```
+sh -n test.sh
+```
+
+没有输出，说明没有错误，开始实际调试：
+
+```
+sh -x test.sh
+```
+
+调试结果如下：
+
+```
++ [ 1 -eq 2 ]
++ echo 1
+1
++ [ 2 -eq 2 ]
++ continue
++ [ 3 -eq 2 ]
++ echo 3
+3
+```
+
+其中**带有 `+` 表示的是 `Shell` 调试器的输出**，**不带 `+` 表示我们程序的输出**。
+
+### Shell 易错点
+
+这里我总结了一些初学 Shell 编程容易犯的错误，大多都是语法错误：
+
+1. `[]` 内不能嵌套 `()`，可以嵌套 `[]`
+2. `$[ val + 1 ]` 是变量加 1 的常用方法
+3. `[]` 在测试或者计算中里面的内容最好**都加空格**
+4. 单引号和双引号差不多，单引号更加严格，双引号可以嵌套单引号
+5. 一定要注意语句的格式，例如缩进
+
+
+
+## Vim编辑器
 
 `yum install vim`
 
@@ -791,7 +1515,7 @@ vim 键盘图：
 | **:set nu**                                                  | 显示行号，设定之后，会在每一行的前缀显示该行的行号           |
 | **:set nonu**                                                | 与 set nu 相反，为取消行号！                                 |
 
-#### 账号管理
+## 账号管理
 
 > 简介
 
@@ -1204,7 +1928,7 @@ Shell是用户与Linux系统之间的接口。Linux的Shell有许多种，每种
 3. "组标识号"与用户标识号类似，也是一个整数，被系统内部用来标识组。
 4. "组内用户列表"是属于这个组的所有用户的列表/b]，不同用户之间用逗号(,)分隔。这个用户组可能是用户的主组，也可能是附加组。
 
-#### 磁盘管理
+## 磁盘管理
 
 > 概述
 
@@ -1289,7 +2013,7 @@ umount [-fn] 装置文件名或挂载点
 [root@www ~]# umount /dev/hdc6
 ```
 
-#### 进程管理
+## 进程管理
 
 > 什么是进程
 
@@ -1330,6 +2054,40 @@ pstree -pu
 `kill -9 进程id 强制结束`
 
 ## Linux安装软件
+
+### 应用程序安装的原理
+
+我们知道，在 `Windows` 下双击安装包即可安装软件，非常的简单方便，但是这种方法是针对大部分普通用户的，作为计算机高手，你可不能止步与表面功夫。因此，我们必须了解系统在安装软件时所做的事情。
+
+`Windows` 安装软件大概的过程如下：
+
+1. 在用户指定的安装目录下建立安装程序目录
+2. 拷贝相关 `dll` 动态库到安装目录
+3. 拷贝 `exe` 可执行文件到安装目录
+4. 拷贝配置文件到安装目录，比如 `Windows` 下的 `ini` 配置文件
+5. 把启动配置或者程序依赖的配置放入注册表中
+6. 如果是服务程序，注册并且启动该服务
+
+`Linux` 安装软件大概的过程如下：
+
+1. 建立安装目录
+2. 拷贝类库
+3. 拷贝可执行程序
+4. 根据需要选择性配置和启动服务
+
+2 者的安装过程几乎是相同的，只是安装方式有些不同。在 `Windows` 下我们经常使用图形界面来安装，而在 `Linux` 下经常通过命令行来安装，我们后面介绍。对于卸载过程，2 者也是相同的，都是**安装的过程逆过程**。
+
+另外需要注意以下 2 点：
+
+1. `Linux` 下的 `/usr` 目录相当于 `Windows` 下的 `ProgramFile` 目录
+2. `Linux` 下的动态库后缀是 `.so` 而 `Windows` 下是 `.dll`
+
+`Linux` 的软件安装主要有 3 种方法，下面一一介绍。
+
+常见的 `Linux` 下的安装包有如下两种：
+
+1. rpm: 红帽 Linux 用的安装包格式
+2. ded: Debian Linux 用的安装包格式
 
 
 
@@ -1615,6 +2373,59 @@ grant all on *.* to 'root'@'%' identified by 'root';
 
 flush privileges;
 ```
+
+
+
+### SELinux导致安装失败
+
+SELinux 是内置于 Linux 内核中的强制访问控制 (MAC) 执行器。它限制了可能对系统构成威胁的个别服务的权限。没有 SELinux 的 CentOS 系统依赖于其所有特权软件应用程序的配置。单个错误配置可能会危及整个系统。
+
+#### 第 1 步：检查 SELinux 状态
+
+> SELinux 服务在 CentOS 和大多数其他基于 RHEL 的系统上默认启用。
+>
+> 首先使用以下命令检查系统上 SELinux 的状态：
+
+```
+sestatus
+```
+
+SELinux 开启状态：`sudo getenforce`
+
+- 有如下三种状态，默认是 Enforcing
+  - Enforcing（开启）
+  - Permissive（开启，但是只起到警告作用，属于比较轻的开启）
+  - Disabled（关闭）
+- 临时关闭：
+  - 命令：`sudo setenforce 0`
+- 临时开启：
+  - 命令：`sudo setenforce 1`
+- 永久关闭：
+  - 命令：`sudo vim /etc/selinux/config`
+  - 将：`SELINUX=enforcing` 改为 `SELINUX=disbaled`，配置好之后需要重启系统。
+
+
+
+SELinux 状态的输出示例
+
+> SELinux 可能会阻止应用程序的正常运行。如果出现以下情况，服务将拒绝访问：
+
+- 文件标签错误。
+- 不兼容的应用程序尝试访问被禁止的文件。
+- 服务在不正确的安全策略下运行。
+- 检测到入侵。
+
+#### 第 2 步：禁用 SELinux
+
+> 暂时禁用 SELinux，请在终端中输入以下命令：
+
+```
+sudo setenforce 0
+```
+
+> 在`sudo setenforce 0`中，你可以使用`permissive`而不是 0。
+>
+> 此命令将 SELinux 模式从`target`改为`permissive`
 
 
 
