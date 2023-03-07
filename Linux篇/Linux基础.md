@@ -889,7 +889,7 @@ $ git init
 git add demo1.txt
 ```
 
-rm命令删除的是工作区里的文件，如果要从版本库中删除文件，那么就需要使用git rm命令删除，并且删除后记得使用git commit命令提交。
+rm命令删除的是工作区里的文件，如果要从版本库中删除文件，那么就需要使用git rm命令删除，并且删除后记得使用`git add` . 再用`git commit -m "delete" `命令提交。
 
 ```bash
 git rm demo2.txt
