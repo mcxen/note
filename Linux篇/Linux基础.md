@@ -867,7 +867,7 @@ glances 是一个相对比较新的系统监控工具，它有一些比较高级
 
 
 
-### 创建git
+### git常用
 
 先来创建一个版本库：先在自己本地找一个合适的地方通过下面的命令创建一个空的目录：
 
@@ -887,6 +887,12 @@ $ git init
 
 ```sh
 git add demo1.txt
+```
+
+添加当前目录下的所有文件到暂存区：
+
+```
+git add .
 ```
 
 rm命令删除的是工作区里的文件，如果要从版本库中删除文件，那么就需要使用git rm命令删除，并且删除后记得使用`git add` . 再用`git commit -m "delete" `命令提交。
@@ -992,6 +998,13 @@ git checkout dev #切换到哪一个分支
 
 ```
 git brach -d dev
+```
+
+或者
+
+```
+$ git branch -d newtest
+Deleted branch newtest (was c1501a2
 ```
 
 ## Shell编程
