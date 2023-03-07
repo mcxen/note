@@ -863,6 +863,137 @@ glances 是一个相对比较新的系统监控工具，它有一些比较高级
 
 ![截屏2023-03-06 19.31.45](https://gcore.jsdelivr.net/gh/mcxen/image@main/uPic/%E6%88%AA%E5%B1%8F2023-03-06%2019.31.45.png)
 
+## Git快速
+
+
+
+### 创建git
+
+先来创建一个版本库：先在自己本地找一个合适的地方通过下面的命令创建一个空的目录：
+
+```shell
+$ mkdir gitspace
+```
+
+然后进入该目录下，通过如下命令把这个目录变成Git可以管理的仓库：
+
+```sh
+$ git init
+```
+
+可以看到在当前目录下多了一个 .git 的目录，这个目录是Git来跟踪管理版本库的，这样就把git仓库建好啦。
+
+接着使用git add命令将该文本文件添加到仓库中：
+
+```sh
+git add demo1.txt
+```
+
+rm命令删除的是工作区里的文件，如果要从版本库中删除文件，那么就需要使用git rm命令删除，并且删除后记得使用git commit命令提交。
+
+```bash
+git rm demo2.txt
+```
+
+如果删除的是工作区的文件，后来发现删除错了，那么可以通过git checkout命令用版本库里的文件进行恢复：
+
+```lua
+$ git checkout -- demo2.txt
+```
+
+进行设置，在命令行输入以下代码设置你的名字和Email地址：
+
+```sh
+$ git config --global user.name "Your Name"
+$ git config --global user.email "email@example.com"
+```
+
+git config -l 可以查看现在的git环境详细配置：
+
+```sh
+config --system --list #查看系统configgit 
+git config --global  --list #查看当前用户（global）配置
+git config --local  --list #查看当前仓库配置信息
+```
+
+![image-20230307093914997](https://gcore.jsdelivr.net/gh/mcxen/image@main/image-20230307093914997.png)
+
+用git commit命令，把文件提交到仓库：
+
+```sh
+git commit -m "提交demo1.txt到仓库"
+```
+
+注：-m后面输入的是本次提交的说明，也就是注释，可以随便输入，一般开发是就注释下这次修改的内容和说明等等。 这时候我们已经提交了一个版本的文件到仓库上了，那如果这时候需要修改该文件的内容。
+
+可以先运行下下面的命令，查看仓库当前的状态：
+
+```lua
+git status
+```
+
+这时候可以看到demo1已经modified了，但是还没有提交修改。还可以使用git diff命令，查看修改的内容：
+
+```
+git diff demo1.txt
+```
+
+### 版本管理
+
+可以使用git log命令查看历史信息：
+
+```bash
+git log
+```
+
+如果我们刚刚添加的hello world内容有误，怎么办？那么就需要将文件回退到上一个版本，这时候就需要使用到git reset命令了。
+
+```css
+git reset --hard HEAD^
+```
+
+版本已经回退到了上一个版本（提交demo1到仓库那个版本）。 注意：HEAD表示当前版本，则HEAD^表示上一个版本，那么上上版本就是HEAD^^。
+
+刚刚添加的hello word是对的，我们又想回到刚刚的那个版本怎么办呢？可以直接在文本添加然后在提交上去。当然这不是这里要说的办法。我们还是可以使用git reset命令来进行回滚到最新版本。这里使用的命令是：
+
+```css
+git reset --hard commit_id
+```
+
+这里不能用HEAD而必须使用commit_id ，因为最新版本在之前返回时已经被删除了，而这里的commitid可以通过刚刚提到的git log命令加上参数：--pretty=oneline来获取：
+
+```ini
+git log --pretty=oneline
+```
+
+<img src="https://gcore.jsdelivr.net/gh/mcxen/image@main/image-20230307093655520.png" alt="image-20230307093655520" style="zoom: 67%;" />
+
+所以回滚到最新版本就是：
+
+```css
+git reset --hard 75b036995f2ba5a6ebabaad22ce0a3d916c1b393
+```
+
+
+
+### git分支
+
+我们可以通过命令git branch查看分支，会列出所有的分支，当前分支前面会添加一个星号。
+
+```sh
+git branch dev  #当前的分支的信息
+
+git checkout dev #切换到哪一个分支
+```
+
+那么可以将dev分支上的内容合并到master分支上么？是可以的，在master分支下使用git merge dev命令即可
+
+可以使用下面的命令删除dev分支：
+
+```
+git brach -d dev
+```
+
 ## Shell编程
 
 
