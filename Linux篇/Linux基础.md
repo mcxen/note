@@ -1,43 +1,4 @@
-# Linux 阿里云真实环境学习
-
-## 购买阿里云服务器
-
-> 为什么程序员需要一个自己的服务器
->
-> - 作为一个程序员，必须发布自己的网站和项目
-> - 练习Linux仓库
-> - 自己的远程仓库、源程数据库、源程Tomcat
-> - 练习，Linux进行任意的环境部署操作
-
-> 服务器如何购买
->
-> - 我自己有2个云服务器，一个是腾讯云一个是阿里云
-> - 如果是学生，可以买学生服务器，一个月10块
->   -  https://promotion.aliyun.com/ntms/act/campus2018.html 
-> - 如果不是学生，那就打折的时候再买
-
-在阿里云购买的，需要开通端口映射和安全组。开启端口映射，否则无法访问。
-
-![1594620941075](images/1594620941075.png)
-
-获取公网IP地址，修改实例名称和密码，第一次修改需要重启。然后就可以远程连接，需要开通22端口。
-
-推荐的远程连接软件
-
-- MobaXterm
-- putty
-
-连接之后如下
-
-![1594621112046](images/1594621112046.png)
-
-> 连接到服务器之后，我们需要搭建环境
->
-> - 宝塔面板 教程查看上一级目录 `宝塔部署项目.md` 官网： https://bt.cn/ 
->
->   - ```shell
->    yum install -y wget && wget -O install.sh http://download.bt.cn/install/install_6.0.sh && sh install.sh
->    ```
+# Linux 基础笔记
 
 ## Linux入门基础
 
@@ -69,7 +30,7 @@
 
 然后获取公网地址：xxx.xxx.xxx.xxx
 
-设置root密码：*********************************
+设置root密码：qqq111...
 
 使用 `MobaXterm` 连接 如下
 
@@ -725,6 +686,36 @@ Systemd 并不是一个命令，而是一组命令，涉及到系统管理的方
 > # 启动进入救援状态（单用户状态）
 > $ sudo systemctl rescue
 > ```
+
+### 网络管理
+
+#### 防火墙
+
+```sh
+#查看已经开放的端口：
+
+firewall-cmd --list-ports
+
+ #开启端口
+
+firewall-cmd --zone=public --add-port=80/tcp --permanent
+
+ #命令含义：
+
+–zone #作用域
+
+–add-port=80/tcp #添加端口，格式为：端口/通讯协议
+
+–permanent #永久生效，没有此参数重启后失效
+
+ #重启防火墙
+
+firewall-cmd --reload #重启firewall
+
+systemctl stop firewalld.service #停止firewall
+
+systemctl disable firewalld.service #禁止firewall开机启动
+```
 
 
 
