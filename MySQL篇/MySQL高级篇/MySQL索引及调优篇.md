@@ -2619,7 +2619,19 @@ WHERE s1.common_field = 'a';
 
 但是下边两种情况下在一条查询语句中会出现多个SELECT关键字：
 
-<img src="MySQL索引及调优篇.assets/image-20220628221948512.png" alt="image-20220628221948512" style="float:left;" />
+- 查询中包含子查询的情况
+
+比如下边这个查询语句中就包含2个 SELECT 关键字：
+
+SELECT * FROM s1
+
+WHERE key1 IN (SELECT key3 FROM s2)
+
+- 查询中包含 UNION语句的情况
+
+比如下边这个查询语句中也包含2个 SELECT 关键字：
+
+SELECT * FROM S1 UNION SELECT * FROM s2;
 
 ```mysql
 mysql > EXPLAIN SELECT * FROM s1 WHERE key1 = 'a';
@@ -2633,11 +2645,11 @@ mysql > EXPLAIN SELECT * FROM s1 WHERE key1 = 'a';
 mysql> EXPLAIN SELECT * FROM s1 INNER JOIN s2;
 ```
 
-![image-20220628222251309](MySQL索引及调优篇.assets/image-20220628222251309.png)
+![image-20230307202440886](https://gcore.jsdelivr.net/gh/mcxen/image@main/uPic/image-20230307202440886.png)
 
 可以看到，上述连接查询中参与连接的s1和s2表分别对应一条记录，但是这两条记录对应的`id`都是1。这里需要大家记住的是，**在连接查询的执行计划中，每个表都会对应一条记录，这些记录的id列的值是相同的**，出现在前边的表表示`驱动表`，出现在后面的表表示`被驱动表`。所以从上边的EXPLAIN输出中我们可以看到，查询优化器准备让s1表作为驱动表，让s2表作为被驱动表来执行查询。
 
-对于包含子查询的查询语句来说，就可能涉及多个`SELECT`关键字，所以在**包含子查询的查询语句的执行计划中，每个`SELECT`关键字都会对应一个唯一的id值，比如这样：
+对于包含子查询的查询语句来说，就可能涉及多个`SELECT`关键字，所以在包含子查询的查询语句的执行计划中，每个`SELECT`关键字都会对应一个唯一的id值，比如这样：
 
 ```mysql
 mysql> EXPLAIN SELECT * FROM s1 WHERE key1 IN (SELECT key1 FROM s2) OR key3 = 'a';
@@ -2645,7 +2657,9 @@ mysql> EXPLAIN SELECT * FROM s1 WHERE key1 IN (SELECT key1 FROM s2) OR key3 = 'a
 
 ![image-20220629165122837](MySQL索引及调优篇.assets/image-20220629165122837.png)
 
-<img src="MySQL索引及调优篇.assets/image-20220629170848349.png" alt="image-20220629170848349" style="float:left;" />
+从输出结果中我们可以看到，s1表在外层查询中，外层查询有一个独立的 `SELECT` 关键字，所以第一条记录的id 值就是1，s2表在子查询中，子查询有一个`独立的SELECT` 关键字，所以第二条记录的 id 值就是2。
+
+但是这里大家需要特别注意，**查询优化器可能对涉及子查询的查询语句进行重写，从而转换为连接查询，多表查询**所以如果我们想知道查询优化器对某个包含子查询的语句是否进行了重写，直接查看执行计划就好了，比如说：
 
 ```mysql
 # 查询优化器可能对涉及子查询的查询语句进行重写，转变为多表查询的操作。  
@@ -2665,7 +2679,9 @@ mysql> EXPLAIN SELECT * FROM s1 UNION SELECT * FROM s2;
 
 ![image-20220629165909340](MySQL索引及调优篇.assets/image-20220629165909340.png)
 
-<img src="MySQL索引及调优篇.assets/image-20220629171104375.png" alt="image-20220629171104375" style="float:left;" />
+这个语句的执行计划的第三条记录是什么？为何id 值是 `NULL`，而且table列也很奇怪？`UNION`！它会把多个查询的结果集合并起来并对结果集中的记录进行去重，怎么去重呢？MySQL使用的是内部的临时表。正如上边的查询计划中所示，UNION子句是为了把id为1的查询和id为2的查询的结果集合并起来并去重，所以在内部创建了一个名为 `<union1，2>`的临时表（就是执行计划第三条记录的table列的名称），id为`NULL`表明这个临时表是为了合并两个查询的结果集而创建的。
+
+跟UNION对比起来，`UNION ALL` 就不需要为最终的结果集进行去重，它只是单纯的把多个查询的结果集中的记录合并成一个并返回给用户，所以也就不需要使用临时表。所以在包含 UNTON ALL 子句的查询的执行计划中，就没有那个id为NULL的记录，如下所示：
 
 ```mysql
 mysql> EXPLAIN SELECT * FROM s1 UNION ALL SELECT * FROM s2;
