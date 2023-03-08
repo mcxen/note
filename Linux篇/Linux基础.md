@@ -978,11 +978,13 @@ $ git checkout -- demo2.txt
 进行设置，在命令行输入以下代码设置你的名字和Email地址：
 
 ```sh
-$ git config --global user.name "Your Name"
-$ git config --global user.email "email@example.com"
+$ git config --global user.name "MCX-air"
+$ git config --global user.email "imsalt@icloud.com"
 ```
 
 > '我猜测这里的email，可能会是使得github的用户名字发生改变的原因，它自动去匹配了imsalt@163.com的github账户。
+>
+> ![image-20230308104509336](https://fastly.jsdelivr.net/gh/mcxen/image@main/uPic/image-20230308104509336.png)
 
 git config -l 可以查看现在的git环境详细配置：
 
