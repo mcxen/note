@@ -982,6 +982,8 @@ $ git config --global user.name "Your Name"
 $ git config --global user.email "email@example.com"
 ```
 
+> '我猜测这里的email，可能会是使得github的用户名字发生改变的原因，它自动去匹配了imsalt@163.com的github账户。
+
 git config -l 可以查看现在的git环境详细配置：
 
 ```sh
