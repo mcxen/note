@@ -28,7 +28,7 @@
 
 使用 `MobaXterm` 连接 如下
 
-![1594644310444](images/1594644310444.png)
+![1594644310444](https://fastly.jsdelivr.net/gh/mcxen/image@main/uPic/1594644310444.png)
 
 使用TABBY连接：
 
