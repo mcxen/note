@@ -1,8 +1,6 @@
 # 第07章_面向对象编程(进阶)
 
-讲师：尚硅谷-宋红康（江湖人称：康师傅）
 
-官网：[http://www.atguigu.com](http://www.atguigu.com/)
 
 ***
 
@@ -2069,6 +2067,13 @@ class Animal implements Cloneable{
 	
 }
 ```
+
+```sh
+原始对象：Animal [name=花花]
+clone之后的对象：Animal [name=毛毛]
+```
+
+
 
 #### 4、finalize()
 
