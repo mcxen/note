@@ -34,6 +34,43 @@
 
 ![截屏2023-03-04 16.46.17](https://gcore.jsdelivr.net/gh/mcxen/image@main/uPic/%E6%88%AA%E5%B1%8F2023-03-04%2016.46.17.png)
 
+> ## 修改阿里云丑陋的名字
+>
+> 1.通过命令`hostname`可以知道当前的主机名称
+> 2.通过命令`hostnamectl set-hostname hello`可以将主机名修改为hello
+>
+> ```sh
+> root@iZf8z5qdmvb3n8mkuvd98gZ ~]# hostname
+> iZf8z5qdmvb3n8mkuvd98gZ
+> [root@iZf8z5qdmvb3n8mkuvd98gZ ~]# hostnamectl set-hostname ali
+> ```
+>
+> 3.重启服务
+> ![image-20230320222245901](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230320222245901.png)
+>
+> 4.重新连接即可
+>
+> ```sh
+> [root@iZf8z5qdmvb3n8mkuvd98gZ ~]# hostnamectl set-hostname ali
+> [root@iZf8z5qdmvb3n8mkuvd98gZ ~]# 
+>  SSH  47.113.146.223: session closed
+> 按任意键重新连接
+> 
+>  SSH  Connecting to 47.113.146.223
+>  SSH  Host key fingerprint:
+>  SSH   ecdsa-sha2-nistp256  gtEDLe8UPh6zobgAGZ5Row6oW0UFugi6xFWpywChG5k= 
+>  SSH  尝试已保存的密码
+> Last login: Mon Mar 20 22:20:08 2023 from 43.227.139.34
+> 
+> Welcome to Alibaba Cloud Elastic Compute Service !
+> 
+> [root@ali ~]# uptime
+>  22:24:31 up 2 min,  1 user,  load average: 0.07, 0.03, 0.01
+> [root@ali ~]# 
+> ```
+>
+> 
+
 ## 走进Linux系统
 
 > 开机登录
@@ -194,6 +231,8 @@ seq_lock(顺序锁)：是对读写锁的优化。也就是写锁不被读锁所�
 RCU(读-拷贝)：在访问RCU保护的资源时，读者不需要任何等待，而写者访问它时首先得拷贝一个副本，然后对父辈修改，最后在没有任何对读者操作，把指向原来的数据的指针指向新的数据。
 
 ## Linux基本命令
+
+
 
 ### 基本的命令在哪里？
 

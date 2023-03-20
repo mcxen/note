@@ -1,8 +1,6 @@
 # 第11章_常用类和基础API
 
-讲师：尚硅谷-宋红康（江湖人称：康师傅）
 
-官网：[http://www.atguigu.com](http://www.atguigu.com/)
 
 ***
 
