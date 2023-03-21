@@ -27,8 +27,6 @@ Redis与其他key-value缓存产品有以下三个特点
 
 由于企业里面做Redis开发，99%都是Linux版的运用和安装，几乎不会涉及到Windows版，所以这里就以linux版为主，可以自己去测试玩玩，Windows安装及使用教程：https://www.cnblogs.com/xing-nb/p/12146449.html
 
-
-
 linux直接去官网下载：https://redis.io/download
 
 安装步骤（基于当时最新版6.2.1）：
@@ -65,7 +63,33 @@ linux直接去官网下载：https://redis.io/download
 
    /usr 这是一个非常重要的目录，类似于windows下的Program Files，存放用户的程序
 
-   ![image-20210406233231151](https://gcore.jsdelivr.net/gh/oddfar/static/img/Redis.assets/image-20210406233231151.png)
+   ```sh
+   [root@ali redis-5.0.14]# ll
+   total 292
+   -rw-rw-r--  1 root root 127554 Oct  4  2021 00-RELEASENOTES
+   -rw-rw-r--  1 root root     53 Oct  4  2021 BUGS
+   -rw-rw-r--  1 root root   2381 Oct  4  2021 CONTRIBUTING
+   -rw-rw-r--  1 root root   1487 Oct  4  2021 COPYING
+   drwxrwxr-x  6 root root   4096 Mar 20 22:00 deps
+   -rw-r--r--  1 root root    107 Mar 20 22:21 dump.rdb
+   -rw-rw-r--  1 root root     11 Oct  4  2021 INSTALL
+   -rw-rw-r--  1 root root    151 Oct  4  2021 Makefile
+   -rw-rw-r--  1 root root   6888 Oct  4  2021 MANIFESTO
+   -rw-rw-r--  1 root root  20555 Oct  4  2021 README.md
+   -rw-rw-r--  1 root root  63089 Mar 20 22:12 redis.conf
+   -rwxrwxr-x  1 root root    275 Oct  4  2021 runtest
+   -rwxrwxr-x  1 root root    280 Oct  4  2021 runtest-cluster
+   -rwxrwxr-x  1 root root    373 Oct  4  2021 runtest-moduleapi
+   -rwxrwxr-x  1 root root    281 Oct  4  2021 runtest-sentinel
+   -rw-rw-r--  1 root root   9710 Oct  4  2021 sentinel.conf
+   drwxrwxr-x  3 root root   4096 Mar 20 22:09 src
+   drwxrwxr-x 11 root root   4096 Oct  4  2021 tests
+   drwxrwxr-x  8 root root   4096 Oct  4  2021 utils
+   ```
+
+   redis-server在src里，redis.conf在外边
+
+   
 
 8. redis默认不是后台启动，修改文件
 
@@ -156,12 +180,10 @@ OK
 可以使用指令`ps -ef|grep redis `显示系统当前redis 进程信息，查看开启和关闭连接的变化
 
 ```sh
-[root@iZf8z5qdmvb3n8mkuvd98gZ redis-5.0.14]# ps -ef|grep redis
+[root@ali redis-5.0.14]# ps -ef|grep redis
 root     21640     1  0 22:13 ?        00:00:00 redis-server 127.0.0.1:6379
 root     21809  7864  0 22:15 pts/0    00:00:00 grep --color=auto redis
 ```
-
-
 
 
 
