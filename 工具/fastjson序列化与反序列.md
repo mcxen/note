@@ -2,7 +2,7 @@
 
 > 银鞍照白马，飒沓如流星。
 
-今天来总结归纳Fastjson漏洞及原理。
+
 
 
 
@@ -29,10 +29,22 @@ JSON.parseObject("{...}", VO.class); //JSON文本解析成VO.class类
 
 建议从[maven仓库](https://mvnrepository.com/artifact/com.alibaba/fastjson/1.2.24)中找到所有版本jar包,方便漏洞复现。
 
+```xml
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.24</version>
+        </dependency>
+    </dependencies>
+```
+
+
+
 先构建需要序列化的Student类：
 
 ```
-package FastjsonTmpl;
 
 public class Student {
     private String name;
@@ -67,7 +79,6 @@ public class Student {
 再使用Fastjson组件：
 
 ```
-package FastjsonTmpl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 

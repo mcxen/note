@@ -429,6 +429,166 @@ OK
 (integer) 0
 ```
 
+
+
+## Redis.conf
+
+### 熟悉基本配置
+
+> 位置
+
+Redis 的配置文件位于 Redis 安装目录下，文件名为 redis.conf
+
+```bash
+config get * # 获取全部的配置
+```
+
+我们一般情况下，会单独拷贝出来一份进行操作。来保证初始文件的安全。
+
+正如在 `安装redis` 中的讲解中拷贝一份
+
+> 容量单位不区分大小写，G和GB有区别
+
+![image-20210408213939472](https://gcore.jsdelivr.net/gh/oddfar/static/img/Redis.assets/image-20210408213939472.png)
+
+>  include 组合多个配置
+
+![image-20210408214037264](https://gcore.jsdelivr.net/gh/oddfar/static/img/Redis.assets/image-20210408214037264.png)
+
+和Spring配置文件类似，可以通过includes包含，redis.conf 可以作为总文件，可以包含其他文件！
+
+> NETWORK 网络配置
+
+```bash
+bind 127.0.0.1 # 绑定的ip
+protected-mode yes # 保护模式
+port 6379 # 默认端口
+```
+
+> GENERAL 通用
+
+```bash
+daemonize yes # 默认情况下，Redis不作为守护进程运行。需要开启的话，改为 yes
+
+supervised no # 可通过upstart和systemd管理Redis守护进程
+
+loglevel notice # 日志级别。可选项有：
+				# debug（记录大量日志信息，适用于开发、测试阶段）
+				# verbose（较多日志信息）
+				# notice（适量日志信息，使用于生产环境）
+				# warning（仅有部分重要、关键信息才会被记录）
+logfile "" # 日志文件的位置，当指定为空字符串时，为标准输出
+databases 16 # 设置数据库的数目。默认的数据库是DB 0
+always-show-logo yes # 是否总是显示logo
+```
+
+> SNAPSHOPTING 快照，持久化规则
+
+由于Redis是基于内存的数据库，需要将数据由内存持久化到文件中
+
+持久化方式：
+
+- RDB
+- AOF
+
+```bash
+# 900秒（15分钟）内至少1个key值改变（则进行数据库保存--持久化）
+save 900 1
+# 300秒（5分钟）内至少10个key值改变（则进行数据库保存--持久化）
+save 300 10
+# 60秒（1分钟）内至少10000个key值改变（则进行数据库保存--持久化）
+save 60 10000
+```
+
+RDB文件相关
+
+```bash
+stop-writes-on-bgsave-error yes # 持久化出现错误后，是否依然进行继续进行工作
+
+rdbcompression yes # 使用压缩rdb文件 yes：压缩，但是需要一些cpu的消耗。no：不压缩，需要更多的磁盘空间
+
+rdbchecksum yes # 是否校验rdb文件，更有利于文件的容错性，但是在保存rdb文件的时候，会有大概10%的性能损耗
+
+dbfilename dump.rdb # dbfilenamerdb文件名称
+
+dir ./ # dir 数据目录，数据库的写入会在这个目录。rdb、aof文件也会写在这个目录
+```
+
+> REPLICATION主从复制
+
+![image-20210408214742862](https://gcore.jsdelivr.net/gh/oddfar/static/img/Redis.assets/image-20210408214742862.png)
+
+后面详细说
+
+> SECURITY安全
+
+访问密码的查看，设置和取消
+
+```bash
+# 启动redis
+# 连接客户端
+
+# 获得和设置密码
+config get requirepass
+config set requirepass "123456"
+
+#测试ping，发现需要验证
+127.0.0.1:6379> ping
+NOAUTH Authentication required.
+# 验证
+127.0.0.1:6379> auth 123456
+OK
+127.0.0.1:6379> ping
+PONG
+```
+
+>  客户端连接相关
+
+```bash
+maxclients 10000  最大客户端数量
+maxmemory <bytes> 最大内存限制
+maxmemory-policy noeviction # 内存达到限制值的处理策略
+```
+
+**maxmemory-policy 六种方式**
+
+**1、volatile-lru：**利用LRU算法移除设置过过期时间的key。
+
+**2、allkeys-lru ：** 用lru算法删除lkey
+
+**3、volatile-random：**随机删除即将过期key
+
+**4、allkeys-random：**随机删除
+
+**5、volatile-ttl ：** 删除即将过期的
+
+**6、noeviction ：** 不移除任何key，只是返回一个写错误。
+
+redis 中的**默认**的过期策略是 **volatile-lru** 。
+
+**设置方式**
+
+```bash
+config set maxmemory-policy volatile-lru 
+```
+
+>  append only模式 
+
+（AOF相关部分）
+
+![在这里插入图片描述](https://gcore.jsdelivr.net/gh/oddfar/static/img/Redis.assets/20200513215037918.png)
+
+![在这里插入图片描述](https://gcore.jsdelivr.net/gh/oddfar/static/img/Redis.assets/20200513215047999.png)
+
+```bash
+appendfsync everysec # appendfsync aof持久化策略的配置
+        # no表示不执行fsync，由操作系统保证数据同步到磁盘，速度最快。
+        # always表示每次写入都执行fsync，以保证数据同步到磁盘。
+        # everysec表示每秒执行一次fsync，可能会导致丢失这1s数据。
+```
+
+## 
+
 ## 关于redis的单线程
 
 注：6.x版本有多线程，一般用不到，单线程足够应对
@@ -1790,6 +1950,24 @@ public class Ping {
 }
 ```
 
+
+
+### Java调用fastjson，jedis存储在redis中
+
+```java
+Jedis jedis = new Jedis("127.0.0.1",6379);
+Student student = new Student();
+//序列化
+String json = JSON.toJSONString(student);
+String key = "student:"+student.getNo();
+jedis.set(key,json)
+
+```
+
+
+
+
+
 ### 常用API
 
 基本操作
@@ -2017,6 +2195,27 @@ public class TestHash {
 
 ### 事务
 
+> JSONObject来自org.json
+>
+> ```xml
+> <dependency>
+>     <groupId>org.json</groupId>
+>     <artifactId>json</artifactId>
+>     <version>20180813</version>
+> </dependency>
+> ```
+>
+> ```java
+> JSONObject obj = new JSONObject();
+> obj.put(key, value);
+> ```
+>
+> 直接构建即直接实例化一个 JSONObject 对象，而后调用其 put() 方法，将数据写入。put() 方法的第一个参数为 key 值，必须为 String 类型，第二个参数为 value，可以为 boolean、double、int、long、Object、Map 以及 Collection 等。当然，double 以及 int 等类型只是在 Java 中，写入到 json 中时，统一都会以 Number 类型存储。
+>
+> 
+
+
+
 ```java
 public class TestMulti {
     public static void main(String[] args) {
@@ -2052,6 +2251,462 @@ public class TestMulti {
 }
 ```
 
+
+
+## lettuce-jedis后起之秀
+
+jedis和lettuce对比：
+
+**jedis**：采用直连，多线程连接不安全，使用jedispool才持久
+
+**优点：**
+
+- 提供了比较全面的 Redis 操作特性的 API
+- API 基本与 Redis 的指令一一对应，使用简单易理解
+
+**缺点：**
+
+- 同步阻塞 IO
+- 不支持异步
+- 线程不安全
+
+**lettuce：**
+
+**优点：**
+
+- 线程安全
+- 基于 Netty 框架的事件驱动的通信，可异步调用
+- 适用于分布式缓存
+
+**缺点：**
+
+- API 更抽象，学习使用成本高
+
+
+
+### **基本使用**
+
+首先，创建一个 maven 项目，引入`lettuce-core`包，就可以使用了。
+
+```xml
+<dependency>
+  <groupId>io.lettuce</groupId>
+  <artifactId>lettuce-core</artifactId>
+  <version>5.3.1.RELEASE</version>
+</dependency>
+```
+
+使用 lettuce 连接 redis，测试是否能正常联通！
+
+```java
+public class LettuceMain {
+
+    public static void main(String[] args) {
+        RedisURI redisUri = RedisURI.builder()
+                .withHost("127.0.0.1")
+                .withPort(6379)
+                .withPassword("111111")
+                .withTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .build();
+        RedisClient redisClient = RedisClient.create(redisUri);
+        StatefulRedisConnection<String, String> connection = redisClient.connect();
+        RedisCommands<String, String> commands = connection.sync();
+        System.out.println(commands.ping());
+        connection.close();
+        redisClient.shutdown();
+    }
+}
+```
+
+### **同步操作**
+
+基本上只要是 Jedis 支持的同步命令操作，Lettuce 都支持。
+
+下面，我们以同步操作字符串为例，Lettuce 的 api 操作如下！
+
+```java
+public class LettuceSyncMain {
+
+    public static void main(String[] args) {
+        RedisURI redisUri = RedisURI.builder()
+                .withHost("127.0.0.1").withPort(6379).withPassword("111111")
+                .withTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .build();
+        RedisClient redisClient = RedisClient.create(redisUri);
+        StatefulRedisConnection<String, String> connection = redisClient.connect();
+        //获取同步操作命令工具
+        RedisCommands<String, String> commands = connection.sync();
+
+        System.out.println("清空数据："+commands.flushdb());
+        System.out.println("判断某个键是否存在："+commands.exists("username"));
+        System.out.println("新增<'username','xmr'>的键值对："+commands.set("username", "xmr"));
+        System.out.println("新增<'password','password'>的键值对："+commands.set("password", "123"));
+        System.out.println("获取<'password'>键的值："+commands.get("password"));
+        System.out.println("系统中所有的键如下：" + commands.keys("*"));
+        System.out.println("删除键password:"+commands.del("password"));
+        System.out.println("判断键password是否存在："+commands.exists("password"));
+        System.out.println("设置键username的过期时间为5s:"+commands.expire("username", 5L));
+        System.out.println("查看键username的剩余生存时间："+commands.ttl("username"));
+        System.out.println("移除键username的生存时间："+commands.persist("username"));
+        System.out.println("查看键username的剩余生存时间："+commands.ttl("username"));
+        System.out.println("查看键username所存储的值的类型："+commands.type("username"));
+
+        connection.close();
+        redisClient.shutdown();
+    }
+}
+```
+
+### **异步操作**
+
+除此之外，Lettuce 还支持异步操作，将上面的操作改成异步处理，结果如下！
+
+```java
+public class LettuceASyncMain {
+
+    public static void main(String[] args) throws Exception {
+        RedisURI redisUri = RedisURI.builder()
+                .withHost("127.0.0.1").withPort(6379).withPassword("111111")
+                .withTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .build();
+        RedisClient redisClient = RedisClient.create(redisUri);
+        StatefulRedisConnection<String, String> connection = redisClient.connect();
+        //获取异步操作命令工具
+        RedisAsyncCommands<String, String> commands = connection.async();
+
+        System.out.println("清空数据："+commands.flushdb().get());
+        System.out.println("判断某个键是否存在："+commands.exists("username").get());
+        System.out.println("新增<'username','xmr'>的键值对："+commands.set("username", "xmr").get());
+        System.out.println("新增<'password','password'>的键值对："+commands.set("password", "123").get());
+        System.out.println("获取<'password'>键的值："+commands.get("password").get());
+        System.out.println("系统中所有的键如下：" + commands.keys("*").get());
+        System.out.println("删除键password:"+commands.del("password").get());
+        System.out.println("判断键password是否存在："+commands.exists("password").get());
+        System.out.println("设置键username的过期时间为5s:"+commands.expire("username", 5L).get());
+        System.out.println("查看键username的剩余生存时间："+commands.ttl("username").get());
+        System.out.println("移除键username的生存时间："+commands.persist("username").get());
+        System.out.println("查看键username的剩余生存时间："+commands.ttl("username").get());
+        System.out.println("查看键username所存储的值的类型："+commands.type("username").get());
+
+        connection.close();
+        redisClient.shutdown();
+    }
+}
+```
+
+### **响应式编程**
+
+Lettuce 除了支持异步编程以外，还支持响应式编程，Lettuce 引入的[响应式编程框架](https://www.zhihu.com/search?q=响应式编程框架&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra={"sourceType"%3A"answer"%2C"sourceId"%3A2820019428})是`Project Reactor`，如果没有响应式编程经验可以先自行了解一下，访问地址`https://projectreactor.io/`。
+
+响应式编程使用案例如下：
+
+```java
+public class LettuceMain {
+
+    public static void main(String[] args) throws Exception {
+        RedisURI redisUri = RedisURI.builder()
+                .withHost("127.0.0.1").withPort(6379).withPassword("111111")
+                .withTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .build();
+        RedisClient redisClient = RedisClient.create(redisUri);
+        StatefulRedisConnection<String, String> connection = redisClient.connect();
+        //获取响应式API操作命令工具
+        RedisReactiveCommands<String, String> commands = connection.reactive();
+
+        Mono<String> setc = commands.set("name", "mayun");
+        System.out.println(setc.block());
+        Mono<String> getc = commands.get("name");
+        getc.subscribe(System.out::println);
+        Flux<String> keys = commands.keys("*");
+        keys.subscribe(System.out::println);
+
+        //开启一个事务，先把count设置为1，再将count自增1
+        commands.multi().doOnSuccess(r -> {
+            commands.set("count", "1").doOnNext(value -> System.out.println("count1：" +  value)).subscribe();
+            commands.incr("count").doOnNext(value -> System.out.println("count2：" +  value)).subscribe();
+        }).flatMap(s -> commands.exec())
+                .doOnNext(transactionResult -> System.out.println("transactionResult：" + transactionResult.wasDiscarded())).subscribe();
+
+        Thread.sleep(1000 * 5);
+        connection.close();
+        redisClient.shutdown();
+    }
+}
+```
+
+### **发布和订阅**
+
+Lettuce 还支持 redis 的消息发布和订阅，具体实现案例如下：
+
+```java
+public class LettuceReactiveMain1 {
+
+    public static void main(String[] args) throws Exception {
+        RedisURI redisUri = RedisURI.builder()
+                .withHost("127.0.0.1").withPort(6379).withPassword("111111")
+                .withTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .build();
+        RedisClient redisClient = RedisClient.create(redisUri);
+        //获取发布订阅操作命令工具
+        StatefulRedisPubSubConnection<String, String> pubsubConn = redisClient.connectPubSub();
+        pubsubConn.addListener(new RedisPubSubListener<String, String>() {
+            @Override
+            public void unsubscribed(String channel, long count) {
+                System.out.println("[unsubscribed]" + channel);
+            }
+            @Override
+            public void subscribed(String channel, long count) {
+                System.out.println("[subscribed]" + channel);
+            }
+            @Override
+            public void punsubscribed(String pattern, long count) {
+                System.out.println("[punsubscribed]" + pattern);
+            }
+            @Override
+            public void psubscribed(String pattern, long count) {
+                System.out.println("[psubscribed]" + pattern);
+            }
+            @Override
+            public void message(String pattern, String channel, String message) {
+                System.out.println("[message]" + pattern + " -> " + channel + " -> " + message);
+            }
+            @Override
+            public void message(String channel, String message) {
+                System.out.println("[message]" + channel + " -> " + message);
+            }
+        });
+        RedisPubSubAsyncCommands<String, String> pubsubCmd = pubsubConn.async();
+        pubsubCmd.psubscribe("CH");
+        pubsubCmd.psubscribe("CH2");
+        pubsubCmd.unsubscribe("CH");
+
+        Thread.sleep(100 * 5);
+        pubsubConn.close();
+        redisClient.shutdown();
+    }
+}
+```
+
+### **客户端资源与参数配置**
+
+Lettuce 客户端的通信框架集成了 Netty 的非阻塞 IO 操作，客户端资源的设置与 Lettuce 的性能、并发和事件处理紧密相关，如果不是特别熟悉客户端参数配置，不建议在没有经验的前提下凭直觉修改默认值，保持默认配置就行。
+
+非集群环境下，具体的配置案例如下：
+
+```java
+public class LettuceMain {
+
+    public static void main(String[] args) throws Exception {
+        ClientResources resources = DefaultClientResources.builder()
+                .ioThreadPoolSize(4) //I/O线程数
+                .computationThreadPoolSize(4) //任务线程数
+                .build();
+        RedisURI redisUri = RedisURI.builder()
+                .withHost("127.0.0.1").withPort(6379).withPassword("111111")
+                .withTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .build();
+        ClientOptions options = ClientOptions.builder()
+                .autoReconnect(true)//是否自动重连
+                .pingBeforeActivateConnection(true)//连接激活之前是否执行PING命令
+                .build();
+        RedisClient client = RedisClient.create(resources, redisUri);
+        client.setOptions(options);
+        StatefulRedisConnection<String, String> connection = client.connect();
+        RedisCommands<String, String> commands = connection.sync();
+        commands.set("name", "关羽");
+        System.out.println(commands.get("name"));
+
+        connection.close();
+        client.shutdown();
+        resources.shutdown();
+    }
+}
+```
+
+集群环境下，具体的配置案例如下：
+
+```java
+public class LettuceMain {
+
+    public static void main(String[] args) throws Exception {
+        ClientResources resources = DefaultClientResources.builder()
+                .ioThreadPoolSize(4) //I/O线程数
+                .computationThreadPoolSize(4) //任务线程数
+                .build();
+        RedisURI redisUri = RedisURI.builder()
+                .withHost("127.0.0.1").withPort(6379).withPassword("111111")
+                .withTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .build();
+        ClusterClientOptions options = ClusterClientOptions.builder()
+                .autoReconnect(true)//是否自动重连
+                .pingBeforeActivateConnection(true)//连接激活之前是否执行PING命令
+                .validateClusterNodeMembership(true)//是否校验集群节点的成员关系
+                .build();
+        RedisClusterClient client = RedisClusterClient.create(resources, redisUri);
+        client.setOptions(options);
+        StatefulRedisClusterConnection<String, String> connection = client.connect();
+        RedisAdvancedClusterCommands<String, String> commands = connection.sync();
+        commands.set("name", "张飞");
+        System.out.println(commands.get("name"));
+
+        connection.close();
+        client.shutdown();
+        resources.shutdown();
+    }
+}
+```
+
+### **线程池配置**
+
+Lettuce 连接设计的时候，就是线程安全的，所以一个连接可以被多个线程共享，同时 lettuce 连接默认是自动重连的，使用单连接基本可以满足业务需求，大多数情况下不需要配置连接池，多连接并不会给操作带来性能上的提升。
+
+但在某些特殊场景下，比如事物操作，使用连接池会是一个比较好的方案，那么如何配置线程池呢？
+
+```text
+public class LettuceMain {
+
+    public static void main(String[] args) throws Exception {
+        RedisURI redisUri = RedisURI.builder()
+                .withHost("127.0.0.1")
+                .withPort(6379)
+                .withPassword("111111")
+                .withTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .build();
+        RedisClient client = RedisClient.create(redisUri);
+        //连接池配置
+        GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
+        poolConfig.setMaxIdle(2);
+
+        GenericObjectPool<StatefulRedisConnection<String, String>> pool = ConnectionPoolSupport.createGenericObjectPool(client::connect, poolConfig);
+        StatefulRedisConnection<String, String> connection = pool.borrowObject();
+        RedisCommands<String, String> commands = connection.sync();
+        commands.set("name", "张飞");
+        System.out.println(commands.get("name"));
+
+        connection.close();
+        pool.close();
+        client.shutdown();
+    }
+}
+```
+
+### **主从模式配置**
+
+redis 一般采用主从复制模式，搭建高可用的架构，简单的说就一个主节点，多个从节点，自动从主节点同步最新数据。
+
+Lettuce 支持自动发现主从模式下的节点信息，然后保存到本地，具体配置如下：
+
+```text
+public class LettuceMain {
+
+    public static void main(String[] args) throws Exception {
+        //这里只需要配置一个节点的连接信息，不一定需要是主节点的信息，从节点也可以;可以自动发现主从节点
+        RedisURI uri = RedisURI.builder().withHost("192.168.31.111").withPort(6379).withPassword("123456").build();
+        RedisClient client = RedisClient.create(uri);
+        StatefulRedisMasterReplicaConnection<String, String> connection = MasterReplica.connect(client, StringCodec.UTF8, uri);
+        //从节点读取数据
+        connection.setReadFrom(ReadFrom.REPLICA);
+
+        RedisCommands<String, String> commands = connection.sync();
+        commands.set("name", "张飞");
+        System.out.println(commands.get("name"));
+
+        connection.close();
+        client.shutdown();
+    }
+}
+```
+
+当然我们也可以手动指定集群节点来加载，具体配置如下：
+
+```text
+public class LettuceMain {
+
+    public static void main(String[] args) throws Exception {
+        //集群节点
+        List<RedisURI> uris = new ArrayList();
+        uris.add(RedisURI.builder().withHost("192.168.31.111").withPort(6379).withPassword("111111").build());
+        uris.add(RedisURI.builder().withHost("192.168.31.112").withPort(6379).withPassword("111111").build());
+        uris.add(RedisURI.builder().withHost("192.168.31.113").withPort(6379).withPassword("111111").build());
+
+        RedisClient client = RedisClient.create();
+        StatefulRedisMasterReplicaConnection<String, String> connection = MasterReplica.connect(client, StringCodec.UTF8, uris);
+        //从节点读取数据
+        connection.setReadFrom(ReadFrom.REPLICA);
+
+        RedisCommands<String, String> commands = connection.sync();
+        commands.set("name", "张飞");
+        System.out.println(commands.get("name"));
+
+        connection.close();
+        client.shutdown();
+    }
+}
+```
+
+### **哨兵模式配置**
+
+哨兵模式，也是 redis 实现服务高可用的一大亮点，具体配置实现如下：
+
+```text
+public class LettuceMain {
+
+    public static void main(String[] args) throws Exception {
+        //集群节点
+        List<RedisURI> uris = new ArrayList();
+        uris.add(RedisURI.builder().withSentinel("192.168.31.111", 26379).withSentinelMasterId("mymaster").withPassword("123456").build());
+        uris.add(RedisURI.builder().withSentinel("192.168.31.112", 26379).withSentinelMasterId("mymaster").withPassword("123456").build());
+        uris.add(RedisURI.builder().withSentinel("192.168.31.113", 26379).withSentinelMasterId("mymaster").withPassword("123456").build());
+
+        RedisClient client = RedisClient.create();
+        StatefulRedisMasterReplicaConnection<String, String> connection = MasterReplica.connect(client, StringCodec.UTF8, uris);
+        //从节点读取数据
+        connection.setReadFrom(ReadFrom.REPLICA);
+
+        RedisCommands<String, String> commands = connection.sync();
+        commands.set("name", "赵云");
+        System.out.println(commands.get("name"));
+
+        connection.close();
+        client.shutdown();
+    }
+}
+```
+
+### **Cluster 集群模式配置**
+
+Cluster 集群模式，是之后推出的一种高可用的架构模型，主要是采用分片方式来存储数据，具体配置如下：
+
+```java
+public class LettuceReactiveMain4 {
+
+    public static void main(String[] args) throws Exception {
+        Set<RedisURI> uris = new HashSet<>();
+        uris.add(RedisURI.builder().withHost("192.168.31.111").withPort(7000).withPassword("123456").build());
+        uris.add(RedisURI.builder().withHost("192.168.31.112").withPort(7000).withPassword("123456").build());
+        uris.add(RedisURI.builder().withHost("192.168.31.113").withPort(7000).withPassword("123456").build());
+        uris.add(RedisURI.builder().withHost("192.168.31.114").withPort(7000).withPassword("123456").build());
+        uris.add(RedisURI.builder().withHost("192.168.31.115").withPort(7000).withPassword("123456").build());
+        uris.add(RedisURI.builder().withHost("192.168.31.116").withPort(7001).withPassword("123456").build());
+
+        RedisClusterClient client = RedisClusterClient.create(uris);
+        StatefulRedisClusterConnection<String, String> connection = client.connect();
+        RedisAdvancedClusterCommands<String, String> commands = connection.sync();
+        commands.set("name", "关羽");
+        System.out.println(commands.get("name"));
+
+        //选择从节点,只读
+        NodeSelection<String, String> replicas = commands.replicas();
+        NodeSelectionCommands<String, String> nodeSelectionCommands = replicas.commands();
+        Executions<List<String>> keys = nodeSelectionCommands.keys("*");
+        keys.forEach(key -> System.out.println(key));
+
+        connection.close();
+        client.shutdown();
+    }
+}
+```
+
 ## SpringBoot整合
 
 ### 基础使用
@@ -2082,7 +2737,7 @@ public class TestMulti {
 </dependency>
 ```
 
-说明：在springboot2.x之后，原来使用的jedis被替换成lettuce
+**说明：在springboot2.x之后，原来使用的jedis被替换成lettuce**
 
 
 
@@ -2236,164 +2891,6 @@ public class RedisTest {
 https://www.cnblogs.com/zeng1994/p/03303c805731afc9aa9c60dbbd32a323.html
 
 https://www.cnblogs.com/zhzhlong/p/11434284.html
-
-
-
-## Redis.conf
-
-### 熟悉基本配置
-
-> 位置
-
-Redis 的配置文件位于 Redis 安装目录下，文件名为 redis.conf
-
-```bash
-config get * # 获取全部的配置
-```
-
-我们一般情况下，会单独拷贝出来一份进行操作。来保证初始文件的安全。
-
-正如在 `安装redis` 中的讲解中拷贝一份
-
-> 容量单位不区分大小写，G和GB有区别
-
-![image-20210408213939472](https://gcore.jsdelivr.net/gh/oddfar/static/img/Redis.assets/image-20210408213939472.png)
-
->  include 组合多个配置
-
-![image-20210408214037264](https://gcore.jsdelivr.net/gh/oddfar/static/img/Redis.assets/image-20210408214037264.png)
-
-和Spring配置文件类似，可以通过includes包含，redis.conf 可以作为总文件，可以包含其他文件！
-
-> NETWORK 网络配置
-
-```bash
-bind 127.0.0.1 # 绑定的ip
-protected-mode yes # 保护模式
-port 6379 # 默认端口
-```
-
-> GENERAL 通用
-
-```bash
-daemonize yes # 默认情况下，Redis不作为守护进程运行。需要开启的话，改为 yes
-
-supervised no # 可通过upstart和systemd管理Redis守护进程
-
-loglevel notice # 日志级别。可选项有：
-				# debug（记录大量日志信息，适用于开发、测试阶段）
-				# verbose（较多日志信息）
-				# notice（适量日志信息，使用于生产环境）
-				# warning（仅有部分重要、关键信息才会被记录）
-logfile "" # 日志文件的位置，当指定为空字符串时，为标准输出
-databases 16 # 设置数据库的数目。默认的数据库是DB 0
-always-show-logo yes # 是否总是显示logo
-```
-
-> SNAPSHOPTING 快照，持久化规则
-
-由于Redis是基于内存的数据库，需要将数据由内存持久化到文件中
-
-持久化方式：
-
-- RDB
-- AOF
-
-```bash
-# 900秒（15分钟）内至少1个key值改变（则进行数据库保存--持久化）
-save 900 1
-# 300秒（5分钟）内至少10个key值改变（则进行数据库保存--持久化）
-save 300 10
-# 60秒（1分钟）内至少10000个key值改变（则进行数据库保存--持久化）
-save 60 10000
-```
-
-RDB文件相关
-
-```bash
-stop-writes-on-bgsave-error yes # 持久化出现错误后，是否依然进行继续进行工作
-
-rdbcompression yes # 使用压缩rdb文件 yes：压缩，但是需要一些cpu的消耗。no：不压缩，需要更多的磁盘空间
-
-rdbchecksum yes # 是否校验rdb文件，更有利于文件的容错性，但是在保存rdb文件的时候，会有大概10%的性能损耗
-
-dbfilename dump.rdb # dbfilenamerdb文件名称
-
-dir ./ # dir 数据目录，数据库的写入会在这个目录。rdb、aof文件也会写在这个目录
-```
-
-> REPLICATION主从复制
-
-![image-20210408214742862](https://gcore.jsdelivr.net/gh/oddfar/static/img/Redis.assets/image-20210408214742862.png)
-
-后面详细说
-
-> SECURITY安全
-
-访问密码的查看，设置和取消
-
-```bash
-# 启动redis
-# 连接客户端
-
-# 获得和设置密码
-config get requirepass
-config set requirepass "123456"
-
-#测试ping，发现需要验证
-127.0.0.1:6379> ping
-NOAUTH Authentication required.
-# 验证
-127.0.0.1:6379> auth 123456
-OK
-127.0.0.1:6379> ping
-PONG
-```
-
->  客户端连接相关
-
-```bash
-maxclients 10000  最大客户端数量
-maxmemory <bytes> 最大内存限制
-maxmemory-policy noeviction # 内存达到限制值的处理策略
-```
-
-**maxmemory-policy 六种方式**
-
-**1、volatile-lru：**利用LRU算法移除设置过过期时间的key。
-
-**2、allkeys-lru ：** 用lru算法删除lkey
-
-**3、volatile-random：**随机删除即将过期key
-
-**4、allkeys-random：**随机删除
-
-**5、volatile-ttl ：** 删除即将过期的
-
-**6、noeviction ：** 不移除任何key，只是返回一个写错误。
-
-redis 中的**默认**的过期策略是 **volatile-lru** 。
-
-**设置方式**
-
-```bash
-config set maxmemory-policy volatile-lru 
-```
-
->  append only模式 
-
-（AOF相关部分）
-
-![在这里插入图片描述](https://gcore.jsdelivr.net/gh/oddfar/static/img/Redis.assets/20200513215037918.png)
-
-![在这里插入图片描述](https://gcore.jsdelivr.net/gh/oddfar/static/img/Redis.assets/20200513215047999.png)
-
-```bash
-appendfsync everysec # appendfsync aof持久化策略的配置
-        # no表示不执行fsync，由操作系统保证数据同步到磁盘，速度最快。
-        # always表示每次写入都执行fsync，以保证数据同步到磁盘。
-        # everysec表示每秒执行一次fsync，可能会导致丢失这1s数据。
-```
 
 ## Redis的持久化
 
