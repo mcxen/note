@@ -684,9 +684,34 @@ Linux 链接分两种，一种被称为硬链接（Hard Link），另一种被�
 
 ##### 连接定义
 
+<img src="https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/3472441_1553739357281_F960C6C562BF518E7DC94B8CA23A374F.png" alt="img" style="zoom:50%;" />
+
 **硬连接**
 
 硬连接指通过索引节点来进行连接。在 Linux 的文件系统中，保存在磁盘分区中的文件不管是什么类型都给它分配一个编号，称为索引节点号(Inode Index)。在 Linux 中，多个文件名指向同一索引节点是存在的。比如：A 是 B 的硬链接（A 和 B 都是文件名），则 A 的目录项中的 inode 节点号与 B 的目录项中的 inode 节点号相同，即一个 inode 节点对应两个不同的文件名，两个文件名指向同一个文件，A 和 B 对文件系统来说是完全平等的。删除其中任何一个都不会影响另外一个的访问。
+
+ls -li查看node
+
+```sh
+mcxw@mcxAir ~ % ls -li
+total 0
+ 424619 drwx------@  8 mcxw  staff   256 Mar 21 20:54 Applications
+ 910125 drwxr-xr-x   4 mcxw  staff   128 Dec 24 10:19 Code
+  36931 drwx------+  4 mcxw  staff   128 Mar  9 16:29 Desktop
+  36975 drwx------@ 12 mcxw  staff   384 Mar 14 09:11 Documents
+  36977 drwx------@ 54 mcxw  staff  1728 Mar 21 14:36 Downloads
+  36933 drwx------@ 89 mcxw  staff  2848 Mar 20 15:37 Library
+  36973 drwx------   4 mcxw  staff   128 Dec 22 07:59 Movies
+  36927 drwx------+  5 mcxw  staff   160 Feb 18 08:31 Music
+  36929 drwx------+  5 mcxw  staff   160 Jan  7 19:36 Pictures
+  36969 drwxr-xr-x+  4 mcxw  staff   128 Dec 20 13:58 Public
+1004391 drwxr-xr-x   3 mcxw  staff    96 Dec 26 19:32 Sunlogin
+1003484 drwxr-xr-x   2 mcxw  staff    64 Dec 26 19:25 Sunlogin Files
+4998096 drwxr-xr-x   4 mcxw  staff   128 Mar  1 23:50 models
+5357139 drwxr-xr-x  20 mcxw  staff   640 Mar  1 23:52 stable-diffusion
+```
+
+
 
 硬连接的作用是允许一个文件拥有多个有效路径名，这样用户就可以建立硬连接到重要文件，以防止“误删”的功能。其原因如上所述，因为对应该目录的索引节点有一个以上的连接。只删除一个连接并不影响索引节点本身和其它的连接，只有当最后一个连接被删除后，文件的数据块及目录的连接才会被释放。也就是说，文件真正删除的条件是与之相关的所有硬连接文件均被删除。
 
@@ -1028,8 +1053,6 @@ crontab 是用来让使用者在固定时间或固定间隔执行程序之用，
 | 每月最后一天定时执行一次 | 0 0 L * * |
 | 每年定时执行一次         | 0 0 1 1 * |
 
-### 实例
-
 每一分钟执行一次 /bin/ls：
 
 ```
@@ -1058,7 +1081,22 @@ crontab 是用来让使用者在固定时间或固定间隔执行程序之用，
 - `echo "字符串内容"`，输出 "字符串内容"
 - `echo > aa.txt`，清空 aa.txt 文件内容（类似的还有：`: > aa.txt`，其中 : 是一个占位符, 不产生任何输出）
 
-##### 进程管理-**线程和进程**
+
+
+##### history
+
+最近执行的2个命令(不包括history)
+
+```sh
+[root@ali ~]# history 3
+  405  ./src/redis-server redis.conf 
+  406  ./src/redis-cli 
+  407  history 3
+```
+
+
+
+### 进程管理-**线程和进程**
 
 > 什么是进程
 
