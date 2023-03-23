@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace类似与包-->
+<mapper namespace="User">
+<!--    id就是名字，User下的selectAll就可以找到这个方法了-->
+    <select id="selectAll" resultType="User">
+        select * from user
+    </select>
+</mapper>
