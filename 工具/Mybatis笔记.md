@@ -686,24 +686,24 @@ namespace中的包名要和dao/mapper中的包名一致
   <!DOCTYPE mapper
           PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-  <mapper namespace="site.whatsblog.dao.UserMapper">
-      <select id="getUsers" resultType="site.whatsblog.pojo.User">
+  <mapper namespace="User">
+      <select id="selectAll" resultType="User">
           select *
           from user
       </select>
-  
-      <select id="findUserById" resultType="site.whatsblog.pojo.User" parameterType="int">
+    	
+      <select id="selectByid" resultType="User" parameterType="Integer">
           select *
           from user
           where id = #{id}
       </select>
   
-      <insert id="addUser" parameterType="site.whatsblog.pojo.User">
+      <insert id="addUser" parameterType="User">
           insert into user(name, password)
           values (#{name}, #{password})
       </insert>
   
-      <update id="updateUser" parameterType="site.whatsblog.pojo.User">
+      <update id="updateUser" parameterType="User">
           update user
           set name    = #{name},
               password=#{password}
@@ -721,6 +721,40 @@ namespace中的包名要和dao/mapper中的包名一致
   注意点：
 
   * 增删改需要提交事务
+  
+  
+  
+  调用就是：
+  
+  ```java
+  @Test
+      public void test() {
+          // 获取SqlSession
+          SqlSession sqlSession = null;
+          try {
+              sqlSession = MyBatisUtils.getSqlSession();
+              Connection connection = sqlSession.getConnection();
+              System.out.println(connection);
+  //            User就是xml的名字，
+              List<User> user = sqlSession.selectList("User.selectAll");
+  
+              User user2 = sqlSession.selectOne("User.selectByid",2);
+              //上面是带参数查询
+  
+  //            for (User user1 : user) {
+  //                System.out.println("user1 = " + user1);
+  //            }
+              System.out.println(user2);
+          } catch (Exception e) {
+              throw new RuntimeException(e);
+          } finally {
+              MyBatisUtils.closeSession(sqlSession);
+          }
+  //
+      }
+  ```
+
+
 
 ### 3.3、万能的Map
 
