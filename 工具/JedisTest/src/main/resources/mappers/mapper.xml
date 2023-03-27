@@ -11,4 +11,11 @@
     <select id="selectByid" parameterType="Integer" resultType="User">
         select * from user where id = #{value}
     </select>
+    <insert id="insert" parameterType="java.util.Map">
+        insert into user values (#{id},#{name},#{password})
+    </insert>
+<!--Mapz作为结果集-->
+    <select id="selectAllMap" resultType="java.util.LinkedHashMap">
+        select * from user
+    </select>
 </mapper>

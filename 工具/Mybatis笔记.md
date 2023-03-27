@@ -754,55 +754,71 @@ namespace中的包名要和dao/mapper中的包名一致
       }
   ```
 
+#### ```#{}```和```${}```的区别是什么？
+
+在Mybatis中，有两种占位符
+
+- ```#{}```解析传递进来的参数数据
+- ```${}```对传递进来的参数原样拼接在SQL中
+- ```#{}```是预编译处理，```${}```是字符串替换。
+- 使用```#{}```可以有效的防止SQL注入，提高系统安全性。
 
 
-### 3.3、万能的Map
+
+### 3.3、万能的Map-多参数的传递
 
 假设我们的实体类或者数据库中的表参数过多，我们应该考虑到Map！
 
-~~~java
-    /**
-     * 添加用户，万能的Map
-     * @param map 用户信息
-     * @return
-     */
-    Integer addUser2(Map<String, Object> map);
-~~~
-
 ~~~xml
 <!--添加用户-->
-    <insert id="addUser2" parameterType="map">
+    <insert id="insert" parameterType="java.util.map">
         insert into user (id, name, password)
         values (#{id}, #{username}, #{password});
     </insert>
 ~~~
 
-~~~java
+```java
 @Test
-public void testAddUser2() {
-    // 获取SqlSession
-    SqlSession sqlSession = MyBatisUtils.getSqlSession();
+public void testMap(){
     try {
-        // 执行SQL
-        UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("id",3);
-        map.put("username","haha");
-        map.put("password","23333");
-        Integer i = userMapper.addUser2(map);
-        if (i>0){
-            sqlSession.commit();
-        }else {
-            sqlSession.rollback();
-        }
-        System.out.println(i);
+      // 获取SqlSession
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        Connection connection = sqlSession.getConnection();
+        System.out.println("connection = " + connection);
+        Map param =  new HashMap();
+        param.put("id",8);
+        param.put("name","aaa");
+        param.put("password","1212121");
+//            User就是xml的名字，,insert就是mapper.xml里main的名字
+        sqlSession.insert("User.insert",param);
+        User one = sqlSession.selectOne("User.selectByid", 8);            
+      //上面是带参数查询
+        System.out.println(one);
+        sqlSession.commit();
     } catch (Exception e) {
-        e.printStackTrace();
+        throw new RuntimeException(e);
     } finally {
-        sqlSession.close();
     }
 }
-~~~
+```
+
+commit之后才会保存
+
+```sh
+mysql> select * from user;
++----+------+----------+
+| id | name | password |
++----+------+----------+
+|  1 | Suk1 | 123456   |
+|  2 | Suk2 | 123456   |
+|  3 | NULL | 23333    |
+|  8 | aaa  | 1212121  |
+| 90 | aaa  | 1212121  |
++----+------+----------+
+5 rows in set (0.00 sec)
+```
+
+
 
 map取key，【parameterType="map"】
 
@@ -811,6 +827,107 @@ map取key，【parameterType="map"】
 只有一个基本类型的时候，随便写，parameterType不用写
 
 多个参数用map或者**注解**
+
+
+
+> mapper.xml文件
+>
+> ```xml
+> <?xml version="1.0" encoding="UTF-8" ?>
+> <!DOCTYPE mapper
+>         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+>         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+> <!--namespace类似与包-->
+> <mapper namespace="User">
+> <!--    id就是名字，User下的selectAll就可以找到这个方法了-->
+>     <select id="selectAll" resultType="User">
+>         select * from user
+>     </select>
+>     <select id="selectByid" parameterType="Integer" resultType="User">
+>         select * from user where id = #{value}
+>     </select>
+>     <insert id="insert" parameterType="java.util.Map">
+>         insert into user values (#{id},#{name},#{password})
+>     </insert>
+> </mapper>
+> ```
+
+
+
+
+
+### 3.4、Map作为resultType
+
+
+
+```xml
+<!--Mapz作为结果集-->
+    <select id="selectAllMap" resultType="java.util.Map">
+        select * from user
+    </select>
+```
+
+
+
+运行代码：
+
+```java
+@Test
+public void testMap(){
+    try {
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        Connection connection = sqlSession.getConnection();
+        System.out.println("connection = " + connection);
+        List<Map> maps = sqlSession.selectList("User.selectAllMap");
+        for (Map map : maps) {
+            System.out.println("map = " + map);
+        }
+    } catch (Exception e) {
+        throw new RuntimeException(e);
+    } finally {
+    }
+}
+```
+
+
+
+Debug，可以看到返回值中的map的key是混乱的，数字会识别成integer。HashMap是按照hash值排序的，所以与table的值不一致
+
+![image-20230327133450258](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230327133450258.png)
+
+
+
+LinkedHashMap是按照插入的顺序来保存的，这时候就正常了。
+
+```xml
+<!--Mapz作为结果集-->
+    <select id="selectAllMap" resultType="java.util.LinkedHashMap">
+        select * from user
+    </select>
+```
+
+
+
+```sh
+connection = com.mysql.cj.jdbc.ConnectionImpl@21a947fe
+map = {id=1, name=Suk1, password=123456}
+map = {id=2, name=Suk2, password=123456}
+map = {id=3, password=23333}
+map = {id=8, name=aaa, password=1212121}
+map = {id=90, name=aaa, password=1212121}
+
+Process finished with exit code 0
+```
+
+Map灵活，但是开发的时候无法看到中间的结构,一般用来多表查询
+
+
+
+### 3.5、ResultMap
+
+#### DTO数据传输对象
+
+
 
 ## 4、配置解析
 
