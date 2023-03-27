@@ -1,3 +1,5 @@
+import DTO.UserDTO;
+import POJO.User;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Test;
 
@@ -45,9 +47,26 @@ public class MapperTest {
             SqlSession sqlSession = MyBatisUtils.getSqlSession();
             Connection connection = sqlSession.getConnection();
             System.out.println("connection = " + connection);
-            List<Map> maps = sqlSession.selectList("User.selectAllMap");
-            for (Map map : maps) {
-                System.out.println("map = " + map);
+            List<User> maps = sqlSession.selectList("User.seMap");
+//            for (User user : maps) {
+//                System.out.println("user = " + user);
+//            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void testMapperImple(){
+        SqlSession sqlSession = null;
+        try {
+            sqlSession = MyBatisUtils.getSqlSession();
+            Connection connection = sqlSession.getConnection();
+            System.out.println("connection = " + connection);
+            UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+            List<User> users = mapper.selectAll();
+            for (User user : users) {
+                System.out.println("user = " + user);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

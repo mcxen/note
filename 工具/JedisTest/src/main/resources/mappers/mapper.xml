@@ -2,20 +2,8 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<!--namespace类似与包-->
-<mapper namespace="User">
-<!--    id就是名字，User下的selectAll就可以找到这个方法了-->
-    <select id="selectAll" resultType="User">
-        select * from user
-    </select>
-    <select id="selectByid" parameterType="Integer" resultType="User">
-        select * from user where id = #{value}
-    </select>
-    <insert id="insert" parameterType="java.util.Map">
-        insert into user values (#{id},#{name},#{password})
-    </insert>
-<!--Mapz作为结果集-->
-    <select id="selectAllMap" resultType="java.util.LinkedHashMap">
+<mapper namespace="UserMapper">
+    <select id="selectAll" resultType="POJO.User">
         select * from user
     </select>
 </mapper>

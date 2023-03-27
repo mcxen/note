@@ -1,5 +1,8 @@
+import POJO.User;
+
 import java.util.List;
 
-public class UserMapper {
+public interface UserMapper {
+    public List<User> selectAll();
 
 }

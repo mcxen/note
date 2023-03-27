@@ -347,7 +347,16 @@ public class MyBatisUtils {
   </mapper>
   ~~~
 
- 
+> 这样也可以，不然就直接sqlSession调用方法，
+
+```java
+public interface UserMapper {
+    List<User> selectAll();
+}
+
+
+UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+```
 
 ​	 在mybatis-config.xml里面添加  
 
@@ -392,8 +401,6 @@ public class MyBatisUtils {
   }
   
   ~~~
-
-
 
 
 
@@ -925,7 +932,110 @@ Map灵活，但是开发的时候无法看到中间的结构,一般用来多表�
 
 ### 3.5、ResultMap
 
-#### DTO数据传输对象
+
+
+在`Mybatis`中，有一个强大的功能元素`resultMap`。当我们希望将`JDBC ResultSets`中的数据，转化为合理的Java对象时，你就能感受到它的非凡之处。正如其官方所述的那样：
+
+> `resultMap`元素是 `MyBatis` 中最重要最强大的元素。它可以让你从 90% 的 `JDBC ResultSets` 数据提取代码中解放出来，并在一些情形下允许你进行一些 JDBC 不支持的操作。实际上，在为一些比如连接的复杂语句编写映射代码的时候，一份 `resultMap` 能够代替实现同等功能的长达数千行的代码。`ResultMap` 的设计思想是，对于简单的语句根本不需要配置显式的结果映射，而对于复杂一点的语句只需要描述它们的关系就行了。
+
+基本结构：
+
+```xml
+<resultMap>
+        <constructor>
+            <idArg/>
+            <arg/>
+        </constructor>
+        <id/>
+        <result/>
+        <association property=""/>
+        <collection property=""/>
+        <discriminator javaType="">
+            <case value=""></case>
+        </discriminator>
+</resultMap>
+
+
+```
+
+```sh
+constructor – 类在实例化时，用来注入参数值到构造方法中。
+idArg – ID 参数；标记结果作为 ID 可以帮助提高整体效能。
+arg – 注入到构造方法的一个普通参数。
+id – 一个 ID 结果； 标记结果作为 ID 可以帮助提高整体效能。
+result – 注入到字段或 JavaBean 属性的普通参数。
+association – 一个复杂的类型关联；许多结果将包成这种类型。
+collection – 复杂类型的集合。
+discriminator – 使用参数值来决定使用哪个参数来进行映射。
+case – 基于某些值的结果映射。
+
+```
+
+
+
+
+
+比如，我们有一个`User`类：
+
+```java
+public class User {
+    private String id;
+    private String username;
+    private String password;
+    private String address;
+    private String email;
+}
+```
+
+如果数据库中表的字段与`User`类的属性名称一致，我们就可以使用`resultType`来返回。
+
+```xml
+<select id="getUsers" resultType="User">
+	SELECT
+		u.id,
+		u.username,
+		u.password,
+		u.address,
+		u.email
+	FROM
+		USER u
+</select>
+```
+
+当然，这是理想状态下，属性和字段名都完全一致的情况。但事实上，不一致的情况是有的，这时候我们的`resultMap`就要登场了。
+
+如果`User`类保持不变，但`SQL`语句发生了变化，将`id`改成了`uid`。
+
+```xml
+<select id="getUsers" resultType="User">
+	SELECT
+		u.id as uid,
+		u.username,
+		u.password,
+		u.address,
+		u.email
+	FROM
+		USER u
+</select>
+```
+
+那么，在结果集中，我们将会丢失`id`数据。这时候我们就可以定义一个`resultMap`，来映射不一样的字段。
+
+```xml
+<resultMap id="rmUser" type="User">
+	<result property="id" column="uid"></result>
+</resultMap>
+```
+
+然后，我们把上面的`select`语句中的`resultType`修改为`resultMap="rmUser"`。
+
+这里面`column`对应的是数据库的列名或别名；`property`对应的是结果集的字段或属性。
+
+这就是`resultMap`最简单，也最基础的用法：字段映射。
+
+
+
+1. * 
 
 
 
@@ -1106,31 +1216,6 @@ Mapper Registry
 * 连接到数据库的一个线程，连接到连接池的一个请求
 * SqlSession 的实例不是线程安全的，因此是不能被共享的，所以它的最佳的作用域是请求或**方法作用域** 
 * 用完之后赶紧关闭，否则资源会被占用
-
-## 5、解决属性名和字段名不一致的问题（ResultMap）
-
-数据库中的字段
-
-![HbBRVs.png](https://s4.ax1x.com/2022/02/19/HbBRVs.png)
-
-解决方法：
-
-1. 起别名
-
-2. ResultMap
-
-   ~~~xml
-   <resultMap id="uu" type="User">
-       <id property="id" column="id" />
-       <result property="username" column="name"/>
-       <result property="password" column="password"/>
-   </resultMap>
-   ~~~
-
-   * `resultMap` 元素是 MyBatis 中最重要最强大的元素。
-   *  ResultMap 的设计思想是，对简单的语句做到零配置，对于复杂一点的语句，只需要描述语句之间的关系就行了。 
-   * 只需要指定property和column不一样的部分，其他部分不需要指定
-   * 如果这个世界总是这么简单就好了。 
 
 ## 6、日志
 
