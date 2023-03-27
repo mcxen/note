@@ -1,22 +1,12 @@
-# MyBatis-2.14
+# MyBatis
 
-[mybatis – MyBatis 3 | 简介](https://mybatis.org/mybatis-3/zh/index.html) 
+2023-03-27 20:08 华科大LAB 晴朗☀️  - 基本mybatis单独使用笔记
 
 
-环境：
 
-* JDK 1.8
-* MySQL 5.7
-* maven 3.6.1
-* IDEA
 
-回顾：
 
-* JDBC
-* MySQL
-* Java SE
-* Maven
-* Junit
+
 
 ## 1、简介
 
@@ -80,9 +70,158 @@ Dao层，Service层，Controller层
 
 引入依赖，常见配置文件，创建pojo，创建mapper映射文件，初始化SessionFactory，创建SqlSession对象
 
+<img src="https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2x5b25saXlhbmc=,size_16,color_FFFFFF,t_70.png" alt="MyBatis执行流程"  />
+
+### 1.6、mybatis预防sql注入
+
+mybatis 中使用 sqlMap 进行 sql 查询时，经常需要动态传递参数，例如我们需要根据用户的姓名来筛选用户时，sql 如下：
+
+```pgsql
+select * from user where name = "ruhua";
+```
+
+上述 sql 中，我们希望 name 后的参数 "ruhua" 是动态可变的，即不同的时刻根据不同的姓名来查询用户。在 sqlMap 的 xml 文件中使用如下的 sql 可以实现动态传递参数 name：
+
+```pgsql
+select * from user where name = #{name};
+```
+
+或者
+
+```pgsql
+select * from user where name = '${name}';
+```
+
+对于上述这种查询情况来说，使用 #{ } 和 ${ } 的结果是相同的，但是在某些情况下，我们只能使用二者其一。
+
+
+
+#### **快速总结：**
+
+- ```#{}```解析传递进来的参数数据
+- ```${}```对传递进来的参数原样拼接在SQL中
+- ```#{}```是预编译处理，```${}```是字符串替换，也就是字符串拼接
+- 使用```#{}```可以有效的防止SQL注入，提高系统安全性。
+
+比如说：
+
+```sh
+Map param = new HashMap();
+param.put("titile","''or 1 = 1 or title = 'yes'");
+```
+
+`${}`这里就直接被注入了
+
+
+
+**详细总结：**
+
+**动态 SQL** 是 mybatis 的强大特性之一，也是它优于其他 ORM 框架的一个重要原因。mybatis 在对 sql 语句进行预编译之前，会对 sql 进行动态解析，解析为一个 BoundSql 对象，也是在此处对动态 SQL 进行处理的。
+
+在动态 SQL 解析阶段， #{ } 和 ${ } 会有不同的表现：
+
+> **#{ } 解析为一个 JDBC 预编译语句（prepared statement）的参数标记符。**
+
+例如，sqlMap 中如下的 sql 语句
+
+```pgsql
+select * from user where name = #{name};
+```
+
+解析为：
+
+```pgsql
+select * from user where name = ?;
+```
+
+一个 #{ } 被解析为一个参数占位符 `?` 。
+
+而，
+
+> **${ } 仅仅为一个纯碎的 string 替换，在动态 SQL 解析阶段将会进行变量替换**
+
+例如，sqlMap 中如下的 sql
+
+```pgsql
+select * from user where name = '${name}';
+```
+
+当我们传递的参数为 "ruhua" 时，上述 sql 的解析为：
+
+```pgsql
+select * from user where name = "ruhua";
+```
+
+预编译之前的 SQL 语句已经不包含变量 name 了。
+
+综上所得， ${ } 的变量的替换阶段是在动态 SQL 解析阶段，而 #{ }的变量的替换是在 DBMS 中。
+
+#### 用法 tips
+
+> 1、能使用 #{ } 的地方就用 `#{ }`
+
+首先这是为了性能考虑的，相同的预编译 sql 可以重复利用。
+
+其次，**${ } 在预编译之前已经被变量替换了，这会存在 sql 注入问题**。例如，如下的 sql，
+
+```pgsql
+select * from ${tableName} where name = #{name} 
+```
+
+假如，我们的参数 tableName 为 `user; delete user; --`，那么 SQL 动态解析阶段之后，预编译之前的 sql 将变为
+
+```sql
+select * from user; delete user; -- where name = ?;
+```
+
+`--` 之后的语句将作为注释，不起作用，因此本来的一条查询语句偷偷的包含了一个删除表数据的 SQL！
+
+> 2、表名作为变量时，必须使用 `${ }`
+
+这是因为，表名是字符串，使用  `#{tableName}`替换字符串时会带上单引号 `''`，这会导致 sql 语法错误，例如：
+
+```pgsql
+select * from #{tableName} where name = #{name};
+```
+
+预编译之后的sql 变为：
+
+```pgsql
+select * from ? where name = ?;
+```
+
+假设我们传入的参数为 tableName = "user" , name = "hua"，那么在占位符进行变量替换后，sql 语句变为
+
+```pgsql
+select * from 'user' where name='hua';
+```
+
+上述 sql 语句是存在语法错误的，表名不能加单引号 `''`（注意，反引号 ``是可以的）。
+
+#### sql预编译
+
+### 定义
+
+> sql 预编译指的是数据库驱动在发送 sql 语句和参数给 DBMS 之前对 sql 语句进行编译，这样 DBMS 执行 sql 时，就不需要重新编译。
+
+### 为什么需要预编译
+
+JDBC 中使用对象 PreparedStatement 来抽象预编译语句，使用预编译
+
+1. **预编译阶段可以优化 sql 的执行**。
+   预编译之后的 sql 多数情况下可以直接执行，DBMS 不需要再次编译，越复杂的sql，编译的复杂度将越大，预编译阶段可以合并多次操作为一个操作。
+2. **预编译语句对象可以重复利用**。
+   把一个 sql 预编译后产生的 PreparedStatement 对象缓存下来，下次对于同一个sql，可以直接使用这个缓存的 PreparedState 对象。
+
+mybatis 默认情况下，将对所有的 sql 进行预编译。
+
+
+
 
 
 ## 2、第一个MyBatis查询程序
+
+
 
 思路：搭建环境 -> 导入MyBatis -> 编写代码 -> 测试！
 
@@ -693,7 +832,7 @@ namespace中的包名要和dao/mapper中的包名一致
   <!DOCTYPE mapper
           PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-  <mapper namespace="User">
+  <mapper namespace="UserMapper">
       <select id="selectAll" resultType="User">
           select *
           from user
@@ -705,9 +844,14 @@ namespace中的包名要和dao/mapper中的包名一致
           where id = #{id}
       </select>
   
-      <insert id="addUser" parameterType="User">
+      <insert id="insert" parameterType="User">
           insert into user(name, password)
           values (#{name}, #{password})
+        -- 查询插入的
+          <selectKey resultType="Integer" keyProperty="id" order="AFTER">
+              select last_insert_id()
+  			-- 这里last_insert_id是mysql自带的函数,System.out.println(yes.getId());//查询结果为0
+          </selectKey>
       </insert>
   
       <update id="updateUser" parameterType="User">
@@ -724,14 +868,13 @@ namespace中的包名要和dao/mapper中的包名一致
       </delete>
   </mapper>
   ~~~
-
+  
   注意点：
-
+  
   * 增删改需要提交事务
+  * last_insert_id，将返回插入的那条记录在表中自增的那个字段的值，一般我们都给那个自增字段命名为ID。这样就可以返回刚插入的记录的ID值了。
   
-  
-  
-  调用就是：
+  sqlSession调用查询就是：
   
   ```java
   @Test
@@ -742,17 +885,24 @@ namespace中的包名要和dao/mapper中的包名一致
               sqlSession = MyBatisUtils.getSqlSession();
               Connection connection = sqlSession.getConnection();
               System.out.println(connection);
-  //            User就是xml的名字，
-              List<User> user = sqlSession.selectList("User.selectAll");
-  
-              User user2 = sqlSession.selectOne("User.selectByid",2);
+  //          UserMapper就是xml的namesapce，
+              List<User> user = sqlSession.selectList("UserMapper.selectAll");
+              User user2 = sqlSession.selectOne("UserMapper.selectByid",2);
               //上面是带参数查询
   
   //            for (User user1 : user) {
   //                System.out.println("user1 = " + user1);
   //            }
+            	User yes = new User(10, "yes", "12121");
+              int insert = sqlSession.insert("UserMapper.insert", yes);
+              //insert返回类型，代表插入的总数
+              sqlSession.commit();
+            
               System.out.println(user2);
           } catch (Exception e) {
+            if (sqlSession!=null)
+                  sqlSession.rollback();
+            //如果出现意外就要回滚
               throw new RuntimeException(e);
           } finally {
               MyBatisUtils.closeSession(sqlSession);
@@ -761,14 +911,9 @@ namespace中的包名要和dao/mapper中的包名一致
       }
   ```
 
-#### ```#{}```和```${}```的区别是什么？
 
-在Mybatis中，有两种占位符
 
-- ```#{}```解析传递进来的参数数据
-- ```${}```对传递进来的参数原样拼接在SQL中
-- ```#{}```是预编译处理，```${}```是字符串替换。
-- 使用```#{}```可以有效的防止SQL注入，提高系统安全性。
+
 
 
 
@@ -971,10 +1116,6 @@ case – 基于某些值的结果映射。
 
 ```
 
-
-
-
-
 比如，我们有一个`User`类：
 
 ```java
@@ -1022,9 +1163,15 @@ public class User {
 那么，在结果集中，我们将会丢失`id`数据。这时候我们就可以定义一个`resultMap`，来映射不一样的字段。
 
 ```xml
-<resultMap id="rmUser" type="User">
-	<result property="id" column="uid"></result>
-</resultMap>
+<!--    resultMap来统计结果-->
+    <resultMap id="rmUser" type="POJO.User">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="password" column="password"/>
+    </resultMap>
+    <select id="selectAllMap" resultMap="rmUser">
+        select * from user
+    </select>
 ```
 
 然后，我们把上面的`select`语句中的`resultType`修改为`resultMap="rmUser"`。
@@ -1033,11 +1180,51 @@ public class User {
 
 这就是`resultMap`最简单，也最基础的用法：字段映射。
 
+```java
+    @Test
+    public void testMapperImple(){
+        SqlSession sqlSession = null;
+        try {
+            sqlSession = MyBatisUtils.getSqlSession();
+            Connection connection = sqlSession.getConnection();
+            System.out.println("connection = " + connection);
+            UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+            List<User> users = mapper.selectAllMap();
+//            List<User> users = sqlSession.selectList("UserMapper.selectAllMap");
+            for (User user : users) {
+                System.out.println("user = " + user);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+// 下面是接口UserMapper.java
+/*
+public interface UserMapper {
+    public List<User> selectAll();
+    public List<User> selectAllMap();
+}
+*/
+```
 
-1. * 
-
-
+> 我靠，烦死了这个bug，对于同一个查询语句只能设定一个id，不然就会报错
+>
+> <img src="https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230327190459457.png" alt="image-20230327190459457" style="zoom: 67%;" />
+>
+> 我特么一直以为这个是我上面写的有问题，结果删了我的下面的，结果还是报错，结果发现是不能对同一个句子写两个id。
+>
+> 对了，这个private和public都是对的。-.-
+>
+> ```java
+> public class User {
+>     private Integer id;
+>     private String name;
+>     private String password;
+> }
+> ```
+>
+> 
 
 ## 4、配置解析
 
@@ -1219,6 +1406,8 @@ Mapper Registry
 
 ## 6、日志
 
+
+
 ### 6.1、日志工厂
 
 如果一个数据库操作出现了异常，我们需要拍错。所以说日志就是最好的助手！
@@ -1227,7 +1416,7 @@ Mapper Registry
 
 现在：日志工厂
 
-![HbBgbj.png](https://s4.ax1x.com/2022/02/19/HbBgbj.png)
+![HbBgbj.png](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/HbBgbj.png)
 
 * SLF4J
 * **LOG4J**
@@ -1538,7 +1727,7 @@ INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('4', '小李', '1');
 INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('5', '小王', '1');
 ~~~
 
-![HbBWan.png](https://s4.ax1x.com/2022/02/19/HbBWan.png)
+![HbBWan.png](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/HbBWan.png)
 
 ### 10.1、测试环境搭建
 

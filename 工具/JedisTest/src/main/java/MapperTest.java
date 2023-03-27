@@ -63,12 +63,23 @@ public class MapperTest {
             sqlSession = MyBatisUtils.getSqlSession();
             Connection connection = sqlSession.getConnection();
             System.out.println("connection = " + connection);
+            User yes = new User(12, "232", "323232");
+            int insert = sqlSession.insert("UserMapper.insert", yes);
+
+            System.out.println(yes.getId());
+            //结果为0
+
+            //insert返回类型，代表插入的总数
+            sqlSession.commit();
             UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-            List<User> users = mapper.selectAll();
+            List<User> users = mapper.selectAllMap();
+//            List<User> users = sqlSession.selectList("UserMapper.selectAllMap");
             for (User user : users) {
                 System.out.println("user = " + user);
             }
         } catch (Exception e) {
+            if (sqlSession!=null)
+                sqlSession.rollback();
             throw new RuntimeException(e);
         }
     }
