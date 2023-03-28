@@ -1,22 +1,12 @@
-# MyBatis-2.14
+# MyBatis
 
-[mybatis – MyBatis 3 | 简介](https://mybatis.org/mybatis-3/zh/index.html) 
+2023-03-27 20:08 华科大LAB 晴朗☀️  - 基本mybatis单独使用笔记
 
 
-环境：
 
-* JDK 1.8
-* MySQL 5.7
-* maven 3.6.1
-* IDEA
 
-回顾：
 
-* JDBC
-* MySQL
-* Java SE
-* Maven
-* Junit
+
 
 ## 1、简介
 
@@ -80,9 +70,158 @@ Dao层，Service层，Controller层
 
 引入依赖，常见配置文件，创建pojo，创建mapper映射文件，初始化SessionFactory，创建SqlSession对象
 
+<img src="https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2x5b25saXlhbmc=,size_16,color_FFFFFF,t_70.png" alt="MyBatis执行流程"  />
+
+### 1.6、mybatis预防sql注入
+
+mybatis 中使用 sqlMap 进行 sql 查询时，经常需要动态传递参数，例如我们需要根据用户的姓名来筛选用户时，sql 如下：
+
+```pgsql
+select * from user where name = "ruhua";
+```
+
+上述 sql 中，我们希望 name 后的参数 "ruhua" 是动态可变的，即不同的时刻根据不同的姓名来查询用户。在 sqlMap 的 xml 文件中使用如下的 sql 可以实现动态传递参数 name：
+
+```pgsql
+select * from user where name = #{name};
+```
+
+或者
+
+```pgsql
+select * from user where name = '${name}';
+```
+
+对于上述这种查询情况来说，使用 #{ } 和 ${ } 的结果是相同的，但是在某些情况下，我们只能使用二者其一。
+
+
+
+#### **快速总结：**
+
+- ```#{}```解析传递进来的参数数据
+- ```${}```对传递进来的参数原样拼接在SQL中
+- ```#{}```是预编译处理，```${}```是字符串替换，也就是字符串拼接
+- 使用```#{}```可以有效的防止SQL注入，提高系统安全性。
+
+比如说：
+
+```sh
+Map param = new HashMap();
+param.put("titile","''or 1 = 1 or title = 'yes'");
+```
+
+`${}`这里就直接被注入了
+
+
+
+**详细总结：**
+
+**动态 SQL** 是 mybatis 的强大特性之一，也是它优于其他 ORM 框架的一个重要原因。mybatis 在对 sql 语句进行预编译之前，会对 sql 进行动态解析，解析为一个 BoundSql 对象，也是在此处对动态 SQL 进行处理的。
+
+在动态 SQL 解析阶段， #{ } 和 ${ } 会有不同的表现：
+
+> **#{ } 解析为一个 JDBC 预编译语句（prepared statement）的参数标记符。**
+
+例如，sqlMap 中如下的 sql 语句
+
+```pgsql
+select * from user where name = #{name};
+```
+
+解析为：
+
+```pgsql
+select * from user where name = ?;
+```
+
+一个 #{ } 被解析为一个参数占位符 `?` 。
+
+而，
+
+> **${ } 仅仅为一个纯碎的 string 替换，在动态 SQL 解析阶段将会进行变量替换**
+
+例如，sqlMap 中如下的 sql
+
+```pgsql
+select * from user where name = '${name}';
+```
+
+当我们传递的参数为 "ruhua" 时，上述 sql 的解析为：
+
+```pgsql
+select * from user where name = "ruhua";
+```
+
+预编译之前的 SQL 语句已经不包含变量 name 了。
+
+综上所得， ${ } 的变量的替换阶段是在动态 SQL 解析阶段，而 #{ }的变量的替换是在 DBMS 中。
+
+#### 用法 tips
+
+> 1、能使用 #{ } 的地方就用 `#{ }`
+
+首先这是为了性能考虑的，相同的预编译 sql 可以重复利用。
+
+其次，**${ } 在预编译之前已经被变量替换了，这会存在 sql 注入问题**。例如，如下的 sql，
+
+```pgsql
+select * from ${tableName} where name = #{name} 
+```
+
+假如，我们的参数 tableName 为 `user; delete user; --`，那么 SQL 动态解析阶段之后，预编译之前的 sql 将变为
+
+```sql
+select * from user; delete user; -- where name = ?;
+```
+
+`--` 之后的语句将作为注释，不起作用，因此本来的一条查询语句偷偷的包含了一个删除表数据的 SQL！
+
+> 2、表名作为变量时，必须使用 `${ }`
+
+这是因为，表名是字符串，使用  `#{tableName}`替换字符串时会带上单引号 `''`，这会导致 sql 语法错误，例如：
+
+```pgsql
+select * from #{tableName} where name = #{name};
+```
+
+预编译之后的sql 变为：
+
+```pgsql
+select * from ? where name = ?;
+```
+
+假设我们传入的参数为 tableName = "user" , name = "hua"，那么在占位符进行变量替换后，sql 语句变为
+
+```pgsql
+select * from 'user' where name='hua';
+```
+
+上述 sql 语句是存在语法错误的，表名不能加单引号 `''`（注意，反引号 ``是可以的）。
+
+#### sql预编译
+
+### 定义
+
+> sql 预编译指的是数据库驱动在发送 sql 语句和参数给 DBMS 之前对 sql 语句进行编译，这样 DBMS 执行 sql 时，就不需要重新编译。
+
+### 为什么需要预编译
+
+JDBC 中使用对象 PreparedStatement 来抽象预编译语句，使用预编译
+
+1. **预编译阶段可以优化 sql 的执行**。
+   预编译之后的 sql 多数情况下可以直接执行，DBMS 不需要再次编译，越复杂的sql，编译的复杂度将越大，预编译阶段可以合并多次操作为一个操作。
+2. **预编译语句对象可以重复利用**。
+   把一个 sql 预编译后产生的 PreparedStatement 对象缓存下来，下次对于同一个sql，可以直接使用这个缓存的 PreparedState 对象。
+
+mybatis 默认情况下，将对所有的 sql 进行预编译。
+
+
+
 
 
 ## 2、第一个MyBatis查询程序
+
+
 
 思路：搭建环境 -> 导入MyBatis -> 编写代码 -> 测试！
 
@@ -347,7 +486,16 @@ public class MyBatisUtils {
   </mapper>
   ~~~
 
- 
+> 这样也可以，不然就直接sqlSession调用方法，
+
+```java
+public interface UserMapper {
+    List<User> selectAll();
+}
+
+
+UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+```
 
 ​	 在mybatis-config.xml里面添加  
 
@@ -392,8 +540,6 @@ public class MyBatisUtils {
   }
   
   ~~~
-
-
 
 
 
@@ -686,24 +832,29 @@ namespace中的包名要和dao/mapper中的包名一致
   <!DOCTYPE mapper
           PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-  <mapper namespace="site.whatsblog.dao.UserMapper">
-      <select id="getUsers" resultType="site.whatsblog.pojo.User">
+  <mapper namespace="UserMapper">
+      <select id="selectAll" resultType="User">
           select *
           from user
       </select>
-  
-      <select id="findUserById" resultType="site.whatsblog.pojo.User" parameterType="int">
+    	
+      <select id="selectByid" resultType="User" parameterType="Integer">
           select *
           from user
           where id = #{id}
       </select>
   
-      <insert id="addUser" parameterType="site.whatsblog.pojo.User">
+      <insert id="insert" parameterType="User">
           insert into user(name, password)
           values (#{name}, #{password})
+        -- 查询插入的
+          <selectKey resultType="Integer" keyProperty="id" order="AFTER">
+              select last_insert_id()
+  			-- 这里last_insert_id是mysql自带的函数,System.out.println(yes.getId());//查询结果为0
+          </selectKey>
       </insert>
   
-      <update id="updateUser" parameterType="site.whatsblog.pojo.User">
+      <update id="updateUser" parameterType="User">
           update user
           set name    = #{name},
               password=#{password}
@@ -717,58 +868,109 @@ namespace中的包名要和dao/mapper中的包名一致
       </delete>
   </mapper>
   ~~~
-
+  
   注意点：
-
+  
   * 增删改需要提交事务
+  * last_insert_id，将返回插入的那条记录在表中自增的那个字段的值，一般我们都给那个自增字段命名为ID。这样就可以返回刚插入的记录的ID值了。
+  
+  sqlSession调用查询就是：
+  
+  ```java
+  @Test
+      public void test() {
+          // 获取SqlSession
+          SqlSession sqlSession = null;
+          try {
+              sqlSession = MyBatisUtils.getSqlSession();
+              Connection connection = sqlSession.getConnection();
+              System.out.println(connection);
+  //          UserMapper就是xml的namesapce，
+              List<User> user = sqlSession.selectList("UserMapper.selectAll");
+              User user2 = sqlSession.selectOne("UserMapper.selectByid",2);
+              //上面是带参数查询
+  
+  //            for (User user1 : user) {
+  //                System.out.println("user1 = " + user1);
+  //            }
+            	User yes = new User(10, "yes", "12121");
+              int insert = sqlSession.insert("UserMapper.insert", yes);
+              //insert返回类型，代表插入的总数
+              sqlSession.commit();
+            
+              System.out.println(user2);
+          } catch (Exception e) {
+            if (sqlSession!=null)
+                  sqlSession.rollback();
+            //如果出现意外就要回滚
+              throw new RuntimeException(e);
+          } finally {
+              MyBatisUtils.closeSession(sqlSession);
+          }
+  //
+      }
+  ```
 
-### 3.3、万能的Map
+
+
+
+
+
+
+### 3.3、万能的Map-多参数的传递
 
 假设我们的实体类或者数据库中的表参数过多，我们应该考虑到Map！
 
-~~~java
-    /**
-     * 添加用户，万能的Map
-     * @param map 用户信息
-     * @return
-     */
-    Integer addUser2(Map<String, Object> map);
-~~~
-
 ~~~xml
 <!--添加用户-->
-    <insert id="addUser2" parameterType="map">
+    <insert id="insert" parameterType="java.util.map">
         insert into user (id, name, password)
         values (#{id}, #{username}, #{password});
     </insert>
 ~~~
 
-~~~java
+```java
 @Test
-public void testAddUser2() {
-    // 获取SqlSession
-    SqlSession sqlSession = MyBatisUtils.getSqlSession();
+public void testMap(){
     try {
-        // 执行SQL
-        UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("id",3);
-        map.put("username","haha");
-        map.put("password","23333");
-        Integer i = userMapper.addUser2(map);
-        if (i>0){
-            sqlSession.commit();
-        }else {
-            sqlSession.rollback();
-        }
-        System.out.println(i);
+      // 获取SqlSession
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        Connection connection = sqlSession.getConnection();
+        System.out.println("connection = " + connection);
+        Map param =  new HashMap();
+        param.put("id",8);
+        param.put("name","aaa");
+        param.put("password","1212121");
+//            User就是xml的名字，,insert就是mapper.xml里main的名字
+        sqlSession.insert("User.insert",param);
+        User one = sqlSession.selectOne("User.selectByid", 8);            
+      //上面是带参数查询
+        System.out.println(one);
+        sqlSession.commit();
     } catch (Exception e) {
-        e.printStackTrace();
+        throw new RuntimeException(e);
     } finally {
-        sqlSession.close();
     }
 }
-~~~
+```
+
+commit之后才会保存
+
+```sh
+mysql> select * from user;
++----+------+----------+
+| id | name | password |
++----+------+----------+
+|  1 | Suk1 | 123456   |
+|  2 | Suk2 | 123456   |
+|  3 | NULL | 23333    |
+|  8 | aaa  | 1212121  |
+| 90 | aaa  | 1212121  |
++----+------+----------+
+5 rows in set (0.00 sec)
+```
+
+
 
 map取key，【parameterType="map"】
 
@@ -777,6 +979,252 @@ map取key，【parameterType="map"】
 只有一个基本类型的时候，随便写，parameterType不用写
 
 多个参数用map或者**注解**
+
+
+
+> mapper.xml文件
+>
+> ```xml
+> <?xml version="1.0" encoding="UTF-8" ?>
+> <!DOCTYPE mapper
+>         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+>         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+> <!--namespace类似与包-->
+> <mapper namespace="User">
+> <!--    id就是名字，User下的selectAll就可以找到这个方法了-->
+>     <select id="selectAll" resultType="User">
+>         select * from user
+>     </select>
+>     <select id="selectByid" parameterType="Integer" resultType="User">
+>         select * from user where id = #{value}
+>     </select>
+>     <insert id="insert" parameterType="java.util.Map">
+>         insert into user values (#{id},#{name},#{password})
+>     </insert>
+> </mapper>
+> ```
+
+
+
+
+
+### 3.4、Map作为resultType
+
+
+
+```xml
+<!--Mapz作为结果集-->
+    <select id="selectAllMap" resultType="java.util.Map">
+        select * from user
+    </select>
+```
+
+
+
+运行代码：
+
+```java
+@Test
+public void testMap(){
+    try {
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        Connection connection = sqlSession.getConnection();
+        System.out.println("connection = " + connection);
+        List<Map> maps = sqlSession.selectList("User.selectAllMap");
+        for (Map map : maps) {
+            System.out.println("map = " + map);
+        }
+    } catch (Exception e) {
+        throw new RuntimeException(e);
+    } finally {
+    }
+}
+```
+
+
+
+Debug，可以看到返回值中的map的key是混乱的，数字会识别成integer。HashMap是按照hash值排序的，所以与table的值不一致
+
+![image-20230327133450258](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230327133450258.png)
+
+
+
+LinkedHashMap是按照插入的顺序来保存的，这时候就正常了。
+
+```xml
+<!--Mapz作为结果集-->
+    <select id="selectAllMap" resultType="java.util.LinkedHashMap">
+        select * from user
+    </select>
+```
+
+
+
+```sh
+connection = com.mysql.cj.jdbc.ConnectionImpl@21a947fe
+map = {id=1, name=Suk1, password=123456}
+map = {id=2, name=Suk2, password=123456}
+map = {id=3, password=23333}
+map = {id=8, name=aaa, password=1212121}
+map = {id=90, name=aaa, password=1212121}
+
+Process finished with exit code 0
+```
+
+Map灵活，但是开发的时候无法看到中间的结构,一般用来多表查询
+
+
+
+### 3.5、ResultMap
+
+
+
+在`Mybatis`中，有一个强大的功能元素`resultMap`。当我们希望将`JDBC ResultSets`中的数据，转化为合理的Java对象时，你就能感受到它的非凡之处。正如其官方所述的那样：
+
+> `resultMap`元素是 `MyBatis` 中最重要最强大的元素。它可以让你从 90% 的 `JDBC ResultSets` 数据提取代码中解放出来，并在一些情形下允许你进行一些 JDBC 不支持的操作。实际上，在为一些比如连接的复杂语句编写映射代码的时候，一份 `resultMap` 能够代替实现同等功能的长达数千行的代码。`ResultMap` 的设计思想是，对于简单的语句根本不需要配置显式的结果映射，而对于复杂一点的语句只需要描述它们的关系就行了。
+
+基本结构：
+
+```xml
+<resultMap>
+        <constructor>
+            <idArg/>
+            <arg/>
+        </constructor>
+        <id/>
+        <result/>
+        <association property=""/>
+        <collection property=""/>
+        <discriminator javaType="">
+            <case value=""></case>
+        </discriminator>
+</resultMap>
+
+
+```
+
+```sh
+constructor – 类在实例化时，用来注入参数值到构造方法中。
+idArg – ID 参数；标记结果作为 ID 可以帮助提高整体效能。
+arg – 注入到构造方法的一个普通参数。
+id – 一个 ID 结果； 标记结果作为 ID 可以帮助提高整体效能。
+result – 注入到字段或 JavaBean 属性的普通参数。
+association – 一个复杂的类型关联；许多结果将包成这种类型。
+collection – 复杂类型的集合。
+discriminator – 使用参数值来决定使用哪个参数来进行映射。
+case – 基于某些值的结果映射。
+
+```
+
+比如，我们有一个`User`类：
+
+```java
+public class User {
+    private String id;
+    private String username;
+    private String password;
+    private String address;
+    private String email;
+}
+```
+
+如果数据库中表的字段与`User`类的属性名称一致，我们就可以使用`resultType`来返回。
+
+```xml
+<select id="getUsers" resultType="User">
+	SELECT
+		u.id,
+		u.username,
+		u.password,
+		u.address,
+		u.email
+	FROM
+		USER u
+</select>
+```
+
+当然，这是理想状态下，属性和字段名都完全一致的情况。但事实上，不一致的情况是有的，这时候我们的`resultMap`就要登场了。
+
+如果`User`类保持不变，但`SQL`语句发生了变化，将`id`改成了`uid`。
+
+```xml
+<select id="getUsers" resultType="User">
+	SELECT
+		u.id as uid,
+		u.username,
+		u.password,
+		u.address,
+		u.email
+	FROM
+		USER u
+</select>
+```
+
+那么，在结果集中，我们将会丢失`id`数据。这时候我们就可以定义一个`resultMap`，来映射不一样的字段。
+
+```xml
+<!--    resultMap来统计结果-->
+    <resultMap id="rmUser" type="POJO.User">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="password" column="password"/>
+    </resultMap>
+    <select id="selectAllMap" resultMap="rmUser">
+        select * from user
+    </select>
+```
+
+然后，我们把上面的`select`语句中的`resultType`修改为`resultMap="rmUser"`。
+
+这里面`column`对应的是数据库的列名或别名；`property`对应的是结果集的字段或属性。
+
+这就是`resultMap`最简单，也最基础的用法：字段映射。
+
+```java
+    @Test
+    public void testMapperImple(){
+        SqlSession sqlSession = null;
+        try {
+            sqlSession = MyBatisUtils.getSqlSession();
+            Connection connection = sqlSession.getConnection();
+            System.out.println("connection = " + connection);
+            UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+            List<User> users = mapper.selectAllMap();
+//            List<User> users = sqlSession.selectList("UserMapper.selectAllMap");
+            for (User user : users) {
+                System.out.println("user = " + user);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+// 下面是接口UserMapper.java
+/*
+public interface UserMapper {
+    public List<User> selectAll();
+    public List<User> selectAllMap();
+}
+*/
+```
+
+> 我靠，烦死了这个bug，对于同一个查询语句只能设定一个id，不然就会报错
+>
+> <img src="https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230327190459457.png" alt="image-20230327190459457" style="zoom: 67%;" />
+>
+> 我特么一直以为这个是我上面写的有问题，结果删了我的下面的，结果还是报错，结果发现是不能对同一个句子写两个id。
+>
+> 对了，这个private和public都是对的。-.-
+>
+> ```java
+> public class User {
+>     private Integer id;
+>     private String name;
+>     private String password;
+> }
+> ```
+>
+> 
 
 ## 4、配置解析
 
@@ -956,32 +1404,9 @@ Mapper Registry
 * SqlSession 的实例不是线程安全的，因此是不能被共享的，所以它的最佳的作用域是请求或**方法作用域** 
 * 用完之后赶紧关闭，否则资源会被占用
 
-## 5、解决属性名和字段名不一致的问题（ResultMap）
-
-数据库中的字段
-
-![HbBRVs.png](https://s4.ax1x.com/2022/02/19/HbBRVs.png)
-
-解决方法：
-
-1. 起别名
-
-2. ResultMap
-
-   ~~~xml
-   <resultMap id="uu" type="User">
-       <id property="id" column="id" />
-       <result property="username" column="name"/>
-       <result property="password" column="password"/>
-   </resultMap>
-   ~~~
-
-   * `resultMap` 元素是 MyBatis 中最重要最强大的元素。
-   *  ResultMap 的设计思想是，对简单的语句做到零配置，对于复杂一点的语句，只需要描述语句之间的关系就行了。 
-   * 只需要指定property和column不一样的部分，其他部分不需要指定
-   * 如果这个世界总是这么简单就好了。 
-
 ## 6、日志
+
+
 
 ### 6.1、日志工厂
 
@@ -991,7 +1416,7 @@ Mapper Registry
 
 现在：日志工厂
 
-![HbBgbj.png](https://s4.ax1x.com/2022/02/19/HbBgbj.png)
+![HbBgbj.png](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/HbBgbj.png)
 
 * SLF4J
 * **LOG4J**
@@ -1302,7 +1727,7 @@ INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('4', '小李', '1');
 INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('5', '小王', '1');
 ~~~
 
-![HbBWan.png](https://s4.ax1x.com/2022/02/19/HbBWan.png)
+![HbBWan.png](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/HbBWan.png)
 
 ### 10.1、测试环境搭建
 
