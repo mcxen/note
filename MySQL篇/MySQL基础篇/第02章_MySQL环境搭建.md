@@ -1,9 +1,5 @@
 # 第02章_MySQL环境搭建
 
-讲师：尚硅谷 宋红康（江湖人称：康师傅）
-
-官网：[http://www.atguigu.com](http://www.atguigu.com/)
-
 ***
 
 ## 1. MySQL的卸载
@@ -127,7 +123,7 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\MySQL服务删除
 
 ![image-20210817185920150](images/image-20210817185920150.png)
 
-**3. 点击 MySQL Community Server**
+**3. 点击 MySQL Community Server**https://dev.mysql.com/downloads/
 
  <img src="images/image-20210817185955123.png" alt="image-20210817185955123" style="zoom:80%;" />
 
@@ -156,7 +152,7 @@ MySQL下载完成后，找到下载文件，双击进行安装，具体操作步
 
 步骤1：双击下载的mysql-installer-community-8.0.26.0.msi文件，打开安装向导。
 
-步骤2：打开“Choosing a Setup Type”（选择安装类型）窗口，在其中列出了5种安装类型，分别是Developer Default（默认安装类型）、Server only（仅作为服务器）、Client only（仅作为客户端）、Full（完全安装）、Custom（自定义安装）。这里选择“Custom（自定义安装）”类型按钮，单击“Next(下一步)”按钮。
+步骤2：打开“Choosing a Setup Type”（选择安装类型）窗口，在其中列出了5种安装类型，分别是Developer Default（默认安装类型）、Server only（仅作为服务器）、Client only（仅作为客户端）、Full（完全安装）、Custom（自定义安装）。**这里选择“Custom（自定义安装）”类型按钮，**单击“Next(下一步)”按钮。
 
 <img src="images/image-20211014170553535.png" alt="image-20211014170553535" style="zoom:90%;" />
 
@@ -202,7 +198,7 @@ MySQL安装之后，需要对服务器进行配置。具体的配置步骤如下
 
 - `Dedicated Machine（专用服务器）`：该选项代表只运行MySQL服务的服务器。MySQL服务器配置成使用所有可用系统资源。
 
-步骤3：单击“Next”（下一步）按钮，打开设置授权方式窗口。其中，上面的选项是MySQL8.0提供的新的授权方式，采用SHA256基础的密码加密方法；下面的选项是传统授权方法（保留5.x版本兼容性）。
+步骤3：单击“Next”（下一步）按钮，打开设置授权方式窗口。其中，上面的选项是MySQL8.0提供的新的授权方式，采用SHA256基础的密码加密方法；**下面的选项是传统授权方法（保留5.x版本兼容性）**。
 
 <img src="images/clip_image008-1634203188595.jpg" alt="img" style="zoom:80%;" />
 
