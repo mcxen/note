@@ -1426,6 +1426,14 @@ Mapper Registry
 * **STDOUT_LOGGING**
 * NO_LOGGING 
 
+SLF4J COMMONS_LOGGING是门面，具体实现是：LOG4J，logback，jul java.util.logging 等
+
+SLF4J Simple Logging Faceade for JAVA
+
+logback是主流，log4j和logback同一个开发者开发的。
+
+
+
 在Mybatis中具体使用哪个日志实现，在设置中设定！
 
 STDOUT_LOGGING标准日志输出
@@ -1437,7 +1445,71 @@ STDOUT_LOGGING标准日志输出
 </settings>
 ~~~
 
-### 6.2、Log4j
+### 6.2、Logback
+
+#### 导入jar包依赖
+
+```xml
+<dependency>
+    <groupId>ch.qos.logback</groupId>
+    <artifactId>logback-classic</artifactId>
+    <version>1.2.7</version>
+</dependency>
+```
+
+![image-20230328203506997](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230328203506997.png)
+
+左边可以看到自动导入了**slf4j这个门面**
+
+
+
+之后就会自动出现运行的结果信息：
+
+> 配置
+>
+> ```xml
+> <!--                下面的thread对应的就是main线程  logger 是哪个类  %msg%n是具体的内容-->
+>                 %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+> ```
+>
+> ![image-20230328204624286](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230328204624286.png)
+>
+> **o.i.a.i.d就是简写**
+
+![image-20230328203707952](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230328203707952.png)
+
+#### 自定义输出
+
+在resource里面Logback.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+    <appender name = "console" class = "ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+<!--                下面的thread对应的就是main线程  logger 是哪个类  %msg%n是具体的内容-->
+                %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+<!--    level代表了日志的输出的级别
+        error 错误，
+        warn 警告
+        info 一般
+        debug 调试信息
+        trace 程序运行跟踪信息
+        开发时改为debug，一般时使用info
+-->
+    <root level = "debug">
+        <appender-ref ref = "console"/>
+    </root>
+</configuration>
+```
+
+
+
+### 6.3、Log4j
 
 什么是Log4j：
 
@@ -1927,65 +1999,121 @@ CREATE TABLE `blog`(
    </mapper>
    ~~~
 
-5. 测试
-
-   ~~~java
-   public void testAddBlog() {
-       SqlSession session = MyBatisUtils.getSqlSession();
-       BlogMapper mapper = session.getMapper(BlogMapper.class);
-       try {
-           mapper.addBlog(new Blog(IDUtils.getUUID(),"MyBatis第一天!","Suk",new Date(),0));
-           mapper.addBlog(new Blog(IDUtils.getUUID(),"MyBatis第二天!","Suk",new Date(),0));
-           mapper.addBlog(new Blog(IDUtils.getUUID(),"MyBatis第三天!","Suk",new Date(),0));
-           mapper.addBlog(new Blog(IDUtils.getUUID(),"MyBatis第四天!","Suk",new Date(),0));
-           session.commit();
-       } catch (Exception e) {
-           e.printStackTrace();
-           session.rollback();
-       }finally {
-           session.close();
-       }
-   }
-   ~~~
-
 ### 12.2、if
 
 > *where* 元素只会在子元素返回任何内容的情况下才插入 “WHERE” 子句。而且，若子句的开头为 “AND” 或 “OR”，*where* 元素也会将它们去除。 
 
+数据准备：
+
+```sh
+mysql> insert into blog values(1,"yes","sas","2020-12-12",12);
+mysql> insert into blog values(2,"ysa","sadsada","2020-12-12",12);
+mysql> select * from blog;
++----+-------+---------+---------------------+-------+
+| id | title | author  | create_time         | views |
++----+-------+---------+---------------------+-------+
+| 1  | yes   | sas     | 2020-12-12 00:00:00 |    12 |
+| 2  | ysa   | sadsada | 2020-12-12 00:00:00 |    12 |
++----+-------+---------+---------------------+-------+
+2 rows in set (0.01 sec)
+```
+
+
+
+```xml
+<mappers>
+    <mapper resource="mappers/mapper.xml"/>
+    <mapper resource="mappers/BlogMapper.xml"/>
+</mappers>
+```
+
+
+
+**！！！！注意resultType要加POJO包名**
+
+mappers/BlogMapper.xml"
+
 ~~~xml
-<select id="findBlogsByBlog" parameterType="map" resultType="Blog">
-    select * from blog
-    <where>
-        <if test="title!=null">
-            and title = #{title}
-        </if>
-        <if test="author!=null">
-            and author = #{author}
-        </if>
-        <if test="createTime!=null">
-            and create_time = #{createTime}
-        </if>
-        <if test="views!=null">
-            and views = #{views}
-        </if>
-    </where>
-</select>
+<?xml version="1.0" encoding="UTF8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BlogMapper">
+    <insert id="addBlog" parameterType="POJO.Blog">
+        insert into blog (id, title, author, create_time, views)
+        values (#{id}, #{title}, #{author}, #{createTime}, #{views});
+    </insert>
+
+    <select id="findBlogsByBlog" parameterType="map" resultType="POJO.Blog">
+        select * from blog
+        <where>
+            <if test="title!=null">
+                and title = #{title}
+            </if>
+            <if test="author!=null">
+                and author = #{author}
+            </if>
+            <if test="createTime!=null">
+                and create_time = #{createTime}
+            </if>
+            <if test="views!=null">
+                and views = #{views}
+            </if>
+        </where>
+    </select>
+</mapper>
 ~~~
+
+where可以保证语法正确。如果你不想加上where就得,
+
+-- 1=1是占位符
+            1=1
+
+    <select id="findBlogsByBlog" parameterType="map" resultType="POJO.Blog">
+        select * from blog
+         where 1=1
+            <if test="title!=null">
+                and title = #{title}
+            </if>
+            <if test="author!=null">
+                and author = #{author}
+            </if>
+            <if test="createTime!=null">
+                and create_time = #{createTime}
+            </if>
+            <if test="views!=null">
+                and views = #{views}
+            </if>
+    </select>
+
+测试testDynamicSql：
 
 ~~~java
-public void testFindTest() {
-    SqlSession session = MyBatisUtils.getSqlSession();
-    BlogMapper mapper = session.getMapper(BlogMapper.class);
-    Map<String, Object> map = new HashMap<String, Object>();
-    map.put("title","MyBatis第二天!");
-    map.put("author","Suk");
-
-    List<Blog> blogs = mapper.findBlogsByBlog(map);
-    for (Blog blog : blogs) {
-        System.out.println(blog);
+    @Test
+    public void testDynamicSql(){
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        sqlSession.getConnection();
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("title","yes");
+        List<Blog> blogs = sqlSession.selectList("BlogMapper.findBlogsByBlog",map);
+        for (Blog blog : blogs) {
+            System.out.println("blog = " + blog);
+        }
     }
-}
 ~~~
+
+> 注意日志文件：
+>
+> ```sh
+> [BlogMapper.findBlogsByBlog]-==>  Preparing: select * from blog WHERE title = ?
+> [BlogMapper.findBlogsByBlog]-==> Parameters: yes(String)
+> [BlogMapper.findBlogsByBlog]-<==      Total: 1
+> blog = Blog{id=1, title='yes', author='sas', createTime=null, views=12}
+> ```
+>
+> 
+>
+> ···
 
 ### 12.3、choose、when、otherwise
 
@@ -2185,8 +2313,8 @@ public void testUpdateBlog() {
 
 * MyBatis包含一个非常强大的查询缓存特性，它可以非常方便地定制和配置缓存，缓存可以极大地提升查询销量
 * MyBatis系统中默认定义了两级缓存，**一级缓存**和**二级缓存**
-  * 默认情况下，只有一级缓存开启
-  * 二级缓存需要手动开启和配置，基于namespace
+  * **默认情况下，只有一级缓存开启** SqlSession会话
+  * 二级缓存需要手动开启和配置，基于namespace Mapper的命名空间
   * 为了提高扩展性，MyBatis定义了缓存接口Cache。我们可以通过实现Cache接口来定义二级缓存
 
 ### 13.3、一级缓存
@@ -2275,6 +2403,9 @@ public void testUpdateBlog() {
   * 如果当前会话关闭了，这个会话对应的一级缓存就没了，我们希望的是会话关闭，一级缓存中的数据会被保存到二级缓存中
   * 新的会话查询信息，就可以从二级缓存汇总获取内容
   * 不同的mapper查出的数据会放在自己对应的缓存中
+  * 写操作commit之后就会对该namspace的缓存强制晴空
+  * useCache = false 可以不用缓存
+  * flushCache = true 代表强制清空缓存
 
 默认情况下，只启用了本地的会话缓存，它仅仅对一个会话中的数据进行缓存。 要启用全局的二级缓存，只需要在你的 SQL 映射文件中添加一行：
 

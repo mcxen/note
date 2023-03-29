@@ -1,4 +1,5 @@
 import DTO.UserDTO;
+import POJO.Blog;
 import POJO.User;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Test;
@@ -63,10 +64,10 @@ public class MapperTest {
             sqlSession = MyBatisUtils.getSqlSession();
             Connection connection = sqlSession.getConnection();
             System.out.println("connection = " + connection);
-            User yes = new User(12, "232", "323232");
-            int insert = sqlSession.insert("UserMapper.insert", yes);
+//            User yes = new User(43, "232", "323232");
+//            int insert = sqlSession.insert("UserMapper.insert", yes);
 
-            System.out.println(yes.getId());
+//            System.out.println(yes.getId());
             //结果为0
 
             //insert返回类型，代表插入的总数
@@ -81,6 +82,18 @@ public class MapperTest {
             if (sqlSession!=null)
                 sqlSession.rollback();
             throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void testDynamicSql(){
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        sqlSession.getConnection();
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("title","yes");
+        List<Blog> blogs = sqlSession.selectList("BlogMapper.findBlogsByBlog",map);
+        for (Blog blog : blogs) {
+            System.out.println("blog = " + blog);
         }
     }
 }

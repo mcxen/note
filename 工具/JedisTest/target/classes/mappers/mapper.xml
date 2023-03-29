@@ -3,19 +3,19 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="UserMapper">
-    <select id="selectAll" resultType="POJO.User">
-        select * from user
-    </select>
+<!--    <select id="selectAll" resultType="POJO.User">-->
+<!--        select * from user-->
+<!--    </select>-->
 
 <!--    resultMap来统计结果-->
-    <resultMap id="rmUser" type="POJO.User">
-        <id property="id" column="id"/>
-        <result property="name" column="name"/>
-        <result property="password" column="password"/>
-    </resultMap>
-    <select id="selectAllMap" resultMap="rmUser">
-        select * from user
-    </select>
+<!--    <resultMap id="rmUser" type="POJO.User">-->
+<!--        <id property="id" column="id"/>-->
+<!--        <result property="name" column="name"/>-->
+<!--        <result property="password" column="password"/>-->
+<!--    </resultMap>-->
+<!--    <select id="selectAllMap" resultMap="rmUser">-->
+<!--        select * from user-->
+<!--    </select>-->
 
     <insert id="insert" parameterType="POJO.User">
         INSERT INTO User

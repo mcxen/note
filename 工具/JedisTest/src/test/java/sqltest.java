@@ -1,3 +1,4 @@
+import POJO.Blog;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -19,4 +20,5 @@ public class sqltest {
         Connection connection = sqlSession.getConnection();
         System.out.println(connection);
     }
+
 }

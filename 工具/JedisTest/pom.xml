@@ -43,6 +43,7 @@
             <artifactId>mybatis</artifactId>
             <version>3.5.9</version>
         </dependency>
+
     </dependencies>
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
