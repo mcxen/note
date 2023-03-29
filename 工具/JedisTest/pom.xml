@@ -43,7 +43,11 @@
             <artifactId>mybatis</artifactId>
             <version>3.5.9</version>
         </dependency>
-
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.12</version>
+        </dependency>
     </dependencies>
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

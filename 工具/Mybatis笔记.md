@@ -2393,6 +2393,8 @@ public void testUpdateBlog() {
    ~~~
 
 > 一级缓存默认是开启的，只在一次sqlsession中有效，也就是拿到连接到关闭连接这个区间，也关不掉
+>
+> 也就是换一个sqlsession，或者说新建了一个sqlsession之后，就会重新查询。
 
 ### 13.4、二级缓存
 
@@ -2415,7 +2417,7 @@ public void testUpdateBlog() {
 
 ==提示==缓存只作用于 cache 标签所在的映射文件中的语句。如果你混合使用 Java API 和 XML 映射文件，在共用接口中的语句将不会被默认缓存。你需要使用` @CacheNamespaceRef `注解指定缓存作用域。
 
-这些属性可以通过 cache 元素的属性来修改。比如：
+这些属性可以通过 cache 元素的属性在`mapper.xml`中 来修改。比如：
 
 ```xml
 <cache
@@ -2425,63 +2427,55 @@ public void testUpdateBlog() {
   readOnly="true"/>
 ```
 
-这个更高级的配置创建了一个 FIFO 缓存，每隔 60 秒刷新，最多可以存储结果对象或列表的 512 个引用，而且返回的对象被认为是只读的，因此对它们进行修改可能会在不同线程中的调用者产生冲突。
+这个更高级的配置创建了一个 FIFO 缓存，`flushInterval`间隔 每隔 60 秒刷新，最多可以存储结果对象或列表的 512 个引用，而且返回的对象被认为是只读的，因此对它们进行修改可能会在不同线程中的调用者产生冲突。
 
 可用的清除策略有：
 
-- `LRU` – 最近最少使用：移除最长时间不被使用的对象。
+- `LRU` – 最近最久最少使用：移除最长时间不被使用的对象。
 - `FIFO` – 先进先出：按对象进入缓存的顺序来移除它们。
-- `SOFT` – 软引用：基于垃圾回收器状态和软引用规则移除对象。
-- `WEAK` – 弱引用：更积极地基于垃圾收集器状态和弱引用规则移除对象。
+- `SOFT` – 软引用：JVM中的基于垃圾回收器状态和**软引用规则移除对象。**
+- `WEAK` – 弱引用：更积极地基于垃圾收集器状态和**弱引用规则移除对象。**
 
 默认的清除策略是 LRU。
 
+`LFU` 最近最少使用，
+
 flushInterval（刷新间隔）属性可以被设置为任意的正整数，设置的值应该是一个以毫秒为单位的合理时间量。 默认情况是不设置，也就是没有刷新间隔，缓存仅仅会在调用语句时刷新。
 
-size（引用数目）属性可以被设置为任意正整数，要注意欲缓存对象的大小和运行环境中可用的内存资源。默认值是 1024。
+size（引用数目）属性可以被设置为任意正整数，要注意欲缓存对象的大小和运行环境中可用的内存资源。默认值是 1024。list集合看成是一个对象，一个Blog也是 一个对象，不建议对list进行二级缓存保存，list的命中率比较小
 
-readOnly（只读）属性可以被设置为 true 或 false。只读的缓存会给所有调用者返回缓存对象的相同实例。 因此这些对象不能被修改。这就提供了可观的性能提升。而可读写的缓存会（通过序列化）返回缓存对象的拷贝。 速度上会慢一些，但是更安全，因此默认值是 false。
+readOnly（只读）属性可以被设置为 true 或 false。只读的缓存会给所有调用者返回缓存对象的相同实例。 因此这些对象不能被修改。这就提供了可观的性能提升。而可读写的缓存会（通过序列化）返回**缓存对象的拷贝**。返回的是副本， 速度上会慢一些，但是更安全，因此默认值是 false。
 
-步骤：
 
-1. 开启全局缓存
 
-   ~~~xml
-   <!--显式开启缓存-->
-   <setting name="cacheEnabled" value="true"/>
-   ~~~
+```xml
+<!--useCache这里表示不适用二级缓存-->
+    <select id="findBlogsByBlog" parameterType="map" resultType="POJO.Blog" useCache="false">
+        select * from blog
+        <where>
+            <if test="title!=null">
+                and title = #{title}
+            </if>
+            <if test="author!=null">
+                and author = #{author}
+            </if>
+            <if test="createTime!=null">
+                and create_time = #{createTime}
+            </if>
+            <if test="views!=null">
+                and views = #{views}
+            </if>
+        </where>
+    </select>
+```
 
-2. 在Mapper.xml中加入cache标签
-
-3. 测试
-
-   ~~~java
-   public void testUpdateUser() {
-       SqlSession sqlSession = MyBatisUtils.getSqlSession();
-       UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-       User user = mapper.findUserById(1);
-       System.out.println(user);
-       sqlSession.close();
-       SqlSession sqlSession2 = MyBatisUtils.getSqlSession();
-       UserMapper mapper2 = sqlSession2.getMapper(UserMapper.class);
-       User user2 = mapper2.findUserById(1);
-       System.out.println(user2);
-       System.out.println(user==user2);
-       sqlSession2.close();
-   }
-   ~~~
-
-输出：
-
-~~~verilog
-......
-Cache Hit Ratio [site.whatsblog.dao.UserMapper]: 0.5
-User(id=1, name=Suk1, password=123456)
-true
-
-Process finished with exit code 0
-
-~~~
+```xml
+<!--插入操作强制开启缓存刷新-->
+    <insert id="addBlog" parameterType="POJO.Blog" flushCache="true" >
+        insert into blog (id, title, author, create_time, views)
+        values (#{id}, #{title}, #{author}, #{createTime}, #{views});
+    </insert>
+```
 
 小结：
 

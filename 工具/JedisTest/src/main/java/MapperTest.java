@@ -90,7 +90,7 @@ public class MapperTest {
         SqlSession sqlSession = MyBatisUtils.getSqlSession();
         sqlSession.getConnection();
         HashMap<String, Object> map = new HashMap<>();
-        map.put("title","yes");
+//        map.put("title","yes");
         List<Blog> blogs = sqlSession.selectList("BlogMapper.findBlogsByBlog",map);
         for (Blog blog : blogs) {
             System.out.println("blog = " + blog);
