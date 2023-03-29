@@ -38,6 +38,7 @@
     <mappers>
         <mapper resource="mappers/mapper.xml"/>
         <mapper resource="mappers/BlogMapper.xml"/>
+        <mapper resource="mappers/OneToManyMapper.xml"/>
     </mappers>
 
 

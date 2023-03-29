@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OneToMany">
+    <select id="getStudent" resultMap="rmStudentDetail">
+        select s.id id,s.name name,t.id tid,t.name tname
+        from student s,teacher t
+        where s.tid = t.id
+    </select>
+<!--    这里就是和resultMap一样的，association-->
+    <resultMap id="rmStudentDetail" type="POJO.Student">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <association property="teacher" javaType="POJO.Teacher">
+            <result property="id" column="tid"/>
+            <result property="name" column="tname"/>
+        </association>
+    </resultMap>
+
+
+<!--    查找某个老师的全部学生-->
+    <select id="getTeacherByid"  resultMap="rmTeacherById">
+        select s.id sid,s.name sname,t.id tid,t.name tname
+        from student s,teacher t
+        where s.tid = t.id and t.id = 1
+    </select>
+    <resultMap id="rmTeacherById" type="POJO.Teacher">
+        <id property="id" column="tid"/>
+        <result property="name" column="tname"/>
+        <collection property="students" ofType="POJO.Student">
+            <id property="students.id" column="sid"/>
+            <result property="students.name" column="sname"/>
+            <result property="students.tid" column="tid"/>
+        </collection>
+    </resultMap>
+</mapper>

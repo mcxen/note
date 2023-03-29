@@ -1,5 +1,7 @@
 import DTO.UserDTO;
 import POJO.Blog;
+import POJO.Student;
+import POJO.Teacher;
 import POJO.User;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Test;
@@ -95,5 +97,14 @@ public class MapperTest {
         for (Blog blog : blogs) {
             System.out.println("blog = " + blog);
         }
+    }
+
+    @Test
+    public void testOneToMany(){
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        sqlSession.getConnection();
+//        map.put("title","yes");
+        Teacher teachers = sqlSession.selectOne("OneToMany.getTeacherByid");
+        System.out.println("teachers = " + teachers);
     }
 }

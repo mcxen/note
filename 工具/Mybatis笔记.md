@@ -1766,7 +1766,12 @@ select * from table_name limit startindex,pagesize;
    }
    ~~~
 
-## 10、多对一处理
+## 10、多对一处理association
+
+在项目中，某些实体类之间肯定有关键关系，比如一对一，一对多等。在hibernate 中用`one to one`和`one to many`，而mybatis 中就用`association`和`collection`。
+ **association:  一对一关联(has one)**
+ **collection:一对多关联(has many)**
+ 注意，只有在做select查询时才会用到这两个标签，都有三种用法，且用法类似。
 
 多对一：
 
@@ -1781,7 +1786,7 @@ CREATE TABLE `teacher` (
   `id` INT(10) NOT NULL,
   `name` VARCHAR(30) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 INSERT INTO teacher(`id`, `name`) VALUES (1, '秦老师'); 
 
@@ -1792,7 +1797,9 @@ CREATE TABLE `student` (
   PRIMARY KEY (`id`),
   KEY `fktid` (`tid`),
   CONSTRAINT `fktid` FOREIGN KEY (`tid`) REFERENCES `teacher` (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('1', '小明', '1'); 
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('1', '小明', '1'); 
 INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('2', '小红', '1'); 
 INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('3', '小张', '1'); 
 INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('4', '小李', '1'); 
@@ -1801,16 +1808,71 @@ INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('5', '小王', '1');
 
 ![HbBWan.png](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/HbBWan.png)
 
-### 10.1、测试环境搭建
+```java
+public class Student {
+    private int id;
+    private String name;
+    private Teacher teacher;
+}
+public class Teacher {
+    private int id;
+    private String name;
+}
+```
 
-1. 导入lombok
-2. 新建实体类Teacher和student
-3. 新建Mapper接口
-4. 新建Mapper.xml
-5. 在核心配置中绑定注册mapper接口或者文件
-6. 测试查询能否成功
+StudentMapper.java 定义了两个查询方法，基于不同的实现方式。
 
-### 10.2、按照查询嵌套处理
+```java
+public interface StudentMapper {
+    List<Student> getStudent();
+    List<Student> getStudent2();
+}
+
+public interface TeacherMapper {
+
+}
+```
+
+
+
+### 10.1、Collection和Association
+
+```xml
+<resultMap id="TeacherAndStudents" type="Teacher">
+    <result property="id" column="tid"/>
+    <result property="name" column="tname"/>
+    <collection property="students" ofType="Student">
+        <result property="id" column="sid"/>
+        <result property="name" column="sname"/>
+        <result property="tid" column="stid"/>
+    </collection>
+</resultMap>
+```
+
+
+
+```xml
+<!--复杂的属性需要单独处理，对象：association；集合：collection-->
+         <!--association关联属性  property属性名 javaType属性类型 column在多的一方的表（即学生表）中的列名-->
+<association property="teacher" javaType="Teacher" column="tid" select="getTeacher" />
+```
+
+
+
+而association中的结构，则和resultMap无异了，同样是id和result，但是仍然有两个需要注意的点：
+
+- id中的column属性，其值应该尽量使用外键列名，主要是对于重名的处理，避免映射错误
+- 同样的，对于result中的column属性的值，也要避免重名带来的映射错误，例如学生id和教师的id
+
+说 association 中结构和resultMap无异，事实上我们也可以直接引用其他的resultMap
+
+```xml
+<association property="teacher" resultMap = "teacherResultMap"/>
+```
+
+
+
+### 10.2、按照Select查询嵌套处理-并不提倡
 
 ~~~xml
 <!--
@@ -1818,31 +1880,129 @@ INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('5', '小王', '1');
             1. 查询所有学生信息
             2. 根据查询出来的学生tid，寻找对应的老师
     -->
-<select id="findAllStudent" resultMap="StuentTeacher">
-    select * from student
-</select>
 
-<resultMap id="StuentTeacher" type="Student">
-    <id property="id" column="id"/>
-    <id property="name" column="name"/>
-    <!--
-            复杂的属性，我们需要单独处理
-                对象：association
-                集合：collection
-        -->
-    <association property="teacher" column="tid" javaType="Teacher" select="findTeacherByTid"/>
-</resultMap>
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<select id="findTeacherByTid" resultType="Teacher">
-    select * from teacher where id = #{id}
-</select>
+<mapper namespace="StudentMapper">
+
+    <select id="getStudent" resultMap="studentTeacher">
+        select * from student
+    </select>
+
+     <resultMap id="studentTeacher" type="student">
+         <id property="id" column="id" />
+         <result property="name" column="name" />
+         <!--复杂的属性需要单独处理，对象：association；集合：collection-->
+         <!--association关联属性  property属性名 javaType属性类型 column在多的一方的表（即学生表）中的列名-->
+         <association property="teacher" javaType="Teacher" column="tid" select="getTeacher" />
+     </resultMap>
+
+    <!--
+       这里传递过来的id，只有一个属性的时候，下面可以写任何值
+       association中column多参数配置：
+       column="{key=value,key=value}"
+       其实就是键值对的形式，key是传给下个sql的取值名称，value是片段一中sql查询的字段名。
+   -->
+     <select id="getTeacher" resultType="teacher">
+         select * from teacher where id = #{tid}
+     </select>
+
+</mapper>
+
 ~~~
 
-### 10.3、按照结果嵌套处理
+```java
+    @Test
+    public void getStudent(){
+        SqlSession sqlSession = MybatisUtil.getSqlSession();
+
+        StudentMapper studentMapper = sqlSession.getMapper(StudentMapper.class);
+        List<Student> students = studentMapper.getStudent();
+        for (Student student : students) {
+            System.out.println(student);
+        }
+        sqlSession.close();
+    }
+```
+
+```sh
+Student(id=1, name=张三, teacher=Teacher(id=1, name=hresh))
+Student(id=2, name=李四, teacher=Teacher(id=1, name=hresh))
+Student(id=3, name=王武, teacher=Teacher(id=1, name=hresh))
+Student(id=4, name=张散散, teacher=Teacher(id=1, name=hresh))
+
+```
+
+
+
+
+
+### 10.3、直接按照结果嵌套处理
 
 ~~~xml
-<!--按照结果嵌套处理-->
-<select id="findAllStudent2" resultType="StuentTeacher2">
+<?xml version="1.0" encoding="UTF8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OneToMany">
+    <select id="getStudent" resultMap="rmStudentDetail">
+        select s.id id,s.name name,t.id tid,t.name tname
+        from student s,teacher t
+        where s.tid = t.id
+    </select>
+    
+    <resultMap id="rmStudentDetail" type="POJO.Student">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <!--    这里就是和resultMap一样的，association-->
+        <association property="teacher" javaType="POJO.Teacher">
+            <result property="id" column="tid"/>
+            <result property="name" column="tname"/>
+        </association>
+    </resultMap>
+</mapper>
+~~~
+
+```java
+    @Test
+    public void testOneToMany(){
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        sqlSession.getConnection();
+//        map.put("title","yes");
+        List<Student> stus = sqlSession.selectList("OneToMany.getStudent");
+        for (Student student : stus) {
+            System.out.println("student = " + student);
+        }
+    }
+```
+
+
+
+结果：
+
+```sh
+student = Student{id=1, name='小明', teacher=Teacher{id=1, name='秦老师'}}
+student = Student{id=2, name='小红', teacher=Teacher{id=1, name='秦老师'}}
+student = Student{id=3, name='小张', teacher=Teacher{id=1, name='秦老师'}}
+student = Student{id=4, name='小李', teacher=Teacher{id=1, name='秦老师'}}
+student = Student{id=5, name='小王', teacher=Teacher{id=1, name='秦老师'}}
+
+Process finished with exit code 0
+
+```
+
+
+
+### 10.4  、按照resultMap
+
+StuentTeacher2 是一个包括了Teacher的对象
+
+```xml
+
+<select id="findAllStudent3" resultType="StuentTeacher2">
     select s.id sid,s.name sname,t.id tid,t.name tname
     from student s,teacher t
     where s.tid=t.id
@@ -1851,23 +2011,38 @@ INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('5', '小王', '1');
 <resultMap id="StuentTeacher2" type="Student">
     <result property="id" column="sid"/>
     <result property="name" column="sname"/>
-    <association property="teacher" javaType="Teacher">
-        <result property="id" column="tid"/>
-        <result property="name" column="tname"/>
-    </association>
+    <!--association引用resultMap-->
+    <association property="teacher" resultMap="rmStudentTeacher"/>
 </resultMap>
-~~~
+<resultMap id = "rmStudentTeacher" type = "Teacher">
+    <result property="id" column="tid"/>
+    <result property="name" column="tname"/>
+</resultMap>
+```
 
-## 11、一对多处理
+
+
+## 11、一对多处理Collection
 
 ### 11.1、测试环境搭建
 
-1. 导入lombok
-2. 新建实体类Teacher和student
-3. 新建Mapper接口
-4. 新建Mapper.xml
-5. 在核心配置中绑定注册mapper接口或者文件
-6. 测试查询能否成功
+
+
+1. 新建实体类Teacher和student
+2. 新建Mapper接口
+3. 新建Mapper.xml
+4. 在核心配置中绑定注册mapper接口或者文件
+5. 测试查询能否成功
+
+```java
+public class Teacher {
+    private int id;
+    private String name;
+    private List<Student> students;
+}
+```
+
+
 
 ### 11.2、按照查询嵌套处理
 
@@ -1875,9 +2050,12 @@ INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('5', '小王', '1');
 <select id="findTeacherById2" resultMap="TeacherAndStudents2">
     select * from teacher where id = #{id}
 </select>
+
 <resultMap id="TeacherAndStudents2" type="Teacher">
     <collection property="students" ofType="Student" column="id" select="findStudentsByTid"/>
+     <!--collection调用select结果来进行查询嵌套-->
 </resultMap>
+
 <select id="findStudentsByTid" resultType="Student">
     select * from student where tid = #{id}
 </select>
@@ -1886,8 +2064,8 @@ INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('5', '小王', '1');
 ### 11.3、按照结果嵌套处理
 
 ~~~xml
-<!-- 按结果嵌套查询 -->
-<select id="findAllTeachers" resultType="Teacher">
+
+<select id="findAllTeachers" resultType="POJO.Teacher">
     select * from teacher
 </select>
 
@@ -1897,6 +2075,7 @@ INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('5', '小王', '1');
     where s.tid=t.id and t.id = #{id}
 </select>
 
+<!-- 按结果嵌套查询 Collection放在map里面 -->
 <resultMap id="TeacherAndStudents" type="Teacher">
     <result property="id" column="tid"/>
     <result property="name" column="tname"/>
