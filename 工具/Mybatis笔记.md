@@ -1226,6 +1226,70 @@ public interface UserMapper {
 >
 > 
 
+### 3.6、批处理插入：
+
+batchInsert速度最快，但是不能获得插入的数据的id，Sql太长了，有可能是服务器会被拒绝。
+
+```xml
+  <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO blog
+        VALUES
+            <foreach collection="list" item="item" index="index" separator=",">
+                (#{item.id},#{item.title},#{item.author},#{item.createTime},#{item.views})
+            </foreach>
+    </insert>
+<!--    &#45;&#45;             list是mybtais指定的的，外面传进来的, ,分割器就是我们插入的时候value(1,2,32),(12,23423,232)这里的分割器-->
+```
+
+结果：
+
+```java
+    @Test
+    public void testBatch(){
+//        批处理
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        sqlSession.getConnection();
+        ArrayList<Blog> blogs = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            Blog blog = new Blog();
+            blog.setId(i+19);
+            blog.setTitle("测试"+i);
+            blog.setAuthor("测试"+i);
+            blog.setViews(i+19);
+            blog.setCreateTime(new Date());
+            blogs.add(blog);
+        }
+        sqlSession.insert("BlogMapper.batchInsert",blogs);
+
+        sqlSession.commit();
+        HashMap<String, Object> map = new HashMap<>();
+//        map.put("title","yes");
+        List<Blog> blogss = sqlSession.selectList("BlogMapper.findBlogsByBlog",map);
+        for (Blog blog : blogss) {
+            System.out.println("blog = " + blog);
+        }
+    }
+```
+
+```sh
+mysql> select * from blog
+    -> ;
++----+-------+---------+---------------------+-------+
+| id | title | author  | create_time         | views |
++----+-------+---------+---------------------+-------+
+| 1  | yes   | sas     | 2020-12-12 00:00:00 |    12 |
+| 2  | ysa   | sadsada | 2020-12-12 00:00:00 |    12 |
+| 19 | 测试0 | 测试0   | 2023-03-30 06:41:38 |    19 |
+| 20 | 测试1 | 测试1   | 2023-03-30 06:41:38 |    20 |
+| 21 | 测试2 | 测试2   | 2023-03-30 06:41:38 |    21 |
+| 22 | 测试3 | 测试3   | 2023-03-30 06:41:38 |    22 |
+| 23 | 测试4 | 测试4   | 2023-03-30 06:41:38 |    23 |
++----+-------+---------+---------------------+-------+
+7 rows in set (0.00 sec)
+```
+
+
+
 ## 4、配置解析
 
 ### 4.1、核心配置文件
@@ -1403,6 +1467,64 @@ Mapper Registry
 * 连接到数据库的一个线程，连接到连接池的一个请求
 * SqlSession 的实例不是线程安全的，因此是不能被共享的，所以它的最佳的作用域是请求或**方法作用域** 
 * 用完之后赶紧关闭，否则资源会被占用
+
+### 4.9、配置连接池 - c3p0
+
+
+
+
+
+```java
+//c3p0DataSourceFactory.java
+public class c3p0DataSourceFactory extends UnpooledDataSourceFactory {
+    public c3p0DataSourceFactory() {
+        //this的这个是父类提供的，Combo是c3p0，就是有c3p0，其他的数据源也是继承这个Unpoll这个数据源
+        this.dataSource = new ComboPooledDataSource();
+    }
+}
+```
+
+```xml
+
+<dependency>
+    <groupId>com.mchange</groupId>
+    <artifactId>c3p0</artifactId>
+    <version>0.9.5.5</version>
+</dependency>
+```
+
+更改mybatis-config.xml
+
+```xml
+<dataSource type="dataSource.c3p0DataSourceFactory">
+<!--                注意：这些属性的名称和c3p0的要求不符-->
+                <property name="driverClass" value="com.mysql.cj.jdbc.Driver"/>
+                <!--                下面的mybatis指的就是连接的哪一个database，这里是mybatis数据库-->
+                <!--                <property name="url" value="jdbc:mysql:///mybatis?useSSL=true&amp;userUnicode=true&amp;characterEncoding=UTF-8"/>-->
+                <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/mybatis?characterEncoding=utf8&amp;useSSL=false&amp;serverTimezone=UTC&amp;rewriteBatchedStatements=true
+"/>
+                <property name="user" value="root"/>
+                <property name="password" value="root"/>
+                <property name="initialPoolSize" value="5"/>
+            </dataSource>
+```
+
+调用测试：
+
+```java
+    @Test
+    public void testDynamicSql(){
+//        在LabPc可以测试这个
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        sqlSession.getConnection();
+        HashMap<String, Object> map = new HashMap<>();
+//        map.put("title","yes");
+        List<Blog> blogs = sqlSession.selectList("BlogMapper.findBlogsByBlog",map);
+        for (Blog blog : blogs) {
+            System.out.println("blog = " + blog);
+        }
+    }
+```
 
 ## 6、日志
 
@@ -1770,6 +1892,22 @@ select * from table_name limit startindex,pagesize;
 [UserMapper.selectPage]-==> Parameters: 2(Integer)
 [UserMapper.selectPage]-<==      Total: 2
 ```
+
+
+
+SQL Server 2000"
+
+```sql
+select top 3 * from table
+where 
+	id not in
+	(select top 15 id from table);
+	
+```
+
+> 就是查询不在前15条数据的前3条数据，也就是第16条数据后面的三条数据
+
+Sql server 2012后面就是使用offest
 
 
 

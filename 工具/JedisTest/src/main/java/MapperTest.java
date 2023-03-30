@@ -89,6 +89,7 @@ public class MapperTest {
 
     @Test
     public void testDynamicSql(){
+//        在LabPc可以测试这个
         SqlSession sqlSession = MyBatisUtils.getSqlSession();
         sqlSession.getConnection();
         HashMap<String, Object> map = new HashMap<>();
@@ -107,4 +108,6 @@ public class MapperTest {
         Teacher teachers = sqlSession.selectOne("OneToMany.getTeacherByid");
         System.out.println("teachers = " + teachers);
     }
+
+
 }
