@@ -1682,9 +1682,96 @@ select * from table_name limit startindex,pagesize;
    }
    ~~~
 
-### 7.3、分页插件
+### 7.3、分页插件 PageHelper
 
 [PageHelper文档](https://pagehelper.github.io/docs/)
+
+在 pom.xml 中添加PageHelper以及jsqlparser(pagehelper调用了jsqlparser，自动解析sql)依赖：
+
+```xml
+<dependency>
+  <groupId>com.github.pagehelper</groupId>
+  <artifactId>pagehelper</artifactId>
+  <version>5.1.10</version>
+</dependency>
+<dependency>
+  <groupId>com.github.jsqlparser</groupId>
+  <artifactId>jsqlparser</artifactId>
+  <version>2.0</version>
+</dependency>
+```
+
+在mybatis-config.xml增加plugin配置
+
+```xml
+    <plugins>
+        <plugin interceptor="com.github.pagehelper.PageInterceptor">
+            <property name="helperDialect" value="mysql"/>
+<!--            这里是不同的数据库，分页的方式是不同的，mysql是limit分野。所以这里设置helperDialect-->
+            <property name="reasonable" value="true"/>
+        </plugin>
+    </plugins>
+```
+
+> 1. `reasonable`：分页合理化参数，默认值为`false`。当该参数设置为 `true` 时，`pageNum<=0` 时会查询第一页， `pageNum>pages`（超过总数时），会查询最后一页。默认`false` 时，直接根据参数进行查询。
+> 2. `helperDialect`：分页插件会自动检测当前的数据库链接，自动选择合适的分页方式。 你可以配置`helperDialect`属性来指定分页插件使用哪种方言。配置时，可以使用下面的缩写值：
+>    `oracle`,`mysql`,`mariadb`,`sqlite`,`hsqldb`,`postgresql`,`db2`,`sqlserver`,`informix`,`h2`,`sqlserver2012`,`derby`
+>    **特别注意：**使用 SqlServer2012 数据库时，需要手动指定为 `sqlserver2012`，否则会使用 SqlServer2005 的方式进行分页。
+
+
+
+比如设置查询的mapper：
+
+```xml
+<select id="selectPage" resultType="POJO.User">
+    select * from user where id &lt; 5
+</select>
+```
+
+> &lt ; 为转意符
+
+```java
+    @Test
+//    测试分页查询
+    public void testPageHelper(){
+        SqlSession sqlSession = null;
+        try {
+            sqlSession = MyBatisUtils.getSqlSession();
+            Connection connection = sqlSession.getConnection();
+            System.out.println("connection = " + connection);
+            sqlSession.commit();
+            UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+            PageHelper.startPage(1,2);
+//            范型指名为User对象
+            Page<User> page = (Page) mapper.selectPage();
+            System.out.println(page.getPages());
+            List<User> users = page.getResult();
+//            getResult是获取当前页面的结果
+            for (User user : users) {
+                System.out.println("user = " + user);
+            }
+        } catch (Exception e) {
+            if (sqlSession!=null)
+                sqlSession.rollback();
+            throw new RuntimeException(e);
+        }
+    }
+```
+
+运行结果：
+
+注意看他自动增加了查询，先查了`count(*)`
+
+```sh
+[UserMapper.selectPage_COUNT]-==>  Preparing: SELECT count(0) FROM user WHERE id < 5
+[UserMapper.selectPage_COUNT]-==> Parameters: 
+[UserMapper.selectPage_COUNT]-<==      Total: 1
+[UserMapper.selectPage]-==>  Preparing: select * from user where id < 5 LIMIT ?
+[UserMapper.selectPage]-==> Parameters: 2(Integer)
+[UserMapper.selectPage]-<==      Total: 2
+```
+
+
 
 ## 8、注解开发
 

@@ -8,14 +8,14 @@
 <!--    </select>-->
 
 <!--    resultMap来统计结果-->
-<!--    <resultMap id="rmUser" type="POJO.User">-->
-<!--        <id property="id" column="id"/>-->
-<!--        <result property="name" column="name"/>-->
-<!--        <result property="password" column="password"/>-->
-<!--    </resultMap>-->
-<!--    <select id="selectAllMap" resultMap="rmUser">-->
-<!--        select * from user-->
-<!--    </select>-->
+    <resultMap id="rmUser" type="POJO.User">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="password" column="password"/>
+    </resultMap>
+    <select id="selectAllMap" resultMap="rmUser">
+        select * from user
+    </select>
 
     <insert id="insert" parameterType="POJO.User">
         INSERT INTO User
@@ -26,5 +26,9 @@
 -- 这里是mysql自带的函数
         </selectKey>
     </insert>
+
+    <select id="selectPage" resultType="POJO.User">
+        select * from user where id &lt; 5
+    </select>
 
 </mapper>
