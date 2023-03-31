@@ -18,7 +18,7 @@
     </plugins>
     <!--环境-->
 <!--    deafult其实就是默认用这个dev开头的环境配置，还可以新建别的id，可以增加多个环境信息，-->
-    <environments default="labdevelopment">
+    <environments default="development">
         <environment id="development">
             <!--事务管理-->
             <transactionManager type="JDBC"/>
@@ -62,6 +62,11 @@
         <mapper resource="mappers/mapper.xml"/>
         <mapper resource="mappers/BlogMapper.xml"/>
         <mapper resource="mappers/OneToManyMapper.xml"/>
+<!--&lt;!&ndash;        注解开发方法1 放一个类的名字&ndash;&gt;-->
+<!--        <mapper class="DAO.blogDAO"/>-->
+<!--        -->
+<!--        注解开发方法2 直接放一个包名-->
+        <package name="DAO"/>
     </mappers>
 
 

@@ -40,5 +40,4 @@
             </foreach>
     </insert>
 <!--    &#45;&#45;             list是mybtais指定的的，外面传进来的, ,分割器就是我们插入的时候value(1,2,32),(12,23423,232)这里的分割器-->
-    <delete id="batch"
 </mapper>

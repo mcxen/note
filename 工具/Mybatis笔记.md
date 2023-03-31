@@ -1936,30 +1936,99 @@ Sql server 2012后面就是使用offest
 - 面向过程是指，我们考虑问题时，以一个具体的流程(事务过程)为单位，考虑它的实现。
 - 接口设计与非接口设计是针对复用技术而言的，与面向对象(过程)不是一个问题，更多的体现就是对系统整体的架构
 
-### 8.2、使用注解开发
+### 8.2、使用注解开发｜*｜
 
-1. 注解直接在接口的方法上实现
+注解开发，构建DAO接口来开发。注解开发不需要Mapper文件了
 
-   ~~~java
-   @Select("select * from user")
-   List<User> getUsers();
-   ~~~
+1、实现interface DAO
 
-2. 绑定接口
+```java
+public interface blogDAO {
+    @Select("select * from blog")
+    public List<Blog> selectAll();
+		//注解开发，select语句写在                                                                            注解里，不需要xml文件了
+    @Select("select * from blog where id < #{max}")
+    public List<Blog> selectAllUnder(@Param("max") int max);
+    
+  
+  @Insert("INSERT INTO blog(id,title,author,create_time,views) values(#{id},#{title},#{author},#{createTime},#{views})")
+    @SelectKey(statement = "select last_insert_id()", before = false, keyProperty = "id",resultType = Integer.class)
+    public int insertBlog(Blog blog);
+}
+```
 
-   ~~~xml
-   <mappers>
-       <mapper class="site.whatsblog.dao.UserMapper"/>
-   </mappers>
-   ~~~
+2、mybatis-config 配置注解开发，调用接口
 
-3. 测试
+```xml
+    <mappers>
+        <mapper resource="mappers/mapper.xml"/>
+        <mapper resource="mappers/BlogMapper.xml"/>
+        <mapper resource="mappers/OneToManyMapper.xml"/>
+<!--&lt;!&ndash;        注解开发方法1 放一个类的名字&ndash;&gt;-->
+<!--        <mapper class="DAO.blogDAO"/>-->
+<!--        -->
+<!--        注解开发方法2 直接放一个包名-->
+        <package name="DAO"/>
+    </mappers>
+```
 
-本质：反射机制
+3、测试结果
 
-底层：动态代理
+```java
+    @Test
+    public void testAnno(){
+//        测试注解开发
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        sqlSession.getConnection();
+//        这里的insert select之类的都是基于xml方式的调用
+        blogDAO blogdao = sqlSession.getMapper(blogDAO.class);
+        List<Blog> blogs = blogdao.selectAllUnder(5);
+        for (Blog blog : blogs) {
+            System.out.println("blog = " + blog);
+        }
+    }
+```
 
-需要知道：**MyBatis详细的执行流程！**
+
+
+```sh
+21:20:05.143 [main] DEBUG o.a.i.t.jdbc.JdbcTransaction - Setting autocommit to false on JDBC Connection [com.mysql.cj.jdbc.ConnectionImpl@5542c4ed]
+21:20:05.168 [main] DEBUG DAO.blogDAO.selectAllUnder - ==>  Preparing: select * from blog where id < ?
+21:20:05.206 [main] DEBUG DAO.blogDAO.selectAllUnder - ==> Parameters: 5(Integer)
+21:20:05.270 [main] DEBUG DAO.blogDAO.selectAllUnder - <==      Total: 2
+blog = Blog{id=1, title='yes', author='sas', createTime=null, views=12}
+blog = Blog{id=2, title='ysa', author='sadsada', createTime=null, views=12}
+```
+
+
+
+z注解插入：
+
+```java
+@Test
+    public void testAnno(){
+//        测试注解开发
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        sqlSession.getConnection();
+//        这里的insert select之类的都是基于xml方式的调用
+
+        blogDAO blogdao = sqlSession.getMapper(blogDAO.class);
+        List<Blog> blogs = blogdao.selectAllUnder(5);
+        for (Blog blog : blogs) {
+            System.out.println("blog = " + blog);
+        }
+
+        Blog blog = new Blog();
+        blog.setId(93);
+        blog.setTitle("测试");
+        blog.setAuthor("测试");
+        blog.setViews(19);
+        blog.setCreateTime(new Date());
+        int insertResult = blogdao.insertBlog(blog);
+        sqlSession.commit();
+        System.out.println("insertResult = " + insertResult);
+    }
+```
 
 ## 9、Lombook
 
