@@ -434,7 +434,7 @@ public class MyBatisUtils {
             throw new ExceptionInInitializerError(e);//在类初始化的时候就抛出异常。
         }
     }
-//    设置为静态，直接类调用openSession
+   //    设置为静态，直接类调用openSession
     public static SqlSession openSession(){
         SqlSession sqlSession = sqlSessionFactory.openSession();
         return sqlSession;
