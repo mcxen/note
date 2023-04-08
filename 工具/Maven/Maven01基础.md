@@ -1,12 +1,3 @@
----
-title: Maven 基础
-date: 2021-12-20 18:44:18
-permalink: /pages/f5fbac/
-categories:
-  - Maven
-tags:
-  - Maven
----
 # Maven 基础
 
 ## Maven 下载
@@ -59,7 +50,7 @@ tags:
 
 ### 坐标
 
-![05](https://cdn.staticaly.com/gh/xustudyxu/image-hosting@master/studynotes/Maven/images/01/05.png)
+![05](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/05.png)
 
 + 什么是坐标?
 
