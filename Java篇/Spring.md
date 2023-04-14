@@ -259,7 +259,11 @@ public void test(){
 
 + `ClassPathXmlApplicationContext`：加载**类路径**里的配置文件
 
-> 原来如此，ClassPath 就是类的路径，FileSys就是文件系统，
+> 原来如此，ClassPath 就是类的路径，FileSys就是文件系统，**ClassPath还可以加载字符串数组的方式加载多个配置文件。**
+>
+> 路径表达式
+>
+> 
 
 + `FileSystemXmlApplicationContext`：加载文件系统里的配置文件
 
@@ -267,19 +271,27 @@ public void test(){
 
 ### bean标签的id和name的配置
 
-+ `id`：使用了约束中的唯一约束。不能有特殊字符
-+ `name`：没有使用约束中的唯一约束（理论上可以重复，但是实际开发中不能出现）。可以有特殊字符
++ `id`：使用了约束中的唯一约束。不能有特殊字符**（默认）**
++ `name`：没有使用约束中的唯一约束（理论上可以重复，但是实际开发中不能出现），可以有特殊字符
+
+> name，可以这么搞
+>
+> ```xml
+> <bean id="dog1,dog2" class="entity.Dog"></bean>
+> ```
+>
+> 然后在context中`getBean("dog1");`也可以`getBean("dog2");`也可以，但是这样没有意义，设置多个bean标识，没有意义，所以我们一般就设置id。
 
 ### bean的生命周期的配置
 
 + `init-method`：bean被初始化的时候执行的方法
 + `destroy-method`：bean被销毁的时候执行的方法，前提是bean是单例的，工厂关闭
 
-### bean的作用范围的配置
+### bean的作用范围的配置-scope
 
 + `scope`：bean的作用范围
-  + **singleton：单例模式，默认的作用域。**
-  + **prototype：多例模式。**
+  + **singleton：单例模式，默认的作用域。**getBean就是唯一的。
+  + **prototype：多例模式。** getBean就会得到新的。
   + request：应用在Web项目中，Spring创建这个类后，将这个类存入到request范围中。
   + session：应用在Web项目中，Spring创建这个类后，将这个类存入到session范围中。
   + globalsession：应用在Web项目中，必须在porlet环境下使用。但是如果没有这种环境，相当于session。
@@ -443,12 +455,12 @@ dog = Dog{name='HAVAL', length=5}
 
 #### 静态工厂实例化方式
 
+工厂模式可以隐藏一些生成对象的细节。
+
+
+
 ```java
-/**
- *
- * @author Chen Rui
- * @version 1.0
- **/
+//car实体
 public class Car {
     private String name;
     private Double price;
@@ -472,22 +484,18 @@ public class Car {
 ```
 
 ```java
-package learningspring.ioc.examples.demo3;
-
-/**
- *
- * @author Chen Rui
- * @version 1.0
- **/
+//car工厂
 public class CarFactory {
 
     public static Car createCar(){
+      //这里是static
         return new Car();
     }
 }
 ```
 
 ```xml
+
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -495,7 +503,7 @@ public class CarFactory {
 
     <!-- Spring Bean的实例化方式-->
     <!-- 静态工厂的方式 -->
-    <bean id="car" class="learningspring.ioc.examples.demo3.CarFactory" factory-method="createCar"/>
+    <bean id="car" class="CarFactory" factory-method="createCar"/>
 
 </beans>
 ```
@@ -504,13 +512,10 @@ public class CarFactory {
 
 #### 实例工厂实例化方式
 
+IOC容器堆Dog进行实例化
+
 ```java
-/**
- * //TODO
- *
- * @author Chen Rui
- * @version 1.0
- **/
+
 public class Dog {
 
     private String name;
@@ -544,14 +549,8 @@ public class Dog {
 ```
 
 ```java
-/**
- * //TODO
- *
- * @author Chen Rui
- * @version 1.0
- **/
-public class DogFactory {
 
+public class DogFactory {
     public Dog createDog(){
         return new Dog();
     }
@@ -567,16 +566,16 @@ public class DogFactory {
     <!-- Spring Bean的实例化方式-->
 
     <!-- 实例工厂的方式 -->
-    <bean id="dogFactory" class="learningspring.ioc.examples.demo3.DogFactory"/>
+    <bean id="dogFactory" class="DogFactory"/>
     <bean id="dog2" factory-bean="dogFactory" factory-method="createDog"/>
 </beans>
 ```
 
-
+> 最大区别就是static和不带static，其他区别不大。
 
 ### Spring的属性注入方式
 
-#### 构造方法方式的属性注入
+#### 带参构造方法方式的属性注入
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -614,7 +613,7 @@ public class DogFactory {
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-    <!--构造方法方式的属性注入-->
+    <!--带参构造方法方式的属性注入-->
     <bean id="car" class="learningspring.ioc.examples.demo3.Car">
         <constructor-arg name="name" value="BWM"/>
         <constructor-arg name="price" value="800000"/>
@@ -802,7 +801,7 @@ ApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext1
 
 # Spring开发中的常用注解
 
-## @Component
+## @Component-衍生注解：Controller,Service,Respository
 
 该注解在类上使用，使用该注解就相当于在配置文件中配置了一个Bean，例如：
 
@@ -819,7 +818,7 @@ public class UserDaoImpl implements UserDao {
 相当于以下内容：
 
 ```xml
-<bean id="userDao" class="learningspring.ioc.examplesannotation.demo1.UserDaoImpl"></bean>
+<bean id="userDao" class="UserDaoImpl"></bean>
 ```
 
 该注解有3个衍生注解：
@@ -884,7 +883,7 @@ public class Dog {
 
 `@Value` 通常用于普通属性的注入。
 
-`@Autowired` 通常用于为对象类型的属性注入值，但是按照**类型**完成属性注入
+`@Autowired` 通常用于为**对象类型的属性注入值**，但是按照**类型**完成属性注入
 
 习惯是按照**名称**完成属性注入，所以必须让`@Autowired`注解和`@Qualifier`注解**一同使用**。
 
@@ -892,6 +891,7 @@ public class Dog {
 
 ```java
 @Service("userService")
+//这是等价于Component
 public class UserServiceImpl implements UserService {
 
     @Autowired
