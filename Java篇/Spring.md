@@ -801,6 +801,28 @@ ApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext1
 
 # Spring开发中的常用注解
 
+
+
+![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6d562a58242d4f479a2ea42407be6336~tplv-k3u1fbpfcp-zoom-in-crop-mark:4536:0:0:0.awebp?)
+
+三类：
+
+- 组件类型注解
+
+- 自动装配注解
+
+- 元数据注解
+
+
+
+>  使用注解需要开启组件扫描：设置XML配置，组件扫描ComponentScan的basePackage, 比如
+>
+> `<context:component-scan base-package='tech.pdai.springframework'>`,
+>
+>  或者`@ComponentScan("tech.pdai.springframework")`注解，或者 `new AnnotationConfigApplicationContext("tech.pdai.springframework")`指定扫描的basePackage.
+
+
+
 ## @Component-衍生注解：Controller,Service,Respository
 
 该注解在类上使用，使用该注解就相当于在配置文件中配置了一个Bean，例如：
@@ -827,7 +849,9 @@ public class UserDaoImpl implements UserDao {
 + **@Service：修饰Service层类**
 + **@Repository：修饰Dao层类**
 
-## @Value
+## @Value-属性注入
+
+>  意义：其实是可以从配置文件中导入，所以显得比直接赋值更加灵活
 
 该注解用于给属性注入值，有2种用法
 
@@ -835,14 +859,6 @@ public class UserDaoImpl implements UserDao {
 + 如果没有set方法，则需要将该注解添加到属性上
 
 ```java
-/**
- * Value 注解用于属性注入
- * 当类有提供set方法时添加在set方法上
- * 如果没有，则添加到属性上
- *
- * @author Chen Rui
- * @version 1.0
- **/
 
 @Component("dog")
 public class Dog {
@@ -879,7 +895,56 @@ public class Dog {
 
 ```
 
-## @Autowired
+进阶用法：
+
+使用方式有:
+
+- @Value(“常量”)  常量,包括字符串,网址,文件路径等
+- @Value(“${}”` : default_value`)    执行SpEl表达式，读取配置文件
+- @Value(“#{}”`? : default_value`)    读取注入bean的属性
+
+> 说明:
+>
+> 读取配置文件方式中, 可添加默认值,即前面变量不存在或读取失败时,时候默认值.
+>
+> 读取注入bean属性,也可添加默认值,效果同上述一样.
+>
+> #### 注入SPEL表达式结果
+>
+> ```java
+> @Value("#{ T(java.lang.Math).random() * 100.0 }")
+> private double randomNumber; //注入表达式结果
+> ```
+>
+> - `@Value`支持SPEL表达式，它的具体用法参考：[cloud.tencent.com/developer/a…](https://link.juejin.cn?target=https%3A%2F%2Fcloud.tencent.com%2Fdeveloper%2Farticle%2F1676200)
+>
+> 
+>
+> #### 注入系统属性
+>
+> ```java
+> @Value("#{systemProperties['os.name']}")
+>  private String systemPropertiesName; // 注入操作系统属性
+> ```
+>
+> - 可以通过`System.getProperties()`方法获取操作系统有哪些属性
+>
+> 
+>
+> #### 注入其他Bean的属性
+>
+> ```
+> @Value("#{person.birth}")
+>  private Date personBirth;
+> ```
+>
+> - person是其他bean的名称
+
+还可以使用properties。
+
+## @Autowired-自动装配对象
+
+
 
 `@Value` 通常用于普通属性的注入。
 
@@ -887,36 +952,166 @@ public class Dog {
 
 习惯是按照**名称**完成属性注入，所以必须让`@Autowired`注解和`@Qualifier`注解**一同使用**。
 
-（如果没有`@Qualifier`注解，修改以下例子中`@Repository`注解的值，也能编译成功）
+
+
+我们可以在**类的属性、setter方法以及构造函数**上使用*@Autowired* 注解。
+
+###  在属性上使用*@Autowired*
+
+*@Autowired*可以直接应用到类的属性上，即使该属性的类型不是public、同时也没有为其定义setter方法，也不会影响自动装配的功能。
+
+为了演示自动装配功能，我们首先定义一个*FooFormatter* bean:
 
 ```java
-@Service("userService")
-//这是等价于Component
-public class UserServiceImpl implements UserService {
+@Component
+public class FooFormatter {
+    public String format() {
+        return "foo";
+    }
+}
+```
 
+接着便可以在属性上应用`@Autowired`来完成自动装配：
+
+```java
+@Component
+public class FooService {  
     @Autowired
-    @Qualifier("userDao")
-    private UserDao userDao;
-
-    @Override
-    public void save() {
-        System.out.println("UserServiceImpl.save");
-        userDao.save();
-    }
+    private FooFormatter fooFormatter;
 }
 ```
+
+此时，Spring将自动为`FooService`中的`FooFormatter`属性提供`fooFormatter` bean。我们也可以认为是自动(auto)将`FooFormatter`与`FooFormatter`连接(wire)了起来，所以此项功能叫做Autowired。
+
+### 在setter方法上使用*@Autowired*
+
+还可以在setter方法上使用*@Autowired*，比如3.1中的代码还可改写为：
 
 ```java
-@Repository("userDao")
-public class UserDaoImpl implements UserDao {
-    @Override
-    public void save() {
-        System.out.println("UserDaoImpl.save");
+@Component
+public class FooService {
+    private FooFormatter fooFormatter;
+    @Autowired
+    public void setFooFormatter(FooFormatter fooFormatter) {
+        this.fooFormatter = fooFormatter;
     }
 }
 ```
 
-## @Resource
+与在属性上使用*@Autowired*来完成自动装配相比较，在setter上使用*@Autowired*没有什么明显的不 。当我们在装配某个属性的同时还希望执行某些逻辑操作时，往往会这么做。
+
+
+
+### 在构造函数上使用*@Autowired*-最佳
+
+最后，还可以在构造函数上使用*@Autowired*，这也是官方推荐的一种使用方式，比如3.2的代码还可以改写为：
+
+```java
+@Component
+public class FooService {
+    private FooFormatter fooFormatter;
+    @Autowired
+    public FooService(FooFormatter fooFormatter) {
+        this.fooFormatter = fooFormatter;
+    }
+}
+```
+
+值得注意的是，在较新的Spring版本中完全可以省略在构造函数上声明的*@Autowired*注解。也就是说以下代码同样可以完成自动装配功能：
+
+```java
+@Component
+public class FooService {
+    private FooFormatter fooFormatter;
+
+    public FooService(FooFormatter fooFormatter) {
+        this.fooFormatter = fooFormatter;
+    }
+}
+```
+
+### @Qualifier
+
+qualifier译为限定符、限定语。
+
+@qualifier可以解决多个对象实现同一个接口问题，比如我们当前有两个实现了*Message* 接口的bean:
+
+```java
+public interface Message {
+    String hello();
+}
+
+@Component
+public class FooMessage implements Message {
+
+    @Override
+    public String hello() {
+        return "foo";
+    }
+}
+
+@Component
+public class BarMessage implements Message {
+
+    @Override
+    public String hello() {
+        return "bar";
+    }
+}
+```
+
+此时若直接使用*@Autowired* 注解尝试注入*Message*:
+
+```java
+@Service
+public class MessageService {
+    @Autowired
+    Message message;
+}
+```
+
+由于*FooMessage* 和*BarMessage*都实现了*Message*接口，所以Spring容器中现在有两个同样是实现了*Message*接口的bean，此时若使用*@Autowired* 尝试注入*Message*, Spring便不知道应该是注入*FooMessage* 还是*BarMessage*，所以发生NoUniqueBeanDefinitionException异常。
+
+NoUniqueBeanDefinitionException的字面意思也很好的说明了这个问题：定义的bean不唯一。
+
+当同一类型存在多个bean时，可以使用*@Qualifier* 来显示指定bean的名称，从而解决了Spring按类型注入时不知道应该注入哪个bean的尴尬情况。
+
+```java
+@Service
+public class MessageService {
+    @Autowired
+    @Qualifier("fooMessage")
+    
+    Message message;
+}
+```
+
+默认情况下Spring自动为每个bean添加一个唯一的名称，该名称的命名原则为：将类的名称由大驼峰变为小驼峰。所以*FooMessage* 的bean名为：fooMessage；*BarMessage* 的bean名为: barMessage。除此以外，我们还可以自定义bean的名称，比如将*BarMessage* 的bean名称定义为customBarMessage：
+
+```java
+@Component("customBarMessage")
+public class BarMessage implements Message {
+```
+
+*@Qualifier* 将根据声明的fooFormatter来完成对Formatter的注入。此时*FooService* 中被注入的*Formatter* 为*FooFormatter* 而非*BarFormatter* 。
+
+也可以加一个@Primary，
+
+```java
+@Component
+@Primary
+public class FooMessage implements Message {
+
+    @Override
+    public String hello() {
+        return "foo";
+    }
+}
+```
+
+就锁定了这个FooMessage
+
+## @Resource自动装配对象
 
 该注解也可以用于属性注入，通常情况下使用**@Resource注解**，默认按照**名称**完成属性注入。
 
@@ -925,29 +1120,17 @@ public class UserDaoImpl implements UserDao {
 `@Resource`有两个重要的属性：`name`和`type`，而Spring将`@Resource`注解的`name`属性解析为bean的名字，而`type`属性则解析为bean的类型。所以，如果使用`name`属性，则使用byName的自动注入策略，而使用`type`属性时则使用byType自动注入策略。如果既不制定`name`也不制定`type`属性，这时将通过反射机制使用byName自动注入策略。
 
 ```java
-/**
- * UserController
- *
- * @author Chen Rui
- * @version 1.0
- **/
 @Controller("userController")
 public class UserController {
     
     @Resource(name = "userService")
+    //上也可以不写userService，写的时候的原因是防止这个属性的名字出现奇怪的东西
     private UserService userService; 
     
 }
 ```
 
 ```java
-/**
- * UserService实现类
- *
- * @author Chen Rui
- * @version 1.0
- **/
-
 @Service("userService")
 public class UserServiceImpl implements UserService {
 
@@ -964,12 +1147,6 @@ public class UserServiceImpl implements UserService {
 ```
 
 ```java
-/**
- * UserDao实现类
- * @author Chen Rui
- * @version 1.0
- **/
-
 @Component("userDao")
 public class UserDaoImpl implements UserDao {
     @Override
@@ -982,7 +1159,7 @@ public class UserDaoImpl implements UserDao {
 
 ## @PostConstruct 和 @PreDestroy
 
-`@PostConstruct`和`@PreDestroy`注解，前者为Bean生命周期相关的注解，在配置文件中，使用到了i`nit-method`参数来配置Bean初始化之前要执行的方法，该注解也是同样的作用。将该注解添加到想在初始化之前执行的目标方法上，就可以实现该功能，而后者则是Bean生命周期中`destroy-method`目标方法，使用该注解在指定方法上，即可实现在Bean销毁之前执行该方法。
+`@PostConstruct`和`@PreDestroy`注解，前者为Bean生命周期相关的注解，在配置文件中，使用到了`<init-method>`参数来配置Bean初始化之前要执行的方法，该注解也是同样的作用。将该注解添加到想在初始化之前执行的目标方法上，就可以实现该功能，而后者则是Bean生命周期中`<destroy-method>`目标方法，使用该注解在指定方法上，即可实现在Bean销毁之前执行该方法。
 
 ```java
 /**
@@ -1024,12 +1201,6 @@ Bean的作用范围的注解，默认为singleton（单例）
 + globalsession
 
 ```java
-/**
- * UserDao实现类
- * @author Chen Rui
- * @version 1.0
- **/
-
 @Component("userDao")
 @Scope // 默认为singleton
 public class UserDaoImpl implements UserDao {
@@ -1065,6 +1236,42 @@ public class UserDaoImpl implements UserDao {
 XML可以适用于任何场景，就算Bean来自第三方也可以适用XML方式来管理。而注解方式就无法在此场景下使用，注解方式可以让开发的过程更加方便，但前提是Bean由自己维护，这样才能在源码中添加注解。
 
 所以可以使用**两者混合**的方式来开发项目，使用**XML配置文件来管理Bean，使用注解来进行属性注入**
+
+
+
+## Java Config核心注解
+
+![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5448c2d20ba74c48bba766a507f5530b~tplv-k3u1fbpfcp-zoom-in-crop-mark:4536:0:0:0.awebp?)
+
+### @Configuration
+
+@Configuration用于定义配置类，可替换xml配置文件，被注解的类内部包含有一个或多个被@Bean注解的方法，这些方法将会被AnnotationConfigApplicationContext或AnnotationConfigWebApplicationContext类进行扫描，并用于构建bean定义，初始化Spring容器。
+
+即：
+
+```java
+public static void main(String[] args) {
+    // @Configuration注解的spring容器加载方式，用AnnotationConfigApplicationContext替换ClassPathXmlApplicationContext
+    ApplicationContext context = new AnnotationConfigApplicationContext(TestConfiguration.class);
+    //获取bean
+    TestBean tb = (TestBean) context.getBean("testBean");
+    tb.sayHello();
+}
+```
+
+
+
+注意：@Configuration注解的配置类有如下要求：
+
+- @Configuration不可以是final类型；
+- @Configuration不可以是匿名类；
+- 嵌套的@Configuration必须是静态类。
+
+@Bean标注在方法上(返回某个实例的方法)，等价于spring的xml配置文件中的，作用为：注册bean对象
+
+@ComponentScan
+
+
 
 # Spring AOP
 
@@ -1103,7 +1310,7 @@ public class UserDaoImpl implements UserDao {
 }
 ```
 
-用这样的方法来实现，弊端就是只能在这一个类中使用，通常一个项目中有许多的方法都可能需要执行权限校验，此时就要在每个类中编写同样的代码，所以该方法并不科学。
+用这样的方法来实现，弊端就是只能在这一个类中使用，通常一个项目中有许多的方法都可能需要执行权限校验，**此时就要在每个类中编写同样的代码，所以该方法并不科学。**
 
 此时就有了一个更好的方法，即**纵向继承**。
 
@@ -1131,11 +1338,11 @@ public class UserDaoImpl extends BaseDao implements UserDao{
 
 此时就只需要维护`BaseDao`中的一份代码就可以，大大减轻了工作量，提高了效率。
 
-但AOP的思想更高一步，不采用纵向继承，而采用**横向抽取**来取代
+但AOP的思想更高一步，**不采用纵向继承父类对象的方法**，而采用**横向抽取**来取代
 
 ```java
 public class UserDaoImpl implements UserDao{
-    @Override
+    @Override 
     public void save(){
         // 保存到数据库
     }

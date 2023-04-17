@@ -272,7 +272,7 @@ XML Schema样例:
 - **<sequence></sequence>标签是当子节点必须按照顺序写时使用，类似于DTD中的<!ELEMENT employee （name,age ,salary,department）>**
 - 数据范围的用法:
 
-```
+```xml
 <element name="age">
 	<simpleType>
 	    <restriction base="integer">
@@ -291,7 +291,11 @@ XML Schema样例:
 
 - 将XML Schema文件与XML文件关联:在根节点处**：**
 
-**<teaching-plan xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="plan.xsd">**
+```xml
+<teaching-plan xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="plan.xsd">
+```
+
+
 
 ## java操作xml
 
