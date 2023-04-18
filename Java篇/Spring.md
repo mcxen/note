@@ -1,5 +1,9 @@
 # Spring 基础笔记
 
+2023-04-18 20:35 华科大LAB 多雨🌧️  - Spring基础完结🎉
+
+
+
 # Spring简介
 
 ![image](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/1745215-20200715181123141-722382173.png)
@@ -1351,14 +1355,29 @@ public class UserDaoImpl implements UserDao{
 
 横向抽取机制实质上就是**代理机制**，通过创建`UserDaoImpl`类的代理类，通过代理类来调用权限校验的方法。
 
-## AOP底层实现原理
+## AOP底层实现-动态代理
+
+代理是设计模式的一种，代理类为委托类提供消息预处理，消息转发，事后消息处理等功能。Java中的代理分为三种角色： `代理类、委托类、接口`。
+
+为了保持行为的一致性，代理类和委托类通常会实现相同的接口，所以在访问者看来两者没有丝毫的区别。通过代理类这中间一层，能有效控制对委托类对象的直接访问，也可以很好地隐藏和保护委托类对象，同时也为实施不同控制策略预留了空间，从而在设计上获得了更大的灵活性。Java 动态代理机制以巧妙的方式近乎完美地实践了代理模式的设计理念。
+
+Java中的代理按照代理类生成时机不同又分为`静态代理`和`动态代理`：
+
+- **静态代理**：静态代理的特点是, 为每一个业务增强都提供一个代理类, 由代理类来创建代理对象. 下面我们通过静态代理来实现对转账业务进行身份验证.
+- **动态代理**：静态代理会为每一个业务增强都提供一个代理类, 由代理类来创建代理对象, 而动态代理并不存在代理类, 代理对象直接由代理生成工具动态生成.
+
+静态代理是自己手写proxy类，动态是自动生成proxy，运行时生成。
 
 AOP的实现使用了动态代理技术，动态代理分为两种
 
 + JDK动态代理：只能对实现了接口的类产生代理
 + Cglib动态代理（类似于javassist的第三方代理技术）：对没有实现接口的类产生代理对象，即生成子类对象。
 
+
+
 ### JDK动态代理
+
+JDK动态代理是使用 java.lang.reflect 包下的代理类来实现. **JDK动态代理动态代理必须要有接口.**
 
 #### JDK动态代理案例
 
@@ -1574,7 +1593,7 @@ public class AppTest {
 }
 ```
 
-到此就完成了在不改变`CalculatorImpl`类的源代码的情况下，实现对计算器的功能增加，实现了日志打印的功能。此时控制台的打印内容为
+到此就完成了在不改变`CalculatorImpl`类的源代码的情况下，**实现对计算器的功能增加，**实现了日志打印的功能。此时控制台的打印内容为
 
 ```
 Sun Mar 17 20:36:26 CST 2019: The method add begins with [10, 10]
@@ -1594,6 +1613,10 @@ res --> 1
 
 
 ### Cglib动态代理
+
+JDK动态代理必须要有接口, 但如果要代理一个没有接口的类该怎么办呢? 这时我们可以使用CGLIB动态代理. CGLIB动态代理的原理是生成目标类的子类, 这个子类对象就是代理对象, 代理对象是被增强过的.
+
+注意: 不管有没有接口都可以使用CGLIB动态代理, 而不是只有在无接口的情况下才能使用.
 
 #### Cglib动态代理案例
 
@@ -1698,9 +1721,40 @@ public class CalculatorProxy implements MethodInterceptor {
 
 ```
 
+
+
+| 动态代理         | cglib                                                        | jdk                                                          |
+| ---------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 是否提供子类代理 | 是                                                           | 否                                                           |
+| 是否提供接口代理 | 是                                                           | 是                                                           |
+| 区别             | 必须依赖于CGLib的类库，但是它需要类来实现任何接口代理的是指定的类生成一个子类，覆盖其中的方法 | 实现InvocationHandler，使用Proxy.newProxyInstance产生代理对象，被代理的对象必须要实现接口 |
+
+
+
+**Spring如何选择是用JDK还是cglib？**
+
+1、当bean实现接口时，会用JDK代理模式
+2、当bean没有实现接口，用cglib实现
+3、可以强制使用cglib（在spring配置中加入<aop:aspectj-autoproxy proxyt-target-class=”true”/>）
+
+如图：
+
+![image-20230417175542747](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230417175542747.png)
+
+
+
 ## Spring中的AOP实现——AspectJ
 
-### AOP开发中的相关术语
+```xml
+ <dependency>
+<!--            这是AOP的底层依赖。-->
+   <groupId>org.aspectj</groupId>
+   <artifactId>aspectjweaver</artifactId>
+   <version>1.9.7</version>
+</dependency>
+```
+
+### AspectJ开发中的相关术语
 
 ```java
 public class UserDao{
@@ -1723,7 +1777,184 @@ public class UserDao{
 - proxy(代理)：代理对象，被增强以后的代理对象
 - aspect(切面)：多个增强(advice)和多个切入点(pointcut)的组合
 
-### AspectJ的XML配置案例
+> ## AspectJ和Spring AOP的区别？
+>
+> 相信作为Java开发者我们都很熟悉Spring这个框架，在spring框架中有一个主要的功能就是AOP，提到AOP就往往会想到AspectJ，下面我对AspectJ和Spring AOP作一个简单的比较：
+>
+> ### Spring AOP
+>
+> 1、基于动态代理来实现，默认如果使用接口的，用JDK提供的动态代理实现，如果是方法则使用CGLIB实现
+>
+> 2、Spring AOP需要依赖IOC容器来管理，并且只能作用于Spring容器，使用纯Java代码实现
+>
+> 3、在性能上，由于Spring AOP是基于动态代理来实现的，在容器启动时需要生成代理实例，在方法调用上也会增加栈的深度，使得Spring AOP的性能不如AspectJ的那么好
+>
+> ### AspectJ
+>
+> - AspectJ来自于Eclipse基金会
+> - AspectJ属于静态织入，通过修改代码来实现，有如下几个织入的时机：
+>
+>  1、编译期织入（Compile-time weaving）： 如类 A 使用 AspectJ 添加了一个属性，类 B 引用了它，这个场景就需要编译期的时候就进行织入，否则没法编译类 B。
+>
+>  2、编译后织入（Post-compile weaving）： 也就是已经生成了 .class 文件，或已经打成 jar 包了，这种情况我们需要增强处理的话，就要用到编译后织入。
+>
+>  3、类加载后织入（Load-time weaving）： 指的是在加载类的时候进行织入，要实现这个时期的织入，有几种常见的方法。1、自定义类加载器来干这个，这个应该是最容易想到的办法，在被织入类加载到 JVM 前去对它进行加载，这样就可以在加载的时候定义行为了。2、在 JVM 启动的时候指定 AspectJ 提供的 agent：`-javaagent:xxx/xxx/aspectjweaver.jar`。
+>
+> - AspectJ可以做Spring AOP干不了的事情，它是AOP编程的完全解决方案，Spring AOP则致力于解决企业级开发中最普遍的AOP（方法织入）。而不是成为像AspectJ一样的AOP方案
+> - 因为AspectJ在实际运行之前就完成了织入，所以说它生成的类是没有额外运行时开销的
+
+### AspectJ的XML配置案例1
+
+目录：
+
+```sh
+.
+├── pom.xml
+├── src
+│   ├── main
+│   │   ├── java
+│   │   │   ├── DAO
+│   │   │   │   └── UserDao.java
+│   │   │   ├── Service
+│   │   │   │   └── UserService.java
+│   │   │   ├── SpringApplication.java
+│   │   │   ├── aspect
+│   │   │   │   └── MethodAspect.java
+│   │   │   └── entity
+│   │   │       ├── Apple.java
+│   │   │       ├── Dog.java
+│   │   │       └── People.java
+│   │   └── resources
+│   │       └── applicationContext.xml
+│   └── test
+│       └── java
+│           └── testAnno.java
+```
+
+
+
+**设计MethodAspect**
+
+```java
+package aspect;
+
+import org.aspectj.lang.JoinPoint;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Date;
+
+public class MethodAspect {
+    public void printTime(JoinPoint jointPoint){
+        //切面，拓展功能，jointPoint是连接点，目标类或者目标方法
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
+        String format = sdf.format(new Date());
+//        System.out.println(format);
+        String name = jointPoint.getTarget().getClass().getName();//获取目标类的名字
+        String nameMethod = jointPoint.getSignature().getName();//获取目标的方法的名称
+        System.out.println("-----> formatTime = " + format);
+        System.out.println("nameMethod = " + nameMethod+" : "+name);
+
+    }
+}
+```
+
+**Dao和service**
+
+```java
+public class UserDao {
+
+    public void insert() {
+        System.out.println("UserDao插入");
+    }
+}
+///////////////////////////////////
+package Service;
+
+import DAO.UserDao;
+
+public class UserService {
+    UserDao userDao;
+    public void createUser(){
+        System.out.println("执行创建逻辑～");
+        userDao.insert();
+    }
+
+    public UserDao getUserDao() {
+        return userDao;
+    }
+
+    public void setUserDao(UserDao userDao) {
+        this.userDao = userDao;
+    }
+}
+
+```
+
+
+
+**配置applicationContext.xml**
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:asp="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+    <!-- applicationContext.xml 配置bean -->
+<!--    尚敏啊的aop是一个切面编程-->
+    <bean id="people" class="entity.People">
+        <property name="name" value="红富士"/>
+<!--        这是配置文件，不需要重新编译就可以生效，spring会自动实例，自动配置-->
+    </bean>
+
+    <bean id="dog" class="entity.Dog">
+        <constructor-arg name="name" value="HAVAL"/>
+        <constructor-arg name="length" value="5"/>
+    </bean>
+    <bean id="userDao" class="DAO.UserDao"></bean>
+    <bean id="userService" class="Service.UserService">
+        <property name="userDao" ref="userDao"></property>
+    </bean>
+    <bean id="methodAspect" class="aspect.MethodAspect"></bean>
+    <asp:config>
+<!--        这个是有aop提供的-->
+        <aop:pointcut id="pointCut" expression="execution(* Service.UserService.createUser(..))"/>
+<!--        定义切面类-->
+        <aop:aspect ref="methodAspect">
+            <aop:before method="printTime" pointcut-ref="pointCut"/>
+        </aop:aspect>
+    </asp:config>
+</beans>
+```
+
+
+
+```java
+import Service.UserService;
+import entity.Dog;
+import entity.People;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class SpringApplication {
+    public static void main(String[] args) {
+        ApplicationContext context =
+                new ClassPathXmlApplicationContext(
+                        "classpath:applicationContext.xml");
+//        测试AOP，
+        UserService userService = context.getBean("userService", UserService.class);
+        userService.createUser();
+//        需求：create之前打印时间，AOP编程
+
+    }
+```
+
+**测试结果：**
+
+![截屏2023-04-17 15.35.43](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/%E6%88%AA%E5%B1%8F2023-04-17%2015.35.43.png)
+
+### AspectJ的XML配置案例2
 
 首先创建一个接口`ProductDao`，在里面定义添加商品，查询商品，修改商品，删除商品方法。
 
@@ -1803,9 +2034,6 @@ public class ProductDaoImpl implements ProductDao {
 ```java
 /**
  * ProductDao的增强类(切面类)
- *
- * @author Chen Rui
- * @version 1.0
  **/
 public class ProductEnhancer {
 
@@ -1907,9 +2135,36 @@ public class AppTest {
 
 至此就实现了在不修改`ProductDaoImpl`类的情况下，对其中的`save()`方法进行增强。
 
+### JointPoint
+
+JoinPoint对象封装了SpringAop中切面方法的信息,在切面方法中添加JoinPoint参数,就可以获取到封装了该方法信息的JoinPoint对象.
+
+### 常用API
+
+| 方法名                      | 功能                                                         |
+| --------------------------- | ------------------------------------------------------------ |
+| Signature `getSignature();` | 获取封装了署名信息的对象,在该对象中可以获取到目标方法名,所属类的Class等信息 |
+| Object[] `getArgs();`       | 获取传入目标方法的参数对象                                   |
+| Object `getTarget();`       | 获取被代理的对象，然后getClass就可以获得类                   |
+| Object  `getThis();`        | 获取代理对象                                                 |
+
+> ```java
+> String name = jointPoint.getTarget().getClass().getName();//获取目标类的名字
+> String nameMethod = jointPoint.getSignature().getName();//获取目标的方法的名称
+> ```
+>
+> 
+
 ### Spring中常用的增强类型
 
-#### 前置增强
+按照增加在目标类方法连接点的位置可以将增强划分为以下五类：
+前置增强   (org.springframework.aop.BeforeAdvice)   表示在目标方法执行前来实施增强
+后置增强   (org.springframework.aop.AfterReturningAdvice)   表示在目标方法执行后来实施增强
+环绕增强   (org.aopalliance.intercept.MethodInterceptor)   表示在目标方法执行前后同时实施增强
+异常抛出增强   (org.springframework.aop.ThrowsAdvice)   表示在目标方法抛出异常后来实施增强
+引介增强   (org.springframework.aop.introductioninterceptor)   表示在目标类中添加一些新的方法和属性
+
+#### 前置通知-advice
 
 在目标方法执行之前执行，可以获得切入点的信息
 
@@ -1918,12 +2173,6 @@ public class AppTest {
 ```java
 import org.aspectj.lang.JoinPoint;
 
-/**
- * ProductDao的增强类(切面类)
- *
- * @author Chen Rui
- * @version 1.0
- **/
 public class ProductEnhancer {
 
     public void checkPri(JoinPoint joinPoint){
@@ -1943,41 +2192,63 @@ public class ProductEnhancer {
 查询商品
 ```
 
+#### 后置通知
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- 配置目标对象，即被增强的对象 -->
+    <bean id="productDao" class="learningspring.aop.aspectj.xml.demo2.ProductDaoImpl"/>
+
+    <!-- 将增强类(切面类)交给Spring管理 -->
+    <bean id="productEnhancer" class="learningspring.aop.aspectj.xml.demo2.ProductEnhancer"/>
+    
+    <!-- 通过对AOP的配置完成对目标对象产生代理 -->
+    <aop:config>
+        <!-- 表达式配置哪些类的哪些方法需要进行增强 -->
+        <!-- 对ProductDaoImpl类中的save方法进行增强 -->
+        <!--
+        “*” 表示任意返回值类型
+        “..” 表示任意参数
+        -->
+        <!-- 后置通知切入点配置 -->
+        <aop:pointcut id="pointcut1" expression="execution(* learningspring.aop.aspectj.xml.demo2.ProductDaoImpl.save(..))"/>
+
+        <!-- 配置切面 -->
+        <aop:aspect ref="productEnhancer">
+            <!-- 后置通知 -->
+            <!-- 实现在调用save方法之后调用checkPri方法来进行权限校验-->
+            <aop:after method="checkPri" pointcut-ref="pointcut1"/>
+        
+        </aop:aspect>
+    </aop:config>
+
+</beans>
+```
 
 
-#### 后置增强
+
+#### 后置增强-返回后通知，就会将返回的值得到
 
 在目标方法执行之后执行，可以获得方法的返回值
 
 首先修改`ProductDao`中的`delete()`方法的返回值类型，改成String
 
 ```java
-/**
- * ProductDao
- *
- * @author Chen Rui
- * @version 1.0
- **/
+
 public interface ProductDao {
 
-    /**
-     * 添加商品
-     */
+
     void save();
-
-    /**
-     * 删除商品
-     */
     String delete();
-
-    /**
-     * 修改商品
-     */
     void modify();
-
-    /**
-     * 查询商品
-     */
     void query();
 }
 
@@ -2538,7 +2809,7 @@ public class ProductEnhancer {
 【异常抛出增强】异常信息：/ by zero
 ```
 
-### AOP切入点表达式语法
+### AOP切入点表达式语法 expression
 
 AOP切入点表达式是基于execution的函数完成的
 
@@ -2548,83 +2819,179 @@ AOP切入点表达式是基于execution的函数完成的
 “..” 表示任意参数
 
 + `public void learningspring.aop.aspectj.xml.demo2.ProductDaoImpl.save(..) `：具体到某个增强的方法
+
 + `* *.*.*.*Dao.save(..) `：所有包下的所有以Dao结尾的类中的save方法都会被增强
+
 + `* learningspring.aop.aspectj.xml.demo2.ProductDaoImpl+.save(..) `：ProductDaoImpl及其子类的save方法都会被增强
+
 + `* learningspring.aop.aspectj.xml..*.*(..)`：xml包及其子包的所有类的方法都会被增强
 
-### AspectJ的注解配置案例
+  举例
 
-首先也是创建一个接口`ProductDao`
+```sh
+任意公共方法的执行：
+execution(public * *(..))
+任何一个以“set”开始的方法的执行：
+execution(* set*(..))
+AccountService 接口的任意方法的执行：
+execution(* com.xyz.service.AccountService.*(..))
+定义在service包里的任意方法的执行：
+execution(* com.xyz.service.*.*(..))
+定义在service包和所有子包里的任意类的任意方法的执行：
+execution(* com.xyz.service..*.*(..))
+定义在pointcutexp包和所有子包里的JoinPointObjP2类的任意方法的执行：
+execution(* com.test.spring.aop.pointcutexp..JoinPointObjP2.*(..))")
+***> 最靠近(..)的为方法名,靠近.*(..))的为类名或者接口名,如上例的JoinPointObjP2.*(..))
+
+pointcutexp包里的任意类.
+within(com.test.spring.aop.pointcutexp.*)
+pointcutexp包和所有子包里的任意类.
+within(com.test.spring.aop.pointcutexp..*)
+实现了MyInterface接口的所有类,如果MyInterface不是接口,限定MyInterface单个类.
+this(com.test.spring.aop.pointcutexp.MyInterface)
+***> 当一个实现了接口的类被AOP的时候,用getBean方法必须cast为接口类型,不能为该类的类型.
+
+带有@MyTypeAnnotation标注的所有类的任意方法.
+@within(com.elong.annotation.MyTypeAnnotation)
+@target(com.elong.annotation.MyTypeAnnotation)
+带有@MyTypeAnnotation标注的任意方法.
+@annotation(com.elong.annotation.MyTypeAnnotation)
+***> @within和@target针对类的注解,@annotation是针对方法的注解
+
+参数带有@MyMethodAnnotation标注的方法.
+@args(com.elong.annotation.MyMethodAnnotation)
+参数为String类型(运行是决定)的方法.
+args(String)
+```
+
+
+
+### AspectJ的注解开发案例
+
+```sh
+.
+├── pom.xml
+├── src
+│   ├── main
+│   │   ├── java
+│   │   │   ├── SpringApplication.java
+│   │   │   └── mcxgroup
+│   │   │       ├── DAO
+│   │   │       │   └── UserDao.java
+│   │   │       ├── Service
+│   │   │       │   └── UserService.java
+│   │   │       ├── aspect
+│   │   │            └── MethodAspect.java
+│   │   └── resources
+│   │       └── applicationContext.xml
+│   └── test
+│       └── java
+│           └── testAnno.java
+```
+
+
+
+xml中配置组件扫描：
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:asp="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd
+http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context.xsd">
+<!--    扫描组建-->
+    <context:component-scan base-package="mcxgroup.*"/>
+<!--    启动spring aop注解模式-->
+    <aop:aspectj-autoproxy/>
+</beans>
+```
+
+
+
+首先也是创建一个接口`userDao`
 
 ```java
-/**
- * ProductDao接口
- *
- * @author Chen Rui
- * @version 1.0
- **/
-public interface ProductDao {
+package mcxgroup.DAO;
 
-    /**
-     * 添加商品
-     */
-    void save();
+import org.springframework.stereotype.Repository;
 
-    /**
-     * 查询商品
-     */
-    void query();
+@Repository("userDao")
 
-    /**
-     * 修改商品
-     */
-    void modify();
+public class UserDao {
 
-    /**
-     * 删除商品
-     */
-    String delete();
+    public void insert() {
+        System.out.println("UserDao插入");
+    }
+}
+
+```
+
+然后创建一个Dao实现类`Service`
+
+```java
+package mcxgroup.Service;
+
+import mcxgroup.DAO.UserDao;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+
+@Service("userService")
+public class UserService {
+    @Resource
+    UserDao userDao;
+    public void createUser(){
+        System.out.println("执行创建逻辑～");
+        userDao.insert();
+    }
+    public UserDao getUserDao() {
+        return userDao;
+    }
+
+    public void setUserDao(UserDao userDao) {
+        this.userDao = userDao;
+    }
+}
+
+```
+
+接着创建**增强类**`MethodAspect`，在该类里面使用注解
+
+```java
+package mcxgroup.aspect;
+
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.springframework.stereotype.Component;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Date;
+@Component //标记为组件。
+@Aspect //标记为切面类
+
+public class MethodAspect {
+//    环绕通知
+    @Before("execution(* mcxgroup.Service.UserService.createUser(..))")
+    public void printTime(JoinPoint jointPoint){
+        //切面，拓展功能，jointPoint是连接点，目标类或者目标方法
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
+        String format = sdf.format(new Date());
+//        System.out.println(format);
+        String name = jointPoint.getTarget().getClass().getName();//获取目标类的名字
+        String nameMethod = jointPoint.getSignature().getName();//获取目标的方法的名称
+        System.out.print("-----> formatTime = " + format);
+        System.out.println(" nameMethod = " + nameMethod+" : "+name);
+    }
 }
 ```
 
-然后创建一个Dao实现类`ProductDaoImpl`
 
-```java
-/**
- * ProductDao的实现类
- *
- * @author Chen Rui
- * @version 1.0
- **/
-public class ProductDaoImpl implements ProductDao {
-
-    @Override
-    public void save() {
-        System.out.println("添加商品");
-    }
-
-    @Override
-    public String delete() {
-        System.out.println("删除商品");
-        return new Date().toString();
-    }
-
-    @Override
-    public void modify() {
-        System.out.println("修改商品");
-    }
-
-    @Override
-    public void query() {
-        System.out.println("查询商品");
-        int a = 1/0;
-    }
-}
-```
-
-接着创建**增强类**`ProductEnhancer`，在该类里面使用注解
-
-使用`@Pointcut`注解可以配置切入点信息，在较多的方法都要使用同一个增强时，就可以配置一个切入点让目标方法都去引用
 
 `@Before`：前置增强
 
@@ -2636,13 +3003,10 @@ public class ProductDaoImpl implements ProductDao {
 
 `@After`：最终增强
 
+
+
 ```java
-/**
- * ProductDao的增强类(切面类)
- *
- * @author Chen Rui
- * @version 1.0
- **/
+
 @Aspect
 public class ProductEnhancer {
 
@@ -2712,53 +3076,39 @@ public class ProductEnhancer {
 编写测试方法
 
 ```java
-/**
- * AspectJ的注解方式配置测试类
- *
- * @author Chen Rui
- * @version 1.0
- **/
+import mcxgroup.Service.UserService;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:aspectj-annotation.xml")
-public class AppTest {
-
-    @Resource(name = "productDao")
-    private ProductDao productDao;
-
-    @Test
-    public void test(){
-
-        productDao.save();
-
-        productDao.delete();
-
-        productDao.modify();
-
-        productDao.query();
+public class SpringApplication {
+    public static void main(String[] args) {
+        ApplicationContext context =
+                new ClassPathXmlApplicationContext(
+                        "classpath:applicationContext.xml");
+//        测试AOP，
+        UserService userService = context.getBean("userService", UserService.class);
+        userService.createUser();
+//        需求：create之前打印时间，AOP编程
     }
 }
+
 ```
 
 运行，控制台输出
 
 ```
-【前置增强】权限校验execution(void learningspring.aop.aspectj.annotation.demo2.ProductDao.save())
-添加商品
-【最终增强】Tue Mar 19 16:01:06 CST 2019
-删除商品
-【最终增强】Tue Mar 19 16:01:06 CST 2019
-【后置增强】写入日志 操作时间：Tue Mar 19 16:01:06 CST 2019
-【环绕增强】当前空闲内存186MB
-修改商品
-【环绕增强】当前空闲内存186MB
-【最终增强】Tue Mar 19 16:01:06 CST 2019
-查询商品
-【最终增强】Tue Mar 19 16:01:06 CST 2019
-【异常抛出增强】异常信息：/ by zero
+-----> formatTime = 2023-04-17 16:57:32 087 nameMethod = createUser : mcxgroup.Service.UserService
+执行创建逻辑～
+UserDao插入
 ```
 
+
+
+
+
 # Spring JDBC Template
+
+类似于Apache的DBUtils，简化了JDBC API，简化开发工作量
 
 Spring提供了提供了多种持久层技术的模板类
 
@@ -2768,6 +3118,132 @@ Spring提供了提供了多种持久层技术的模板类
 | Hibernate3.0    | org.springframework.orm.hibernate3.HibernateTemplate |
 | IBatis(Mybatis) | org.springframework.orm.ibatis.SqlMapClientTemplate  |
 | JPA             | org.springframework.orm.jpa.JpaTemplate              |
+
+- 学习配置JDBC
+- 学习JDBC Template
+
+> 封装程度较低，简单封装，性能较高。大厂使用Spring JDBC再二次封装，Spring JDBC是介于二者之间
+
+## JDBC实例配置
+
+- **Maven依赖**
+
+- applicationContext.xml配置DataSource数据源
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:asp="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd
+http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context.xsd">
+<!--    扫描组建-->
+    <context:component-scan base-package="mcxgroup.*"/>
+<!--    启动spring aop注解模式-->
+    <aop:aspectj-autoproxy/>
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+<!--        当前数据源的设置的参数-->
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"></property>
+        <property name="url" value="jdbc:mysql:///mybatis?useSSL=true&amp;userUnicode=true&amp;characterEncoding=UTF-8"></property>
+        <property name="username" value="root"/>
+        <property name="password" value="Mysql2486"/>
+    </bean>
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+<!--        首要核心-->
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+</beans>
+```
+
+- **Dao注入JdbcTemplate**
+
+```java
+package mcxgroup.DAO;
+
+import mcxgroup.entity.Employee;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.List;
+import java.util.Map;
+
+public class EmployeeDao {
+//    导入jdbc
+
+    private JdbcTemplate jdbcTemplate;
+
+    public Employee findById(Integer eno){
+        String sql = "select * from employee where eno = ?";
+        //查询单条数据
+        //这里就是BeanPropertyRowMapper完成数据库数据对实体对象的转化。
+        Employee employee = jdbcTemplate.queryForObject(sql, new Object[]{eno}, new BeanPropertyRowMapper<Employee>(Employee.class));
+        return employee;
+    }
+
+
+    public JdbcTemplate getJdbcTemplate() {
+        return jdbcTemplate;
+    }
+
+    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+}
+```
+
+
+
+JDBC初步测试：
+
+```java
+public class SpringApplication {
+    public static void main(String[] args) {
+        ApplicationContext context =
+                new ClassPathXmlApplicationContext(
+                        "classpath:applicationContext.xml");
+//        测试JDBC Tempkate
+        EmployeeDao dao = context.getBean("employeeDao", EmployeeDao.class);
+        Employee employee = dao.findById(3308);
+        System.out.println("employee = " + employee);
+
+    }
+}
+```
+
+## JDBC Template 单元测试准备
+
+#### RunWith
+
+```java
+//testJDBCTemplate.java
+
+import mcxgroup.DAO.EmployeeDao;
+import mcxgroup.entity.Employee;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import javax.annotation.Resource;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+//这里是把JUNIT的控制权交给Spring，自动出实话
+@ContextConfiguration(locations = {"classpath:applicationContext.xml"})
+//load configureationo
+public class testJDBCTemplate {
+    @Resource
+    private EmployeeDao employeeDao;
+    @Test
+    public void testFindById(){
+        Employee daoById = employeeDao.findById(3308);
+        System.out.println("daoById = " + daoById);
+    }
+}
+```
+
+> 前提：开启组件扫描+导入spring-test jar包，导入版本需要匹配。
 
 ## JDBC Template的入门
 
@@ -3032,7 +3508,7 @@ public class AppTest {
 
 ```
 
-### 完成基本的CRUD操作
+### C3P0完成基本的CRUD操作
 
 以下内容都是使用的**C3P0连接池**，并且通过`@Resource`注解从IOC容器中获取了`jdbcTemplateC3P0`对象
 
@@ -3081,76 +3557,25 @@ public void test(){
 }
 ```
 
-#### 查询操作
+### 默认数据库连接池完成基本的CRUD操作
 
-##### 查询某个属性
 
-```java
-/**
- * 查询操作
- *
- * 查询单个字符串结果
- */
-@Test
-public void test(){
-    String result = jdbcTemplateC3P0.queryForObject("SELECT name FROM account WHERE id = ?", String.class, 1);
-    if (result != null){
-        System.out.println(result);
-    } else{
-        System.out.println("NULL");
-    }
-}
 
-/**
- * 统计查询
- * 返回数据表中的记录数
- */
-@Test
-public void test(){
-    Long result = jdbcTemplateC3P0.queryForObject("SELECT COUNT(*) FROM account", Long.class);
-    System.out.println(result);
-}
-```
+更新操作：
+
+
+
+#### Query
 
 ##### 查询返回单个对象
 
-要实现查询的数据封装成一个对象的话，查询`queryForObject`的参数列表可知需要一个`rowMapper`的参数。所以需要创建一个执行数据封装的类来实现`RowMapper<T>`接口里的`mapRow`方法，在这个方法里进行数据对象的封装。
-
 ```java
-/**
- * 数据封装类
- *
- * @author Chen Rui
- * @version 1.0
- **/
-public class MyRowMapper implements RowMapper<Account> {
-    @Override
-    public Account mapRow(ResultSet rs, int rowNum) throws SQLException {
-        Account account = new Account();
-        account.setId(rs.getInt("id"));
-        account.setName(rs.getString("name"));
-        account.setMoney(rs.getDouble("money"));
-        return account;
-    }
-}
-
-```
-
-编写测试方法
-
-```java
-/**
- * 将查询的结果封装成对象
- * 要创建一个自定义rowMapper来实现RowMapper接口
- */
-@Test
-public void test(){
-    Account account = jdbcTemplateC3P0.queryForObject("SELECT * FROM account WHERE id = ?", new MyRowMapper(), 1);
-    if (account != null){
-        System.out.println(account);
-    } else{
-        System.out.println("NULL");
-    }
+public Employee findById(Integer eno){
+    String sql = "select * from employee where eno = ?";
+    //查询单条数据
+    //这里就是BeanPropertyRowMapper完成数据库数据对实体对象的转化。
+    Employee employee = jdbcTemplate.queryForObject(sql, new Object[]{eno}, new BeanPropertyRowMapper<Employee>(Employee.class));
+    return employee;
 }
 ```
 
@@ -3159,15 +3584,136 @@ public void test(){
 要实现查询返回对象集合依然需要自定义类实现`RowMapper<T>`接口，调用的是`query`方法
 
 ```java
-/**
- * 查询多条记录
- */
-@Test
-public void test10(){
-    List<Account> accounts = jdbcTemplateC3P0.query("SELECT * FROM account", new MyRowMapper());
-    accounts.forEach(System.out::println);
+    public List<Employee> findByDname(String dname){
+        String sql = "select * from employee where dname = ?";
+        //查询复合数据
+        List<Employee> list = jdbcTemplate.query(sql, 
+                                                 new Object[]{dname}, 
+                                                 new BeanPropertyRowMapper<Employee>
+                                                 (Employee.class));
+        return list;
+    }
+```
+
+##### 查询返回Map对象,存储数据
+
+```java
+public List<Map<String, Object>> findMapByDname(String dname){
+    //无法实体属性映射
+    String sql = "select eno as empno , salary as s from employee where dname = ?";
+    //将查询结果作为Map进行封装
+    List<Map<String, Object>> maps = jdbcTemplate.queryForList(sql, new Object[]{dname});
+    return maps;
 }
 ```
+
+
+
+测试方法：
+
+```java
+@RunWith(SpringJUnit4ClassRunner.class)
+//这里是把JUNIT的控制权交给Spring，自动出实话
+@ContextConfiguration(locations = {"classpath:applicationContext.xml"})
+//load configureationo
+public class testJDBCTemplate {
+    @Resource
+    private EmployeeDao employeeDao;
+    @Test
+    public void testFindById(){
+        Employee daoById = employeeDao.findById(3308);
+        System.out.println("daoById = " + daoById);
+    }
+
+    @Test
+    public void testByname(){
+//        列表查找
+        List<Employee> byDname = employeeDao.findByDname("市场部");
+        for (Employee employee : byDname) {
+            System.out.println("employee = " + employee);
+        }
+    }
+  //map存书数据
+    @Test
+    public void testByDname(){
+        List<Map<String, Object>> maps = employeeDao.findMapByDname("市场部");
+        for (Map<String, Object> map : maps) {
+            System.out.println("map = " + map);
+        }
+    }
+}
+```
+
+#### Insert：
+
+```java
+public void insert(Employee employee){
+    String sql = "insert into employee(eno,ename,salary,dname,hiredate) values(?,?,?,?,?)";
+    //利用update方法实现数据写入操作
+    jdbcTemplate.update(sql,new Object[]{
+       employee.getEno() , employee.getEname(),employee.getSalary(),employee.getDname() , employee.getHiredate()
+    });
+}
+```
+
+> 这个是默认就commit的？
+
+```java
+@Test
+public void testInsert(){
+    Employee employee = new Employee();
+    employee.setDname("市场部");
+    employee.setEname("NANCY");
+    employee.setEno(8989);
+    employee.setHiredate(new Date());
+    employee.setSalary((float)1213);
+    employeeDao.insert(employee);
+
+}
+```
+
+#### Update：
+
+```java
+public int update(Employee employee){
+    String sql = "UPDATE employee SET ename = ?, salary = ?, dname = ?, hiredate = ? WHERE eno = ?";
+    int count = jdbcTemplate.update(sql, new Object[]{employee.getEname(), employee.getSalary(), employee.getDname(), employee.getHiredate(), employee.getEno()});
+    return count;
+}
+```
+
+**TestUpdate code:**
+
+```java
+@Test
+public void testUpdate(){
+    Employee employee = employeeDao.findById(8888);
+    System.out.println("employee = " + employee);
+    employee.setSalary(employee.getSalary()+1000);
+    int count = employeeDao.update(employee);
+    System.out.println("本次更新： " + count+"条数据");
+}
+```
+
+**Result:**
+
+```sh
+employee = Employee{eno=8888, ename='NANCY', salary=8888.0, dname='市场部', hiredate=2023-04-18 00:00:00.0}
+本次更新： 1条数据
+```
+
+
+
+#### Delete
+
+```java
+public int delete(Integer eno){
+    String sql = "delete from employee where eno = ?";
+    return jdbcTemplate.update(sql, new Object[]{eno});
+}
+```
+
+
 
 # Spring事务管理
 
@@ -3175,14 +3721,14 @@ public void test10(){
 
 事务：逻辑上的一组操作，组成这组操作的各个单元，要么全部成功，要么全部失败。
 
-## 事务的特性
+### 事务的特性
 
 + 原子性：事务不可分割
 + 一致性：事务执行前后数据完整性保持一致
 + 隔离性：一个事务的执行不应该受到其他事务的干扰
 + 持久性：一旦事务结束，数据就持久化到数据库
 
-## 不考虑隔离性引发的安全性问题
+### 不考虑隔离性引发的安全性问题
 
 + 读问题
   + 脏读：A事务读到B事务未提交的数据
@@ -3191,13 +3737,66 @@ public void test10(){
 + 写问题
   + 丢失更新：
 
-## 解决读问题
+### 解决读问题
 
 + 设置事务的隔离级别
   + `Read uncommitted`：未提交读，任何读问题都解决不了
   + `Read committed`：已提交读，解决脏读，但是不可重复读和幻读有可能发生
   + `Repeatable read`：重复读，解决脏读和不可重复读，但是幻读有可能发生
   + `Serializable`：解决所有读问题，因为禁止并行执行
+
+### 事物测试代码：
+
+```java
+public void batchImport(){
+        for (int i = 0; i < 11; i++) {
+            Employee employee = new Employee();
+            employee.setDname("市场部");
+            employee.setEname("员工00"+i);
+            employee.setEno(8000+i);
+            employee.setHiredate(new Date());
+            employee.setSalary((float)1213);
+            employeeDao.insert(employee);
+        }
+    }
+```
+
+JDBC连接日志：可以看到产生了十次数据库连接,十次提交，是在十个事物。
+
+```sh
+17:17:18.393 [main] DEBUG org.springframework.jdbc.core.JdbcTemplate - Executing prepared SQL statement [insert into employee(eno,ename,salary,dname,hiredate) values(?,?,?,?,?)]
+17:17:18.393 [main] DEBUG org.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+17:17:18.393 [main] DEBUG org.springframework.jdbc.datasource.DriverManagerDataSource - Creating new JDBC DriverManager Connection to [jdbc:mysql:///imooc?useSSL=true&userUnicode=true&characterEncoding=UTF-8]
+17:17:18.425 [main] DEBUG org.springframework.jdbc.core.JdbcTemplate - SQLWarning ignored: SQL state '22007', error code '1292', message [Incorrect date value: '2023-04-18 17:17:18.393' for column 'hiredate' at row 1]
+17:17:18.425 [main] DEBUG org.springframework.jdbc.core.JdbcTemplate - Executing prepared SQL update
+```
+
+引入事物，**对这个整体控制。**
+
+### Spring 支持两种方式的事务管理
+
+#### 编程式事务管理
+
+通过 `TransactionTemplate`或者`TransactionManager`手动管理事务，实际应用中很少使用，但是对于你理解 Spring 事务管理原理有帮助。
+
+#### 声明式事务管理
+
+推荐使用（代码侵入性最小），实际是通过 AOP 实现（基于`@Transactional` 的全注解方式使用最多）。
+
+使用 `@Transactional`注解进行事务管理的示例代码如下：
+
+```java
+@Transactional(propagation=propagation.PROPAGATION_REQUIRED)
+public void aMethod {
+  //do something
+  B b = new B();
+  C c = new C();
+  b.bMethod();
+  c.cMethod();
+}
+```
+
+
 
 ## Spring事务管理API
 
@@ -3228,7 +3827,7 @@ Spring中提供了7种传播行为
 **假设x()方法称为A，y()方法称为B**
 
 + 保证多个操作在同一个事务中
-  + **`PROPAGATION_REQUIRED`**(\*)：Spring事务隔离级别的默认值。如果A中有事务，则使用A中的事务。如果没有，则创建一个新的事务，将操作包含进来。
+  + **`PROPAGATION_REQUIRED`**(\*)：Spring事务隔离级别的默认值。如果A中有事务，则使用A中的事务。如果没有，则创建一个新的事务，将操作包含进来。也就是A虽然完成了，还是会回滚。
   + `PROPAGATION_SUPPORTS`：支持事务。如果A中有事务，使用A中的事务。如果A没有事务，则不使用事务。
   + `PROPAGATION_MANDATORY`：如果A中有事务，使用A中的事务。如果没有事务，则抛出异常。
 + 保证多个事务不在同一个事务中
@@ -3520,6 +4119,7 @@ public class AccountServiceImpl implements AccountService {
     <!-- 配置Service -->
     <bean id="accountService" class="learningspring.transaction.programmatic.AccountServiceImpl">
         <property name="accountDao" ref="accountDao"/>
+       <!-- 配置transactionTemplate -->
         <property name="transactionTemplate" ref="transactionTemplate"/>
     </bean>
 
@@ -3563,138 +4163,188 @@ public class AccountServiceImpl implements AccountService {
 
 ### 声明式事务
 
+**类似于环绕通知；**
+
+配置方法：
+
+配置事物管理器
+
+配置事物通知和属性
+
+绑定pointcut切入点
+
+
+
 #### XML配置方式
 
-声明式事务即通过配置文件实现，利用的就是Spring的AOP
+声明式事务即通过配置文件实现，利用的就是Spring的AOP的环绕通知
 
-修改类`AccountServiceImpl`，删除`TransactionTemplate`对象，并修改`transfer`方法，保留异常代码
-
-```java
-/**
- * AccountService实现类
- *
- * @author Chen Rui
- * @version 1.0
- **/
-public class AccountServiceImpl implements AccountService{
-
-    private AccountDao accountDao;
-
-    public void setAccountDao(AccountDao accountDao) {
-        this.accountDao = accountDao;
-    }
-
-    @Override
-    public void transfer(String from, String to, Double money) {
-        accountDao.out(from, money);
-        int i = 1/0;
-        accountDao.in(to,money);
-
-    }
-}
-```
-
-然后创建配置文件`spring-tx-declarative.xml`，配置数据源即Bean对象，然后配置事务管理器。
+advice
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:tx="http://www.springframework.org/schema/tx"
-       xmlns:aop="http://www.springframework.org/schema/aop"
-       xmlns:context="http://www.springframework.org/schema/context"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="
-            http://www.springframework.org/schema/beans
-            http://www.springframework.org/schema/beans/spring-beans.xsd
-            http://www.springframework.org/schema/context
-            http://www.springframework.org/schema/context/spring-context.xsd
-            http://www.springframework.org/schema/tx
-            http://www.springframework.org/schema/tx/spring-tx.xsd
-            http://www.springframework.org/schema/aop
-            http://www.springframework.org/schema/aop/spring-aop.xsd">
-
-    <!-- 声明式事务管理配置文件 -->
-
-    <!-- 配置Service -->
-    <bean id="accountService" class="learningspring.transaction.declarative.AccountServiceImpl">
-        <property name="accountDao" ref="accountDao"/>
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop
+       https://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd">
+  
+  
+<!--    扫描组建-->
+    <context:component-scan base-package="mcxgroup.*"/>
+<!--    启动spring aop注解模式-->
+    <aop:aspectj-autoproxy/>
+  
+  
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+<!--        当前数据源的设置的参数-->
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"></property>
+        <property name="url" value="jdbc:mysql:///imooc?useSSL=true&amp;userUnicode=true&amp;characterEncoding=UTF-8"></property>
+        <property name="username" value="root"/>
+        <property name="password" value="Mysql2486"/>
     </bean>
-
-    <!-- 配置Dao -->
-    <bean id="accountDao" class="learningspring.transaction.declarative.AccountDaoImpl">
-        <property name="dataSource" ref="dataSource"/>
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+<!--        首要核心-->
+        <property name="dataSource" ref="dataSource"></property>
     </bean>
-
-    <!-- 引入数据库配置文件 -->
-    <context:property-placeholder location="db.properties"/>
-
-    <!-- 配置C3P0连接池 -->
-    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
-        <property name="driverClass" value="${jdbc.driverClassName}"/>
-        <property name="jdbcUrl" value="${jdbc.url}"/>
-        <property name="user" value="${jdbc.username}"/>
-        <property name="password" value="${jdbc.password}"/>
+    <bean id="employeeDao" class="mcxgroup.DAO.EmployeeDao">
+<!--        注入jdbcTemplate属性-->
+        <property name="jdbcTemplate" ref="jdbcTemplate"></property>
     </bean>
-    
-    <!-- 配置事务管理器 -->
+  
+  
+  
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource"/>
+<!--        事物管理器-->
     </bean>
+<!--    事物通州配置-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+<!--            哪些方法使用事务，以及传播行为，一般使用REQUIRED-->
+            <tx:method name="batchImport" propagation="REQUIRED"/>
+<!--            执行成功会自动提交，失败会自动回滚-->
+        </tx:attributes>
+    </tx:advice>
+    <aop:config>
+<!--        设置了切入点，设置作用范围-->
+        <aop:pointcut id="point" expression="execution(* mcxgroup.Service.EmployeeService.batchImport(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="point"/>
+    </aop:config>
 </beans>
 ```
 
-接着就配置事务的增强，配置文件中加入以下配置
 
-```xml
-<!-- 配置事务的增强 -->
-<tx:advice id="txAdvice" transaction-manager="transactionManager">
-    <tx:attributes>
-        <!-- 配置事务的规则 根据实际业务修改-->
-        <tx:method name="*" propagation="REQUIRED"/>
-    </tx:attributes>
-</tx:advice>
-
-<!-- AOP的配置 -->
-<aop:config>
-    <aop:pointcut id="pointcut1" expression="execution(* learningspring.transaction.declarative.AccountServiceImpl.*(..))"/>
-    <aop:advisor advice-ref="txAdvice" pointcut-ref="pointcut1"/>
-</aop:config>
-```
-
-先查看当前数据库数据
-
-![](https://blogpictrue-1251547651.cos.ap-chengdu.myqcloud.com/blog/20190321130039.png)
-
-编写测试方法
 
 ```java
-/**
- * 声明式事务配置测试类
- *
- * @author Chen Rui
- * @version 1.0
- **/
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(value = "classpath:spring-tx-declarative.xml")
-public class AppTest {
+package mcxgroup.Service;
 
-    @Resource(name = "accountService")
-    private AccountService accountService;
+import mcxgroup.DAO.EmployeeDao;
+import mcxgroup.entity.Employee;
+import org.springframework.stereotype.Service;
 
-    @Test
-    public void test(){
-        accountService.transfer("Bob","Jack",1000d);
+import javax.annotation.Resource;
+import java.util.Date;
+
+@Service
+public class EmployeeService {
+    @Resource
+    private EmployeeDao employeeDao;
+    public void batchImport(){
+        for (int i = 0; i < 11; i++) {
+            Employee employee = new Employee();
+            employee.setDname("市场部");
+            employee.setEname("员工00"+i);
+            employee.setEno(8000+i);
+            employee.setHiredate(new Date());
+            employee.setSalary((float)1213);
+            employeeDao.insert(employee);
+            if (i==3){
+                throw new RuntimeException("意料之外的异常");
+            }
+        }
+    }
+    public EmployeeDao getEmployeeDao() {
+        return employeeDao;
+    }
+
+    public void setEmployeeDao(EmployeeDao employeeDao) {
+        this.employeeDao = employeeDao;
     }
 }
+
 ```
 
-运行查看结果，是否变化
 
-![](https://blogpictrue-1251547651.cos.ap-chengdu.myqcloud.com/blog/20190321132512.png)
 
-至此就实现了声明式事务XML方式的配置。
+测试结果：
+
+可以看到这里的
+
+```sh
+19:51:11.828 [main] DEBUG o.s.j.d.DataSourceTransactionManager - Creating new transaction with name [mcxgroup.Service.EmployeeService.batchImport]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+19:51:11.828 [main] DEBUG o.s.j.d.DriverManagerDataSource - Creating new JDBC DriverManager Connection to [jdbc:mysql:///imooc?useSSL=true&userUnicode=true&characterEncoding=UTF-8]
+19:51:12.589 [main] DEBUG o.s.j.d.DataSourceTransactionManager - Acquired Connection [com.mysql.cj.jdbc.ConnectionImpl@45be7cd5] for JDBC transaction
+19:51:12.591 [main] DEBUG o.s.j.d.DataSourceTransactionManager - Switching JDBC Connection [com.mysql.cj.jdbc.ConnectionImpl@45be7cd5] to manual commit
+19:51:12.627 [main] DEBUG o.s.jdbc.core.JdbcTemplate - Executing prepared SQL update
+```
+
+这里是在创建事务， Creating new transaction with name [mcxgroup.Service.EmployeeService.batchImport]:。
+
+
+
+
+
+> ```sh
+> 19:51:11.828 [main] DEBUG o.s.j.d.DataSourceTransactionManager - Creating new transaction with name [mcxgroup.Service.EmployeeService.batchImport]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+> 19:51:11.828 [main] DEBUG o.s.j.d.DriverManagerDataSource - Creating new JDBC DriverManager Connection to [jdbc:mysql:///imooc?useSSL=true&userUnicode=true&characterEncoding=UTF-8]
+> 19:51:12.589 [main] DEBUG o.s.j.d.DataSourceTransactionManager - Acquired Connection [com.mysql.cj.jdbc.ConnectionImpl@45be7cd5] for JDBC transaction
+> 19:51:12.591 [main] DEBUG o.s.j.d.DataSourceTransactionManager - Switching JDBC Connection [com.mysql.cj.jdbc.ConnectionImpl@45be7cd5] to manual commit
+> 19:51:12.627 [main] DEBUG o.s.jdbc.core.JdbcTemplate - Executing prepared SQL update
+> 19:51:12.630 [main] DEBUG o.s.jdbc.core.JdbcTemplate - Executing prepared SQL statement [insert into employee(eno,ename,salary,dname,hiredate) values(?,?,?,?,?)]
+> 19:51:12.692 [main] DEBUG o.s.jdbc.core.JdbcTemplate - SQLWarning ignored: SQL state '22007', error code '1292', message [Incorrect date value: '2023-04-18 19:51:12.624' for column 'hiredate' at row 1]
+> 19:51:12.695 [main] DEBUG o.s.jdbc.core.JdbcTemplate - Executing prepared SQL update
+> 19:51:12.695 [main] DEBUG o.s.jdbc.core.JdbcTemplate - Executing prepared SQL statement [insert into employee(eno,ename,salary,dname,hiredate) values(?,?,?,?,?)]
+> 19:51:12.697 [main] DEBUG o.s.jdbc.core.JdbcTemplate - SQLWarning ignored: SQL state '22007', error code '1292', message [Incorrect date value: '2023-04-18 19:51:12.695' for column 'hiredate' at row 1]
+> 19:51:12.698 [main] DEBUG o.s.jdbc.core.JdbcTemplate - Executing prepared SQL update
+> 19:51:12.698 [main] DEBUG o.s.jdbc.core.JdbcTemplate - Executing prepared SQL statement [insert into employee(eno,ename,salary,dname,hiredate) values(?,?,?,?,?)]
+> 19:51:12.700 [main] DEBUG o.s.jdbc.core.JdbcTemplate - SQLWarning ignored: SQL state '22007', error code '1292', message [Incorrect date value: '2023-04-18 19:51:12.698' for column 'hiredate' at row 1]
+> 19:51:12.700 [main] DEBUG o.s.jdbc.core.JdbcTemplate - Executing prepared SQL update
+> 19:51:12.700 [main] DEBUG o.s.jdbc.core.JdbcTemplate - Executing prepared SQL statement [insert into employee(eno,ename,salary,dname,hiredate) values(?,?,?,?,?)]
+> 19:51:12.701 [main] DEBUG o.s.jdbc.core.JdbcTemplate - SQLWarning ignored: SQL state '22007', error code '1292', message [Incorrect date value: '2023-04-18 19:51:12.7' for column 'hiredate' at row 1]
+> 19:51:12.701 [main] DEBUG o.s.j.d.DataSourceTransactionManager - Initiating transaction rollback
+> 19:51:12.701 [main] DEBUG o.s.j.d.DataSourceTransactionManager - Rolling back JDBC transaction on Connection [com.mysql.cj.jdbc.ConnectionImpl@45be7cd5]
+> 19:51:12.703 [main] DEBUG o.s.j.d.DataSourceTransactionManager - Releasing JDBC Connection [com.mysql.cj.jdbc.ConnectionImpl@45be7cd5] after transaction
+> 19:51:12.713 [main] DEBUG o.s.t.c.c.DefaultCacheAwareContextLoaderDelegate - Retrieved ApplicationContext [572191680] from cache with key [[MergedContextConfiguration@d6da883 testClass = testJDBCTemplate, locations = '{classpath:applicationContext.xml}', classes = '{}', contextInitializerClasses = '[]', activeProfiles = '{}', propertySourceLocations = '{}', propertySourceProperties = '{}', contextCustomizers = set[[empty]], contextLoader = 'org.springframework.test.context.support.DelegatingSmartContextLoader', parent = [null]]]
+> 19:51:12.713 [main] DEBUG o.springframework.test.context.cache - Spring test ApplicationContext cache statistics: [DefaultContextCache@1fb19a0 size = 1, maxSize = 32, parentContextCount = 0, hitCount = 4, missCount = 1]
+> 19:51:12.715 [main] DEBUG o.s.t.c.c.DefaultCacheAwareContextLoaderDelegate - Retrieved ApplicationContext [572191680] from cache with key [[MergedContextConfiguration@d6da883 testClass = testJDBCTemplate, locations = '{classpath:applicationContext.xml}', classes = '{}', contextInitializerClasses = '[]', activeProfiles = '{}', propertySourceLocations = '{}', propertySourceProperties = '{}', contextCustomizers = set[[empty]], contextLoader = 'org.springframework.test.context.support.DelegatingSmartContextLoader', parent = [null]]]
+> 19:51:12.715 [main] DEBUG o.springframework.test.context.cache - Spring test ApplicationContext cache statistics: [DefaultContextCache@1fb19a0 size = 1, maxSize = 32, parentContextCount = 0, hitCount = 5, missCount = 1]
+> 19:51:12.717 [main] DEBUG o.s.t.c.s.AbstractDirtiesContextTestExecutionListener - After test method: context [DefaultTestContext@5cdd8682 testClass = testJDBCTemplate, testInstance = testJDBCTemplate@4148db48, testMethod = testBatch@testJDBCTemplate, testException = java.lang.RuntimeException: 意料之外的异常, mergedContextConfiguration = [MergedContextConfiguration@d6da883 testClass = testJDBCTemplate, locations = '{classpath:applicationContext.xml}', classes = '{}', contextInitializerClasses = '[]', activeProfiles = '{}', propertySourceLocations = '{}', propertySourceProperties = '{}', contextCustomizers = set[[empty]], contextLoader = 'org.springframework.test.context.support.DelegatingSmartContextLoader', parent = [null]], attributes = map[[empty]]], class annotated with @DirtiesContext [false] with mode [null], method annotated with @DirtiesContext [false] with mode [null].
+> 
+> java.lang.RuntimeException: 意料之外的异常
+> ```
+>
+> 
+
+---
+
+
+
+
 
 #### 注解配置方式
+
+
+
+
 
 Spring的事务配置仍然支持注解配置
 
@@ -3794,3 +4444,199 @@ public class AccountServiceImpl implements AccountService{
 ```
 
 再次运行测试方法，数据库也不会发生改变。
+
+
+
+### @Transactional注解
+
+#### **事物传播行为介绍:** 
+
+　　@Transactional(propagation=Propagation.REQUIRED) ：如果有事务, 那么加入事务, 没有的话新建一个(默认情况下)
+　　@Transactional(propagation=Propagation.NOT_SUPPORTED) ：容器不为这个方法开启事务
+　　@Transactional(propagation=Propagation.REQUIRES_NEW) ：不管是否存在事务,都创建一个新的事务,原来的挂起,新的执行完毕,继续执行老的事务
+　　@Transactional(propagation=Propagation.MANDATORY) ：必须在一个已有的事务中执行,否则抛出异常
+　　@Transactional(propagation=Propagation.NEVER) ：必须在一个没有的事务中执行,否则抛出异常(与Propagation.MANDATORY相反)
+　　@Transactional(propagation=Propagation.SUPPORTS) ：如果其他bean调用这个方法,在其他bean中声明事务,那就用事务.如果其他bean没有声明事务,那就不用事务.
+
+#### **事物超时设置:**
+
+　　@Transactional(timeout=30) //默认是30秒
+
+#### **事务隔离级别:**
+
+　　@Transactional(isolation = Isolation.READ_UNCOMMITTED)：读取未提交数据(会出现脏读, 不可重复读) 基本不使用
+　　@Transactional(isolation = Isolation.READ_COMMITTED)：读取已提交数据(会出现不可重复读和幻读)
+　　@Transactional(isolation = Isolation.REPEATABLE_READ)：可重复读(会出现幻读)
+　　@Transactional(isolation = Isolation.SERIALIZABLE)：串行化
+
+　　MYSQL: 默认为REPEATABLE_READ级别
+　　SQLSERVER: 默认为READ_COMMITTED
+
+**脏读** : 一个事务读取到另一事务未提交的更新数据
+**不可重复读** : 在同一事务中, 多次读取同一数据返回的结果有所不同, 换句话说, 
+后续读取可以读到另一事务已提交的更新数据. 相反, "可重复读"在同一事务中多次
+读取数据时, 能够保证所读数据一样, 也就是后续读取不能读到另一事务已提交的更新数据
+**幻读** : 一个事务读到另一个事务已提交的insert数据
+
+#### **注意的几点:**
+
+​	 1、@Transactional 只能被应用到public方法上, 对于其它非public的方法,如果标记了@Transactional也不会报错,但方法没有事务功能.
+
+  	2、用 spring 事务管理器,由spring来负责数据库的打开,提交,回滚.默认遇到运行期例外(throw new RuntimeException("注释");)会回滚，即遇到不受检查（unchecked）的例外时回滚；而遇到需要捕获的例外(throw new Exception("注释");)不会回滚,即遇到受检查的例外（就是非运行时抛出的异常，编译器会检查到的异常叫受检查例外或说受检查异常）时，需我们指定方式来让事务回滚要想所有异常都回滚,要加上 @Transactional( rollbackFor={Exception.class,其它异常}) .如果让unchecked例外不回滚： @Transactional(notRollbackFor=RunTimeException.class)
+
+　3、@Transactional 注解应该只被应用到 public 可见度的方法上。 如果你在 protected、private 或者 package-visible 的方法上使用 @Transactional 注解，它也不会报错， 但是这个被注解的方法将不会展示已配置的事务设置。
+
+　　4、@Transactional 注解可以被应用于接口定义和接口方法、类定义和类的 public 方法上。然而，请注意仅仅 @Transactional 注解的出现不足于开启事务行为，它仅仅 是一种元数据，能够被可以识别 @Transactional 注解和上述的配置适当的具有事务行为的beans所使用。上面的例子中，其实正是 元素的出现 开启 了事务行为。
+
+　　5、Spring团队的建议是你在具体的类（或类的方法）上使用 @Transactional 注解，而不要使用在类所要实现的任何接口上。你当然可以在接口上使用 @Transactional 注解，但是这将只能当你设置了基于接口的代理时它才生效。因为注解是不能继承的，这就意味着如果你正在使用基于类的代理时，那么事务的设置将不能被基于类的代理所识别，而且对象也将不会被事务代理所包装（将被确认为严重的）。因此，请接受Spring团队的建议并且在具体的类上使用 @Transactional 注解。
+
+
+
+#### **@Transactional注解中常用参数说明**
+
+| **参数名称**               | **功能描述**                                                 |
+| -------------------------- | ------------------------------------------------------------ |
+| **readOnly**               | 该属性用于设置当前事务是否为只读事务，设置为true表示只读，false则表示可读写，默认值为false。例如：@Transactional(readOnly=true) |
+| **rollbackFor**            | 该属性用于设置需要进行回滚的异常类数组，当方法中抛出指定异常数组中的异常时，则进行事务回滚。例如：指定单一异常类：@Transactional(rollbackFor=RuntimeException.class)指定多个异常类：@Transactional(rollbackFor={RuntimeException.class, Exception.class}) |
+| **rollbackForClassName**   | 该属性用于设置需要进行回滚的异常类名称数组，当方法中抛出指定异常名称数组中的异常时，则进行事务回滚。例如：指定单一异常类名称：@Transactional(rollbackForClassName="RuntimeException")指定多个异常类名称：@Transactional(rollbackForClassName={"RuntimeException","Exception"}) |
+| **noRollbackFor**          | 该属性用于设置不需要进行回滚的异常类数组，当方法中抛出指定异常数组中的异常时，不进行事务回滚。例如：指定单一异常类：@Transactional(noRollbackFor=RuntimeException.class)指定多个异常类：@Transactional(noRollbackFor={RuntimeException.class, Exception.class}) |
+| **noRollbackForClassName** | 该属性用于设置不需要进行回滚的异常类名称数组，当方法中抛出指定异常名称数组中的异常时，不进行事务回滚。例如：指定单一异常类名称：@Transactional(noRollbackForClassName="RuntimeException")指定多个异常类名称：@Transactional(noRollbackForClassName={"RuntimeException","Exception"}) |
+| **propagation**            | 该属性用于设置事务的传播行为，具体取值可参考表6-7。例如：@Transactional(propagation=Propagation.NOT_SUPPORTED,readOnly=true) |
+| **isolation**              | 该属性用于设置底层数据库的事务隔离级别，事务隔离级别用于处理多事务并发的情况，通常使用数据库的默认隔离级别即可，基本不需要进行设置 |
+| **timeout**                | 该属性用于设置事务的超时秒数，默认值为-1表示永不超时         |
+
+ 
+
+## Spring XML配置文件
+
+下面配置文件：开启了AOP，开启了context上下文管理，实现了容器DI，开启了事物管理。开启组件扫描，aop代理模式自动注解。开启事物管理。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop
+       https://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/context/spring-tx.xsd">
+  
+  
+<!--    扫描组建-->
+    <context:component-scan base-package="mcxgroup.*"/>
+<!--    启动spring aop注解模式-->
+    <aop:aspectj-autoproxy/>
+  
+  
+  
+  
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+<!--        当前数据源的设置的参数-->
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"></property>
+        <property name="url" value="jdbc:mysql:///imooc?useSSL=true&amp;userUnicode=true&amp;characterEncoding=UTF-8"></property>
+        <property name="username" value="root"/>
+        <property name="password" value="Mysql2486"/>
+    </bean>
+    
+  	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+<!--        首要核心-->
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    
+  	<bean id="employeeDao" class="mcxgroup.DAO.EmployeeDao">
+<!--        注入jdbcTemplate属性-->
+        <property name="jdbcTemplate" ref="jdbcTemplate"></property>
+    </bean>
+    
+  
+  
+  
+  	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+<!--        事物管理器-->
+    </bean>
+<!--    事物通州配置-->
+<!--    事物通州配置-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+<!--            哪些方法使用事务，以及传播行为，一般使用REQUIRED-->
+            <tx:method name="batchImport" propagation="REQUIRED"/>
+<!--            执行成功会自动提交，失败会自动回滚-->
+        </tx:attributes>
+    </tx:advice>
+    <aop:config>
+<!--        设置了切入点，设置作用范围-->
+        <aop:pointcut id="point" expression="execution(* mcxgroup.Service.EmployeeService.batchImport(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="point"/>
+    </aop:config>
+</beans>
+```
+
+
+
+
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>TestSpring</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>5.2.6.RELEASE</version>
+        </dependency>
+        <dependency>
+<!--            这是AOP的底层依赖。-->
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.9.7</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>5.2.6.RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>5.2.6.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.32</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.7</version>
+        </dependency>
+    </dependencies>
+</project>
+```
