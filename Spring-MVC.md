@@ -152,34 +152,53 @@ Spring版本：5.3.1
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
-<!-- 配置SpringMVC的前端控制器，对浏览器发送的请求统一进行处理 -->
-<servlet>
-    <servlet-name>springMVC</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-    <!-- 通过初始化参数指定SpringMVC配置文件的位置和名称 -->
-    <init-param>
-        <!-- contextConfigLocation为固定值 -->
-        <param-name>contextConfigLocation</param-name>
-        <!-- 使用classpath:表示从类路径查找配置文件，例如maven工程中的src/main/resources -->
-        <param-value>classpath:applicationContext.xml</param-value>
-    </init-param>
-    <!-- 
- 		作为框架的核心组件，在启动过程中有大量的初始化操作要做
-		而这些操作放在第一次请求时才执行会严重影响访问速度
-		因此需要通过此标签将启动控制DispatcherServlet的初始化时间提前到服务器启动时
-	-->
-    <load-on-startup>1</load-on-startup>
-</servlet>
-<servlet-mapping>
-    <servlet-name>springMVC</servlet-name>
-    <!--
-        设置springMVC的核心控制器所能处理的请求的请求路径
-        /所匹配的请求可以是/login或.html或.js或.css方式的请求路径
-        但是/不能匹配.jsp请求路径的请求
-    -->
-    <url-pattern>/</url-pattern>
-</servlet-mapping>
+    <!-- 配置SpringMVC的前端控制器，对浏览器发送的请求统一进行处理 -->
+    <servlet>
+        <servlet-name>springMVC</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <!-- 通过初始化参数指定SpringMVC配置文件的位置和名称 -->
+        <init-param>
+            <!-- contextConfigLocation为固定值 -->
+            <param-name>contextConfigLocation</param-name>
+            <!-- 使用classpath:表示从类路径查找配置文件，例如maven工程中的src/main/resources -->
+            <param-value>classpath:applicationContext.xml</param-value>
+        </init-param>
+        <!--
+             作为框架的核心组件，在启动过程中有大量的初始化操作要做
+            而这些操作放在第一次请求时才执行会严重影响访问速度
+            因此需要通过此标签将启动控制DispatcherServlet的初始化时间提前到服务器启动时
+        -->
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>springMVC</servlet-name>
+        <!--
+            设置springMVC的核心控制器所能处理的请求的请求路径
+            /所匹配的请求可以是/login或.html或.js或.css方式的请求路径
+            但是/不能匹配.jsp请求路径的请求
+        -->
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
 
+    <!--配置springMVC的编码过滤器-->
+    <filter>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>forceResponseEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+</web-app>
 ```
 
 > 注：
@@ -191,26 +210,6 @@ Spring版本：5.3.1
 > 因此就可以避免在访问jsp页面时，该请求被DispatcherServlet处理，从而找不到相应的页面
 >
 > /*则能够匹配所有请求，例如在使用过滤器时，若需要对所有请求进行过滤，就需要使用/*的写法
-
-##### c>配置基础的 applicationContext.xml
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:aop="http://www.springframework.org/schema/aop"
-       xmlns:mvc="http://www.springframework.org/schema/mvc"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/aop
-       https://www.springframework.org/schema/aop/spring-aop.xsd
-       http://www.springframework.org/schema/context
-       http://www.springframework.org/schema/context/spring-context.xsd
-       http://www.springframework.org/schema/mvc
-       http://www.springframework.org/schema/mvc/spring-mvc.xsd">
-</beans>
-```
 
 
 
@@ -259,10 +258,23 @@ public class TestController {
        http://www.springframework.org/schema/mvc
        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
     <context:component-scan base-package="mcxgroup"></context:component-scan>
-    <mvc:annotation-driven/>
-<!--    启动mvc注解开发-->
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <!--                对相应的文本消息转换-->
+                <property name="supportedMediaTypes">
+                    <list>
+                        <!--                        在servlet里面这么设置的
+                                                    response.setContentType-->
+                        <value>text/html;charset=utf-8</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <!--    启动mvc注解开发-->
     <mvc:default-servlet-handler/>
-<!--    这一个是排除静态资源的处理，也就是图片或者视频之类的。-->
+    <!--    这一个是排除静态资源的处理，也就是图片或者视频之类的。-->
 </beans>
 ```
 
@@ -1424,7 +1436,7 @@ b>当前请求必须传输请求参数_method
         employees.remove(id);
      }
   }
-  12345678910111213141516171819202122232425262728293031323334353637383940414243444546
+  
   ```
 
 ### 2、功能清单
@@ -1696,7 +1708,15 @@ public String updateEmployee(Employee employee){
 
 HttpMessageConverter，报文信息转换器，将请求报文转换为Java对象，或将Java对象转换为响应报文
 
-HttpMessageConverter提供了两个注解和两个类型：@RequestBody，@ResponseBody，RequestEntity，
+HttpMessageConverter提供了两个注解和两个类型：
+
+@RequestBody，
+
+@ResponseBody，
+
+
+
+RequestEntity，
 
 ResponseEntity
 
@@ -1758,42 +1778,74 @@ public String testResponseBody(){
 
 ### 4、SpringMVC处理json
 
-@ResponseBody处理json的步骤：
+
 
 a>导入jackson的依赖
 
 ```xml
-<dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.12.1</version>
-</dependency>
-12345
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.9.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.9.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.62</version>
+        </dependency>
 ```
 
-b>在SpringMVC的核心配置文件中开启mvc的注解驱动，此时在HandlerAdaptor中会自动装配一个消息转换器：MappingJackson2HttpMessageConverter，可以将响应到浏览器的Java对象转换为Json格式的字符串
+b>直接用Spring的Controller配合一大堆注解写REST太麻烦了，因此，Spring还额外提供了一个`@RestController`注解，使用`@RestController`替代`@Controller`后，每个方法自动变成API接口方法。
 
-```
-<mvc:annotation-driven />
-1
-```
-
-c>在处理器方法上使用@ResponseBody注解进行标识
-
-d>将Java对象直接作为控制器方法的返回值返回，就会自动转换为Json格式的字符串
+c>将Java对象直接作为控制器方法的返回值返回**，就会自动转换为Json格式的字符**串
 
 ```java
-@RequestMapping("/testResponseUser")
-@ResponseBody
-public User testResponseUser(){
-    return new User(1001,"admin","123456",23,"男");
+package mcxgroup.controller;
+
+import mcxgroup.entity.User;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class Restfulcontroller {
+    @GetMapping("/req")
+//    @ResponseBody//加了body就是作为字符串输出，不加就是作为页面跳转，
+    public String deGetRequest(){
+//        restful就是一种风格。
+        return "{\"message\":\"返回查询结果\"}";//转意输出，
+    }
+
+    @GetMapping("/user")
+    public User doRest(){
+        User user = new User();
+        user.setId(1);
+        user.setName("啊啊啊啊");
+        return user;
+    }
 }
-12345
+
 ```
+
+
+
+编写REST接口只需要定义`@RestController`，然后，每个方法都是一个API接口，输入和输出只要能被Jackson序列化或反序列化为JSON就没有问题。我们用浏览器测试GET请求，可直接显示JSON响应：
 
 浏览器的页面中展示的结果：
 
-{“id”:1001,“username”:“admin”,“password”:“123456”,“age”:23,“sex”:“男”}
+![image-20230424222724099](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image-20230424222724099.png)
 
 ### 5、SpringMVC处理ajax
 
@@ -1853,6 +1905,155 @@ public String testAjax(String username, String password){
 ### 7、ResponseEntity
 
 ResponseEntity用于控制器方法的返回值类型，该控制器方法的返回值就是响应到浏览器的响应报文
+
+### 跨域访问
+
+假设你的公司内部有一个应用程序，它运行在 `http://localhost:8080` 上。现在你想要从这个应用程序中发起一个 Ajax 请求去访问另一个运行在 `http://example.com` 上的服务器资源。
+
+由于这两个域名不同，所以默认情况下，浏览器会拒绝该请求，并抛出跨域安全错误。这就像是你的公司门卫只允许进入本公司的员工，而不允许外来人士进入。
+
+为了解决这个问题，可以在服务端添加 CORS 头信息，告诉浏览器允许来自 `http://localhost:8080` 的跨域请求。这就像是你的公司门卫特别开通了一个通道，允许某些特定的外来人士进入大楼。
+
+Spring 的 `@CrossOrigin` 注解就提供了这样的功能，它可以设置允许跨域请求的来源、允许的 HTTP 方法、允许的头信息、缓存时间等相关参数，从而实现跨域请求的控制。
+
+#### @crossOrigin -controller跨域注解
+
+其中@CrossOrigin中的2个参数：
+
+**origins** ： 允许可访问的域列表
+
+**maxAge**：准备响应前的缓存持续的最大时间（以秒为单位）。
+
+```java
+@CrossOrigin(origins = {"http://127.0.0.1:8080"})
+@CrossOrigin(origins = "*")
+@CrossOrigin(maxAge = 3600)
+```
+
+`maxAge` 参数用于指定预检请求（preflight request）的缓存时间。预检请求是在实际请求之前发出的一种 HTTP OPTIONS 请求，它用于检查实际请求是否安全以及是否可以被服务器接受。浏览器通常会对预检请求进行缓存，以减少网络流量和延迟。
+
+在跨域请求中，如果服务器需要发送 CORS 响应头信息，则会自动发送预检请求。如果服务器对预检请求的响应中包含了 `Access-Control-Max-Age` 头部，并设置了一个非零值，那么浏览器将会缓存此次预检请求的响应结果，并在下一次同源请求时使用该响应结果，从而避免再次发送预检请求。
+
+例如，以下代码示例设置 `maxAge` 为 3600 秒：
+
+```java
+@CrossOrigin(origins = "http://localhost:8080", maxAge = 3600)
+@RestController
+public class UserController {
+    // ...
+}
+```
+
+这表示在收到来自 `http://localhost:8080` 的预检请求时，服务器会返回一个 `Access-Control-Max-Age: 3600` 的响应头，告诉浏览器可以将预检请求结果缓存 3600 秒，即一个小时。注意：单位是秒，如果不是整数值，则会被舍去小数部分。
+
+值得注意的是，`maxAge` 参数只有在预检请求的响应中才会生效，对于实际请求是没有作用的。
+
+#### <mvc:cors>xml中配置
+
+小程序啥的都不行，都不能跨域访问。
+
+在 Spring 中，可以使用 `CorsConfigurationSource` 和 `CorsFilter` 类实现跨域访问控制。以下是在 applicationContext.xml 文件中配置跨域访问的示例：
+
+1. 首先，在 applicationContext.xml 文件中添加一个 `CorsConfigurationSource` 的 bean，并设置允许跨域请求的来源、HTTP 方法、头信息等相关参数：
+
+   ```xml
+   <bean id="corsConfiguration" class="org.springframework.web.cors.CorsConfiguration">
+       <property name="allowedOrigins" value="http://localhost:8080"/>
+       <property name="allowedMethods" value="GET,POST,PUT"/>
+       <property name="allowedHeaders" value="Content-Type,Authorization"/>
+       <property name="exposedHeaders" value="Content-Type,Authorization"/>
+       <property name="maxAge" value="3600"/>
+       <property name="allowCredentials" value="true"/>
+   </bean>
+   
+   <bean id="corsConfigurationSource" class="org.springframework.web.cors.UrlBasedCorsConfigurationSource">
+       <property name="corsConfigurations">
+           <map>
+               <entry key="/**" value-ref="corsConfiguration"/>
+           </map>
+       </property>
+   </bean>
+   ```
+
+2. 然后，在 applicationContext.xml 文件中添加一个 `CorsFilter` 的 bean，并将上述创建的 `CorsConfigurationSource` 对象注入到其中：
+
+   ```xml
+   <bean id="corsFilter" class="org.springframework.web.filter.CorsFilter">
+       <constructor-arg ref="corsConfigurationSource"/>
+   </bean>
+   ```
+
+这样，在每次发起的跨域请求时，Spring 会先检查该请求是否允许跨域访问。如果允许，就会添加相应的 CORS 头信息，并返回响应；否则，将阻止该请求，并抛出跨域安全错误。
+
+需要注意的是，在配置文件中使用 `CorsFilter` 后，您的应用程序将处理所有的跨域请求，因此请务必确保您充分了解这些请求的来源和目的。
+
+
+
+Spring MVC 提供了 `<mvc:cors>` 配置元素，可以用于在 XML 中配置跨域访问。使用 `<mvc:cors>` 配置元素，您可以设置允许跨域请求的来源、HTTP 方法、头信息等相关参数。
+
+以下是一个示例，在 `<mvc:cors>` 配置元素中设置允许来自 `http://localhost:8080` 的 GET 和 POST 请求：
+
+```xml
+<mvc:cors>
+  <mvc:mapping path="/**"
+    allowed-origins="http://localhost:8080"
+    allowed-methods="GET,POST"
+  />
+</mvc:cors>
+```
+
+您还可以设置其他属性，例如 `allowed-headers`、`exposed-headers`、`max-age` 和 `allow-credentials` 等。
+
+需要注意的是，如果您同时在 XML 和 Java 代码中配置跨域访问，则应该确保两种配置方式不会相互冲突。优先级高的配置方式将覆盖优先级低的配置方式，会优先选择注解的。因此，建议只使用其中一种配置方式，以避免不必要的麻烦和混淆。
+
+当使用 `<mvc:cors>` 配置元素配置跨域访问时，还可以设置其他属性。以下是一些常用的属性及其对应的配置示例：
+
+- `allowed-methods`: 允许的 HTTP 方法。例如，`GET, POST, PUT, DELETE`。示例：
+
+  ```xml
+  <mvc:mapping path="/**"
+    allowed-origins="http://localhost:8080"
+    allowed-methods="GET,POST,PUT,DELETE"
+  />
+  ```
+
+- `allowed-headers`: 允许的 HTTP 头信息。例如，`Content-Type, Authorization`。示例：
+
+  ```xml
+  <mvc:mapping path="/**"
+    allowed-origins="http://localhost:8080"
+    allowed-headers="Content-Type,Authorization"
+  />
+  ```
+
+- `exposed-headers`: 允许客户端访问的响应头信息。例如，`Content-Type, Authorization`。示例：
+
+  ```xml
+  <mvc:mapping path="/**"
+    allowed-origins="http://localhost:8080"
+    exposed-headers="Content-Type,Authorization"
+  />
+  ```
+
+- `max-age`: 缓存预检请求的时间（单位为秒）。例如，`3600`。示例：
+
+  ```xml
+  <mvc:mapping path="/**"
+    allowed-origins="http://localhost:8080"
+    max-age="3600"
+  />
+  ```
+
+- `allow-credentials`: 是否允许发送凭据信息（如 Cookie 和认证头）进行身份验证。例如，`true` 或 `false`。示例：
+
+  ```xml
+  <mvc:mapping path="/**"
+    allowed-origins="http://localhost:8080"
+    allow-credentials="true"
+  />
+  ```
+
+需要注意的是，这些属性都是可选的，并且您可以根据需要自由组合它们。另外，当同时设置多个配置元素时，Spring MVC 将按照它们在 XML 文件中的顺序依次处理它们，因此后面的配置元素可能会覆盖前面的配置元素的设置。
 
 # 九、文件上传和下载
 
@@ -1941,7 +2142,32 @@ public String testUp(MultipartFile photo, HttpSession session) throws IOExceptio
 12345678910111213141516171819
 ```
 
-# 十、拦截器
+# 十、拦截器 Interceptor
+
+Filter和Interceptor都是用来拦截请求并进行处理的组件，它们之间的区别如下：
+
+1. 作用范围不同：Filter是基于Servlet规范实现的，其作用范围是在HttpServletRequest被Servlet容器处理之前或之后。而Interceptor是Spring MVC框架中的概念，其作用范围是在请求进入Spring MVC控制器之前或之后。
+2. API不同：Filter是Servlet API定义的，它与Servlet容器有关；而Interceptor是Spring MVC框架内部定义的，它与Spring框架有关。
+3. 处理方式不同：Filter可以对请求和响应进行过滤处理，包括修改请求数据、修改响应数据等。而Interceptor通常用于处理请求和响应之前或之后的逻辑，如日志记录、权限检查、异常处理等。
+4. 配置方式不同：Filter需要在web.xml文件中声明，并按照指定顺序配置多个Filter；而Interceptor可以通过实现HandlerInterceptor接口，将其注册到Spring MVC框架中，也可以通过注解的方式来配置。
+
+需要注意的是，Filter属于Servlet规范的一部分，是在请求进入Servlet容器之前或之后进行处理的，因此它可以拦截所有的请求，包括静态资源请求；而Interceptor是Spring MVC框架中的概念，只能拦截到经过DispatcherServlet处理的请求，因此它不能拦截静态资源请求。
+
+
+
+依赖于Spring AOP，相当于环绕通知
+
+导入pom.xml
+
+```xml
+       <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+<!--            tomcat带的api和spring自带，不需要的这个-->
+        </dependency>
+```
 
 ### 1、拦截器的配置
 
@@ -1952,29 +2178,79 @@ SpringMVC中的拦截器需要实现HandlerInterceptor
 SpringMVC的拦截器必须在SpringMVC的配置文件中进行配置：
 
 ```xml
-<bean class="com.atguigu.interceptor.FirstInterceptor"></bean>
-<ref bean="firstInterceptor"></ref>
-<!-- 以上两种配置方式都是对DispatcherServlet所处理的所有的请求进行拦截 -->
-<mvc:interceptor>
-    <mvc:mapping path="/**"/>
-    <mvc:exclude-mapping path="/testRequestEntity"/>
-    <ref bean="firstInterceptor"></ref>
-</mvc:interceptor>
-<!-- 
-	以上配置方式可以通过ref或bean标签设置拦截器，通过mvc:mapping设置需要拦截的请求，通过mvc:exclude-mapping设置需要排除的请求，即不需要拦截的请求
--->
-1234567891011
+    <mvc:interceptors>
+        <mvc:interceptor>
+<!--            对所有的请求-->
+            <mvc:mapping path="/**"/>
+            <bean class="mcxgroup.interceptor.myInterceptro"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
 ```
 
 ### 2、拦截器的三个抽象方法
 
 SpringMVC中的拦截器有三个抽象方法：
 
+```java
+public class myInterceptro implements HandlerInterceptor {
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println(request.getRequestURL()+"--准备执行");
+        return true;
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println(request.getRequestURL()+"--目标处理成功");
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println(request.getRequestURL()+"--响应完成");
+    }
+}
+```
+
 preHandle：控制器方法执行之前执行preHandle()，其boolean类型的返回值表示是否拦截或放行，返回true为放行，即调用控制器方法；返回false表示拦截，即不调用控制器方法
 
-postHandle：控制器方法执行之后执行postHandle()
+postHandle：控制器方法执行之后执行postHandle()，但是还没有响应之前、
 
-afterComplation：处理完视图和模型数据，渲染视图完毕之后执行afterComplation()
+afterComplation：处理完视图和模型数据，渲染视图完毕之后执行afterComplation()。
+
+这三个方法分别代表了拦截器在请求处理前、后以及整个请求完成后所执行的操作。
+
+假如设置了controller方法：
+
+```java
+@RestController
+//@CrossOrigin(origins = {"http://127.0.0.1:8080"})
+public class Restfulcontroller {
+    @GetMapping("/user")
+    public User doRest(){
+        User user = new User();
+        user.setId(1);
+        user.setName("啊啊啊啊");
+        System.out.println("return user啦");
+        return user;
+    }
+}
+```
+
+测试：
+
+```sh
+C:\Users\mcxen>curl http://127.0.0.1:8080/user
+{"id":1,"name":"啊啊啊啊"}
+C:\Users\mcxen>
+
+
+http://127.0.0.1:8080/user--准备执行
+return user啦
+http://127.0.0.1:8080/user--目标处理成功
+http://127.0.0.1:8080/user--响应完成
+```
+
+
 
 ### 3、多个拦截器的执行顺序
 
@@ -1987,6 +2263,106 @@ preHandle()会按照配置的顺序执行，而postHandle()和afterComplation()�
 b>若某个拦截器的preHandle()返回了false
 
 preHandle()返回false和它之前的拦截器的preHandle()都会执行，postHandle()都不执行，返回false的拦截器之前的拦截器的afterComplation()会执行
+
+
+
+### 排除静态资源：
+
+```xml
+    <mvc:interceptors>
+        <mvc:interceptor>
+<!--            对所有的请求-->
+            <mvc:mapping path="/**"/>
+            <mvc:exclude-mapping path="/**.ico"/>
+            <mvc:exclude-mapping path="/**.js"/>
+<!--            配置一些排除的资源-->
+            <bean class="mcxgroup.interceptor.myInterceptro"/>
+        </mvc:interceptor>
+
+    </mvc:interceptors>
+```
+
+也可以通过目录区分，
+
+![image-20230425151704602](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image-20230425151704602.png)
+
+
+
+也可以排除某一个请求（比如：/restful/** 下
+
+```xml
+    <mvc:interceptors>
+        <mvc:interceptor>
+<!--            对所有的请求-->
+            <mvc:mapping path="/restful/**"/>
+            <mvc:mapping path="/webapi/**"/>
+            <mvc:exclude-mapping path="/**.ico"/>
+            <mvc:exclude-mapping path="/**.js"/>
+<!--            配置一些排除的资源-->
+            <bean class="mcxgroup.interceptor.myInterceptro"/>
+        </mvc:interceptor>
+
+    </mvc:interceptors>
+```
+
+
+
+> 在Spring MVC中，多个拦截器的执行顺序与它们在Spring的配置文件中声明的顺序相关。按照声明顺序，先声明的拦截器会先被执行，后声明的拦截器会后被执行。
+>
+> 例如，声明了两个拦截器A和B，将它们都加入到Spring MVC的配置文件中，则A会先被执行，然后再执行B。如果需要改变拦截器的执行顺序，可以通过调整它们在配置文件中的声明顺序来实现。
+>
+> 需要注意的是，如果一个拦截器的preHandle方法返回false，那么后面的拦截器将不会被执行，请求也不会被发送到控制器。同时，如果一个拦截器的afterCompletion方法抛出了异常，那么前面的拦截器的afterCompletion方法将不会被执行，这可能会对应用程序产生一些影响。因此，在编写拦截器时，需要特别注意这些情况，并进行适当的处理。
+
+### 实现一个用户样貌记录器
+
+导入logback：
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+    <appender name = "console" class = "ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                <!--                下面的thread对应的就是main线程  logger 是哪个类10表示太长进行压缩  %msg%n是具体的内容-->
+                [%thread]  %d{HH:mm:ss.SSS} %level %logger{10} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+    <appender name="accessHistoryLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+<!--        生成每一天的自动的输出文件-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>
+                d:/logs/history.%d.log
+            </fileNamePattern>
+        </rollingPolicy>
+    </appender>
+    <!--    level代表了日志的输出的级别
+            error 错误，
+            warn 警告
+            info 一般
+            debug 调试信息
+            trace 程序运行跟踪信息
+            开发时改为debug，一般时使用info
+    -->
+    <root level = "debug">
+<!--        <root> 标签表示默认的日志记录器。它是所有其他日志记录器的祖先，如果没有为特定的类或包指定日志记录器，则使用 <root> 标签的配置。-->
+        <appender-ref ref = "console"/>
+<!--         属性引用了一个名为 "console" 的 appender，将日志事件输出到控制台(console)。-->
+    </root>
+<!--    logger 标签用于配置日志记录器。-->
+<!--    name：指定日志记录器的名称，通常使用类的全限定名作为名称。-->
+    <logger name = "mcxgroup.interceptor.AccessInterceptor" level = "INFO" additivity = "false">
+<!--        additivity 属性被设置为 false，表示日志事件不会被传递到父级日志记录器。-->
+        <appender-ref ref="accessHistoryLog"/>
+    </logger>
+</configuration>
+```
+
+
+
+
+
+
 
 # 十一、异常处理器
 

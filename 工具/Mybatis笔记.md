@@ -1631,6 +1631,54 @@ STDOUT_LOGGING标准日志输出
 
 
 
+#### 总结：
+
+Logback 是一个强大的日志管理框架，使用 XML 文件配置。在 Logback 的配置文件中，logger 标签用于配置日志记录器。
+
+Logger 标签有以下属性：
+
+- name：指定日志记录器的名称，通常使用类的全限定名作为名称。
+- level：指定日志记录器的级别，即只记录该级别及以上级别的日志信息。可选值包括 TRACE、DEBUG、INFO、WARN、ERROR 和 OFF。
+- additivity：指定是否将日志事件传递给父级日志记录器，默认为 true。
+
+以下是一个 logger 标签的示例：
+
+```xml
+xmlCopy Code<logger name="com.example.myapp" level="DEBUG" additivity="false">
+  <appender-ref ref="CONSOLE"/>
+  <appender-ref ref="FILE"/>
+</logger>
+```
+
+在这个示例中，我们创建了一个名为 com.example.myapp 的日志记录器，并设置其日志级别为 DEBUG。additivity 属性被设置为 false，表示日志事件不会被传递到父级日志记录器。该日志记录器同时也引用了两个 appender：CONSOLE 和 FILE，这里的appender是要自定义的，这意味着日志事件将输出到控制台和文件中。
+
+> 比如：console appnder是这么用的
+>
+> ```xml
+>     <appender name = "console" class = "ch.qos.logback.core.ConsoleAppender">
+>         <encoder>
+>             <pattern>
+>                 <!--                下面的thread对应的就是main线程  logger 是哪个类10表示太长进行压缩  %msg%n是具体的内容-->
+>                 [%thread]  %d{HH:mm:ss.SSS} %-5level %logger{10} - %msg%n
+>             </pattern>
+>         </encoder>
+>     </appender>
+> ```
+>
+> 
+
+需要注意的是，Logger 标签是可以嵌套使用的，这意味着我们可以为特定的包、类或方法设置不同的日志级别、appender 等配置。
+
+在 Logback 配置文件中，`<root>` 标签表示默认的日志记录器。它是所有其他日志记录器的祖先，如果没有为特定的类或包指定日志记录器，则使用 `<root>` 标签的配置。
+
+`level="debug"` 参数设置了根日志记录器的日志级别为 DEBUG，这意味着只有 debug 及以上级别的日志信息才会被记录。
+
+`<appender-ref ref="console"/>` 属性引用了一个名为 "console" 的 appender，将日志事件输出到控制台(console)。
+
+因此，这个配置意味着所有日志记录器都将使用该配置，并记录 DEBUG 及以上级别的日志信息，并将日志事件输出到控制台。
+
+
+
 ### 6.3、Log4j
 
 什么是Log4j：
