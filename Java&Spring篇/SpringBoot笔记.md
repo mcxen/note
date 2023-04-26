@@ -338,94 +338,227 @@ import javax.validation.constraints.NotNull;
 
 ## 配置文件的位置以及原理
 
-**优先级依次降低**
 
-项目下的 `config/application.yml` 
 
-项目下的 `application.yml` 
+springboot的application.properties可以设置很多东西，
 
-项目classpath路径下的 `config/application.yml`
+1. 服务器端口号： server.port=8080
+2. 应用名称： spring.application.name=MyApplication
+3. 日志级别： logging.level.root=INFO
+4. 数据库配置： spring.datasource.url=jdbc:mysql://localhost:3306/mydatabase spring.datasource.username=root spring.datasource.password=123456
 
-项目classpath路径下的 `application.yml`
+### 配置文件设定文件
 
-**多环境配置**
-
-```yml
-# application.yml
-
-# 配置激活的配置
-spring:
-  profiles:
-    active: dev
-
-# application-dev.yml
-
-# application-pro.yml
- 
-# 也可以使用 三条 --- 来实现配置的分割 如下
-
-spring:
-  profiles:
-    active: dev
-server:
-  port: 8080
----
-server:
-  port: 8181
-spring:
-  profiles: dev
----
-server:
-  port: 8282
-spring:
-  profiles: pro
----
-server:
-  port: 8383
-spring:
-  profiles: test
-```
-
-**配置的原理**
-
-配置文件到底能写什么 `yml 配置文件和 factories 文件有直接挂钩`
-
-如下代码
+**设定controller里面的属性值**
 
 ```java
-@ConfigurationProperties(prefix = "spring.jackson")
-public class JacksonProperties {
+@RestController
+public class PropertiesController {
+    @Value("${school.greade}")
+    Integer greade = 1;
+//    它会将配置文件（如 application.properties 或 application.yml）
+//    中名为 "school.greade" 的属性值读取到变量 greade
+    @Value("${school.classnum}")
+    Integer classnum;
+    @GetMapping("/g")
+    public String gradeClass(){
+        return "年级"+greade+" 班级为："+classnum;
+    }
 }
 ```
 
-因为 `JacksonProperties` 使用`@ConfigurationProperties(prefix = "spring.jackson")`注解标识
+```sh
+F:\项目\note>curl localhost:8080/g
+年级2 班级为：4
+```
 
-会自动去找配置文件中 `spring.jackson`为前缀的配置，找到了就覆盖默认的配置
+还可以指定ip地址之类的
 
-所以能配置哪些内容，取决于 `xxxProperties`类的属性 
 
-**能够配置哪些内容，可以通过 yml 配置文件 Ctrl + 鼠标左键点进该配置文件 **
 
-xxxAutoConfiguration：默认值   xxxProperties  和 配置文件绑定，就可以使用自定义的配置
+**静态变量**
 
-**精髓**
+Spring @Value注解不支持设置静态变量。这是因为静态变量是类级别的，而Spring容器是实例化的。在Spring容器初始化时，Spring会创建一些实例来管理bean对象，而静态变量是在类加载时就被初始化了，此时Spring容器还没有被创建。因此，@Value注解无法注入静态变量。
 
-- SpringBoot启动会加载大量的自动配置类
-- 我们看我们需要的功能有没有在SpringBoot默认写好的自动配置类当中
-- 我们再看这个自动配置类到底配置了哪些组件 (只要组件在其中，我们就不需要配置了)
-- 给容器中自动配置类添加组件的时候，会从properties类中获取某些属性，我们只需要在配置文件中指定这些属性的值即可
-- xxxAutoConfiguration：自动配置类，给容器中添加组件
-- xxxProperties：封装配置文件中相关的属性
+如果你需要在静态方法中使用@Value注解注入值，可**以考虑使用静态代码块来初始化静态变量，然后在非静态方法中使用该变量。**这样就可以实现注入。
 
-**@Conditional**
+示例代码：
 
-自动配置类必须在一定的条件下才会生效
+```java
+public class MyBean {
 
-参考文章： https://blog.csdn.net/xcy1193068639/article/details/81517456?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.edu_weight&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.edu_weight 
+    private static String myValue;
 
-可以通过配置：`debug: true`查看哪些生效了
+    @Value("${school.age}")
+    public void setMyValue(String myValue) {
+        MyBean.myValue = myValue;
+    }
+    @GetMapping("/do")
+    public static void doSomething() {
+        System.out.println("myValue: " + myValue);
+    }
+    
+    static {
+        // 初始化静态变量
+        myValue = "default value";
+    }
+}
+```
+
+在使用静态方法doSomething时，myValue已经被注入age了。
+
+
 
 ## SpringBoot Web开发
+
+### Service和Dao层设置
+
+#### 导入pom和properties
+
+mybatis-spring-boot-starter是一个用于在Spring Boot中集成MyBatis的官方Starter。它提供了MyBatis在Spring Boot中的自动配置，包括自动扫描Mapper接口、自动装配SqlSessionFactory、自动配置事务管理器等。使用mybatis-spring-boot-starter可以使得在Spring Boot应用中使用MyBatis变得更加简单和方便。
+
+而MyBatis是一款优秀的持久层框架，它是一种半自动化的ORM（Object-Relational Mapping）框架，将SQL语句和Java对象之间的映射配置在XML或Java注解中，使用起来比Hibernate等全自动化ORM框架更加灵活和轻量级。
+
+简单来说，mybatis-spring-boot-starter是MyBatis在Spring Boot中的自动化配置，而MyBatis是一款独立的持久层框架，可以在任何Java应用中使用。
+
+```xml
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.25</version>
+        </dependency>
+```
+
+
+
+> #### 查看mysql版本
+>
+> 1. 使用MySQL命令行客户端：
+>
+> 连接到MySQL服务器后，输入以下命令：
+>
+> ```
+> SELECT VERSION();
+> ```
+>
+> 执行该命令后，MySQL将返回当前安装的MySQL版本号。
+>
+> 1. 使用Linux命令行：
+>
+> 在Linux终端中，输入以下命令：
+>
+> ```
+> mysql --version
+> ```
+>
+> 执行该命令后，MySQL将返回当前安装的MySQL版本号。
+>
+> #### Linux命令--
+>
+> 单个短横线“-”表示一个短选项，而双短横线“--”表示一个长选项。
+>
+> 短选项通常只有一个字母，表示某个选项的缩写，例如“-h”表示“--help”，“-v”表示“--version”。短选项可以单独使用，也可以和参数一起使用，例如：
+>
+> ```
+> mkdir -p /path/to/new_folder
+> ```
+>
+> 长选项通常由一个或多个单词组成，表示某个选项的全称，例如“--help”表示显示帮助信息，“--version”表示显示软件版本信息。长选项通常需要使用等号“=”连接参数值，
+
+设置application.properties
+
+```properties
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/mybatis?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+spring.datasource.username=root
+spring.datasource.password=root
+```
+
+#### 新建controller，pojo，service，mapper
+
+![](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/64489fa86239c.jpg)
+
+
+
+Student.java:
+
+```java
+public class Student {
+    private int id;
+    private String name;
+    private int tid;
+}
+```
+
+Mapper:
+
+```java
+@Mapper
+//@Mapper注解用于标识一个Java类是MyBatis中的Mapper接口，
+// 一般与@Select、@Insert、@Update、@Delete等注解一起使用，
+// 用于描述SQL语句的执行和返回结果的映射。
+@Repository
+/*
+@Mapper注解用于标识StudentMapper接口是一个MyBatis的Mapper接口，
+用于执行与学生对象相关的SQL语句；@Repository注解
+用于标识StudentMapper接口是一个Spring的仓库类，
+用于访问数据库和持久化学生对象的数据。
+ */
+public interface StudentMapper {
+    @Select("SELECT * FROM student WHERE id = #{id}")
+    Student findById(Integer id);
+}
+```
+
+Services:
+
+```java
+@Service
+public class StudentService {
+    @Autowired
+    StudentMapper studentMapper;
+    public Student getStudent(Integer id){
+        return studentMapper.findById(id);
+    }
+}
+```
+
+Controller:
+
+```java
+//StudentController.java
+@RestController
+public class StudentController {
+//    查出来学生在哪里
+    @Autowired
+    StudentService studentService;
+    @GetMapping("/s")
+    public String getStu(@RequestParam() int id){
+        return studentService.getStudent(id).toString();
+    }
+}
+```
+
+测试结果：
+
+```sh
+F:\项目\note>curl localhost:8080/s?id=1
+Student{id=1, name='小明', tid=1}
+F:\项目\note>curl localhost:8080/s?id=2
+Student{id=2, name='小红', tid=1}
+F:\项目\note>curl localhost:8080/s?id=4
+Student{id=4, name='小李', tid=1}
+F:\项目\note>
+```
+
+
+
+
 
 ### 如何放置静态资源文件
 
@@ -517,10 +650,4 @@ public class MyMvcConfig implements WebMvcConfigurer {
 ```
 
 自动配置的原理是一样的，SpringBoot在自动配置的时候，先看容器中有没有用户自己配置的，如果有用户自己配置的bean，那么就用用户配置的，如果没有，就用自动配置的。如果组件可以存在多个，就将用户配置和自己的默认组合起来
-
-## 基于SpringBoot和模板引擎的项目实战
-
-和尚硅谷的一样
-
-记得使用`Lombok`的时候,不仅仅是 `@Data`注解，也要标注 `@AllArgsConstructor`  `@NoArgsConstructor` 为有参构造和无参构造
 

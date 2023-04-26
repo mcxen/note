@@ -71,6 +71,22 @@
 >
 > 
 
+### 设置网络：
+
+因为本地装的vm virualbox时常崩溃，所以下载了一个vmware，参照一些教程配置以后，依然ping不通本机和外网，报错network is unreachable。
+
+**找到的有效解决方法是：**
+修改虚拟机文件/etc/sysconfig/network-scripts/ifcfg-eth0，将ONBOOT=no 改成ONBOOT= yes
+然后重启网络，`service network restart`
+
+
+
+`ip addr`查看ip地址
+
+
+
+
+
 ## 走进Linux系统
 
 > 开机登录
@@ -2656,8 +2672,8 @@ mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
 - [CentOS7](http://mirrors.163.com/.help/CentOS7-Base-163.repo) ：http://mirrors.163.com/.help/CentOS7-Base-163.repo
 
 ```
-wget http://mirrors.163.com/.help/CentOS6-Base-163.repo
-mv CentOS6-Base-163.repo CentOS-Base.repo
+wget http://mirrors.163.com/.help/CentOS7-Base-163.repo
+mv CentOS7-Base-163.repo CentOS-Base.repo
 ```
 
 运行以下命令生成缓存
@@ -2675,6 +2691,57 @@ sohu 的 yum 源安装方法查看: http://mirrors.sohu.com/help/centos.html
 
 阿里云的源：https://developer.aliyun.com/mirror/centos
 
+### RabbitMQ-安装
+
+echo "export LC_ALL=en_US.UTF-8"  >>  /etc/profile
+source /etc/profile
+下面两个安装方法，任选其一即可，推荐方法一：
+2 方法一（推荐）
+第一步：执行
+curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
+第二步，执行：
+curl -s https://packagecloud.io/install/repositories/rabbitmq/erlang/script.rpm.sh | sudo bash
+第三步：sudo yum install rabbitmq-server-3.8.2-1.el7.noarch
+
+
+
+**RabbitMQ常用命令**
+
+添加admin用户：
+rabbitmqctl add_user admin password
+rabbitmqctl set_user_tags admin administrator
+
+
+
+开启web管理界面
+rabbitmq-plugins enable rabbitmq_management
+
+
+
+浏览器访问ip: 15672
+用admin，密码password即可登录
+
+http://192.168.198.128:15672/#/
+
+
+
+停止RabbitMQ
+$rabbitmqctl stop
+
+设置开机启动
+$ systemctl enable rabbitmq-server
+
+启动RabbitMQ
+$ systemctl start rabbitmq-server
+
+看看端口有没有起来，查看状态
+
+$ rabbitmqctl status
+
+要检查RabbitMQ服务器的状态，请运行：
+
+systemctl status rabbitmq-server
+
 
 
 ### JDK安装
@@ -2683,50 +2750,24 @@ sohu 的 yum 源安装方法查看: http://mirrors.sohu.com/help/centos.html
 
 - 安装Java环境
 
-  -  如果有安装openjdk 则卸载 
-
-  - ![1594726791310](images/1594726791310.png)
-
   - ```bash
-    [root@ali-icanci home]# java -version
-    -bash: java: command not found
-    [root@ali-icanci home]# javac
-    -bash: javac: command not found
-    [root@ali-icanci home]# java
-    -bash: java: command not found
-    # 检查JDK版本
-    [root@ali-icanci home]#  rpm -qa|grep jdk 
-    # rpm -e --nodeps 强制移除 jdk版本
-    [root@ali-icanci home]#
+    1.查看云端目前支持安装的JDK版本
+    yum search java|grep jdk
+    2.选择JDK版本，并安装
+    yum install -y java-1.8.0-openjdk
+    3.检查是否安装成功
+    java -version
+    4.查看JDK的安装目录
+    find / -name 'java'
     ```
   
--  安装JDK 
-
-  - ```bash
-    # 安装java rpm
-    rpm -ivh xxx.rpm
-    ```
-
-  - ![1594728566535](images/1594728566535.png)
-
-  - ```
-    # 安装完成后配置环境变量   可以暂时不设置 依旧可以使用
-    文件：/etc/profile
-    
-    JAVA_HOME=/usr/java/jdk1.8.0_131
-    CLASSPATH=%JAVA_HOME%/lib;%JAVA_HOME%/jre/lib
-    PATH=$JAVA_HOME/bin;$JAVA_HOME/jre/bin
-    export PATH CLASSPATH JAVA_HOME
-    
-    # 让新增的环境变量生效！
-    source /etc/profile
-    ```
+-  
 
   - 测试 一个SpringBoot项目已经成功跑起来
   
   - 应该修改如下
   
-  - ![1595374540769](images/1595374540769.png)
+- ![1595374540769](images/1595374540769.png)
 
 ### Tomcat安装
 
