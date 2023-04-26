@@ -657,7 +657,7 @@ public class User {
 
 
 
-### 3、@RequestParam
+### 3、@RequestParam以及@RequestBody
 
 @RequestParam是将请求参数和控制器方法的形参创建映射关系
 
@@ -670,6 +670,47 @@ required：设置是否必须传输此请求参数，默认值为true
 若设置为true时，则当前请求必须传输value所指定的请求参数，若没有传输该请求参数，且没有设置defaultValue属性，则页面报错400：Required String parameter ‘xxx’ is not present；若设置为false，则当前请求不是必须传输value所指定的请求参数，若没有传输，则注解所标识的形参的值为null
 
 defaultValue：不管required属性值为true或false，当value所指定的请求参数没有传输或传输的值为""时，则使用默认值为形参赋值
+
+**@RequestParam以及@RequestBody**区别
+
+@RequestParam和@RequestBody是Spring MVC框架中常用的两个注解，它们的主要区别在于它们处理请求参数的方式不同。
+
+@RequestParam注解用于从请求URL中获取单个或多个查询参数或表单参数。当使用@RequestParam时，需要指定参数的名称、数据类型和是否必填等信息。例如：
+
+```java
+@GetMapping("/user")
+public User getUser(@RequestParam("id") Long userId) {
+    // 根据userId查询用户信息
+}
+```
+
+上面的代码中，@RequestParam注解用于从请求URL中获取名为"id"的查询参数，并将其转换为Long类型的userId参数。
+
+而@RequestBody注解用于从请求体中获取请求参数，适用于POST、PUT等请求方法。当使用@RequestBody时，Spring会自动将请求体中的JSON、XML等数据格式转换为Java对象。例如：
+
+```java
+@PostMapping("/user")
+public User createUser(@RequestBody User user) {
+    // 处理用户创建请求
+}
+```
+
+上面的代码中，@RequestBody注解用于将请求体中的JSON格式数据转换成User对象，并传递给createUser方法。
+
+因此，@RequestParam注解适用于获取URL中的请求参数，而@RequestBody注解适用于获取请求体中的请求参数。
+
+> ![截屏2023-04-25 22.09.04](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/%E6%88%AA%E5%B1%8F2023-04-25%2022.09.04.png)post很难在浏览器做请求，因此我们一般使用表单或者postman来请求Post
+>
+> > ```java
+> >     @PostMapping("/p1")
+> > //    Post传参数一般比较多，所以封装成了类，所以就是RequestBody
+> > //    当使用@RequestBody时，Spring会自动将请求体中的JSON、XML等数据格式转换为Java对象。
+> >     public String postRequest(@RequestBody Student student){
+> >         return "我收到了参数："+student;
+> >     }
+> > ```
+>
+> 记得在Student里面set和get方法以及构造函数
 
 ### 4、@RequestHeader
 
@@ -696,14 +737,14 @@ defaultValue：不管required属性值为true或false，当value所指定的请�
     邮箱：<input type="text" name="email"><br>
     <input type="submit">
 </form>
-12345678
+
 @RequestMapping("/testpojo")
 public String testPOJO(User user){
     System.out.println(user);
     return "success";
 }
 //最终结果-->User{id=null, username='张三', password='123', age=23, sex='男', email='123@qq.com'}
-123456
+
 ```
 
 > 时间格式转换
