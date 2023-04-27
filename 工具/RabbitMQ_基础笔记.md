@@ -547,12 +547,13 @@ Java 进行连接的时候，需要 Linux 开放 5672 端口，否则会连接�
 6. 发送一个消息到交换机，交换机发送到队列。"" 代表默认交换机
 
 ```java
-/**
- * @author frx
- * @version 1.0
- * @date 2022/7/23  21:59
- * desc:生产者：发消息
- */
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
 public class Producer {
 
     //对列名称
@@ -563,11 +564,11 @@ public class Producer {
         //创建一个连接工厂
         ConnectionFactory factory = new ConnectionFactory();
         //工厂IP 连接RabbitMQ对列
-        factory.setHost("192.168.91.200");
+        factory.setHost("localhost");
         //用户名
-        factory.setUsername("root");
+        factory.setUsername("admin");
         //密码
-        factory.setPassword("123");
+        factory.setPassword("password");
 
         //创建连接
         Connection connection = factory.newConnection();
@@ -593,10 +594,14 @@ public class Producer {
          */
         channel.basicPublish("",QUEUE_NAME,null,message.getBytes());
         System.out.println("消息发送完毕");
+        channel.close();
+        connection.close();
     }
 }
 ```
 
++ 设置权限
++ ![image-20230427095738237](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230427095738237.png)
 + 结果
 
 ![image](https://cdn.staticaly.com/gh/xustudyxu/image-hosting1@master/20220723/image.x5zo4wuta74.webp)
@@ -646,7 +651,7 @@ AMQP.BasicProperties properties = new AMQP.BasicProperties().builder().priority(
 channel.basicPublish("", QUEUE_NAME, properties, message.getBytes());
 ```
 
-### 消息消费者
+### 消息消费者-接受消息
 
 创建一个类作为消费者，消费 RabbitMQ 队列的消息
 
@@ -664,13 +669,12 @@ public class Consumer {
     //接受消息
     public static void main(String[] args) throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("192.168.91.200");
-        factory.setUsername("root");
-        factory.setPassword("123");
+        factory.setHost("localhost");
+        factory.setUsername("admin");
+        factory.setPassword("password");
         Connection connection = factory.newConnection();
-
         Channel channel = connection.createChannel();
-
+//前面都是一样的
         //声明接收消息
         DeliverCallback deliverCallback = (consumerTag,message) -> {
             System.out.println(new String(message.getBody()));
@@ -684,8 +688,8 @@ public class Consumer {
          * 消费者消费消息
          * 1.消费哪个队列
          * 2.消费成功之后是否要自动应答true：代表自动应答false:代表手动应答
-         * 3.消费者未成功消费的回调
-         * 4.消费者取消消费的回调
+         * 3.消费者未成功消费的回调，消息没收到的时候的回调
+         * 4.消费者取消消费的回调，消息收到之后ack确认信息。
          */
         channel.basicConsume(QUEUE_NAME,true,deliverCallback,cancelCallback);
     }

@@ -85,6 +85,14 @@
 
 
 
+> Windows ssh客户端：
+>
+> ![MainWindow](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/WindTerm.png)
+>
+> [WindTerm_2.6.0](https://github.com/kingToolbox/WindTerm/releases/download/2.6-prerelease/WindTerm_2.6.0_Prerelease_1_Windows_Portable_x86_64.zip)
+>
+> 
+
 
 
 ## 走进Linux系统
@@ -2651,11 +2659,50 @@ rpm 执行安装包
   - **yum clean oldheaders**: 清除缓存目录下旧的 headers
   - **yum clean, yum clean all (= yum clean packages; yum clean oldheaders)** :清除缓存目录下的软件包及旧的 headers
 
-#### 国内 yum 源
+使用 yum 安装软件包之前，需指定好 yum 下载 RPM 包的位置，此位置称为 yum 源。换句话说，yum 源指的就是软件安装包的来源。
 
-网易（163）yum 源是国内较好的 yum 源之一 ，无论是速度还是软件版本，都非常的不错。
+使用 yum 安装软件时至少需要一个 yum 源。yum 源既可以使用网络 yum 源，也可以将本地光盘作为 yum 源。接下来就给大家介绍这两种 yum 源的搭建方式。
 
-将yum源设置为163 yum，可以提升软件包安装和更新的速度，同时避免一些常见软件版本无法找到。
+**网络 yum 源搭建**
+
+一般情况下，只要你的主机网络正常，可以直接使用网络 yum 源，不需要对配置文件做任何修改，这里对 yum 源配置文件做一下简单介绍。
+
+网络 yum 源配置文件位于 /etc/yum.repos.d/ 目录下，文件扩展名为"*.repo"（只要扩展名为 "*.repo" 的文件都是 yum 源的配置文件）。
+
+```sh
+[root@localhost ~]# ls /etc/yum.repos.d/
+CentOS-Base.repo
+CentOS-Media.repo
+CentOS-Debuginfo.repo.bak
+CentOS-Vault.repo
+```
+
+可以看到，该目录下有 4 个 yum 配置文件，通常情况下 CentOS-Base.repo 文件生效。我们可以尝试打开此文件，命令如下：
+
+```sh
+[root@localhost yum.repos.d]# vim /etc/yum.repos.d/ CentOS-Base.repo
+[base]
+name=CentOS-$releasever - Base
+mirrorlist=http://mirrorlist.centos.org/? release= $releasever&arch=$basearch&repo=os
+baseurl=http://mirror.centos.org/centos/$releasever/os/$basearch/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+…省略部分输出…
+```
+
+
+
+此文件中含有 5 个 yum 源容器，这里只列出了 base 容器，其他容器和 base 容器类似。base 容器中各参数的含义分别为：
+
+- [base]：容器名称，一定要放在[]中。
+- name：容器说明，可以自己随便写。
+- mirrorlist：镜像站点，这个可以注释掉。
+- baseurl：我们的 yum 源服务器的地址。默认是 CentOS 官方的 yum 源服务器，是可以使用的。如果你觉得慢，则可以改成你喜欢的 yum 源地址。
+- enabled：此容器是否生效，如果不写或写成 enabled 则表示此容器生效，写成 enable=0 则表示此容器不生效。
+- gpgcheck：如果为 1 则表示 RPM 的数字证书生效；如果为 0 则表示 RPM 的数字证书不生效。
+- gpgkey：数字证书的公钥文件保存位置。不用修改。
+
+
 
 ### 安装步骤
 
@@ -2703,7 +2750,17 @@ wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-
 
 yum clean all
 
-
+> 建议加入epel源
+>
+> EPEL(Extra Packages for Enterprise Linux) 是由 Fedora Special Interest Group 维护的 Enterprise Linux（RHEL、CentOS）中经 常用到的包。
+>
+> 下面以 CentOS 7 为例讲解如何使用本镜像站的 epel 镜像。CentOS 8 同样可用该方法。
+>
+> 首先从 CentOS Extras 这个源里安装 epel-release：
+>
+> ```shell
+> sudo yum install epel-release
+> ```
 
 ### RabbitMQ-安装
 
