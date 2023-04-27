@@ -2691,6 +2691,20 @@ sohu 的 yum 源安装方法查看: http://mirrors.sohu.com/help/centos.html
 
 阿里云的源：https://developer.aliyun.com/mirror/centos
 
+**如果失败了：**
+
+删除yum.repos.d目录下所有文件
+
+rm -f /etc/yum.repos.d/*
+ 然后重新下载阿里的：
+
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+清理缓存：
+
+yum clean all
+
+
+
 ### RabbitMQ-安装
 
 echo "export LC_ALL=en_US.UTF-8"  >>  /etc/profile
