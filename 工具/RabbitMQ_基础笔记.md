@@ -210,177 +210,46 @@ CentOs 8.x 版本需要e18。包括 Red Hat 8,modern Fedora 版本。
 
 ## 安装
 
-> 一键在线安装：
->
-> ### RabbitMQ-安装
->
-> ```sh
-> echo "export LC_ALL=en_US.UTF-8"  >>  /etc/profile
-> source /etc/profile
-> ```
->
-> 下面两个安装方法，任选其一即可，推荐方法一：
-> 2 方法一（推荐）
-> 第一步：执行
->
-> ```sh
-> curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
-> ```
->
-> 第二步，执行：
-> ```sh
-> curl -s https://packagecloud.io/install/repositories/rabbitmq/erlang/script.rpm.sh | sudo bash
-> ```
->
-> 第三步：
->
-> ```sh
-> sudo yum install rabbitmq-server-3.8.2-1.el7.noarch
-> ```
->
-> 
->
-> **RabbitMQ常用命令**
->
-> 添加admin用户：
-> `rabbitmqctl add_user admin password`
-> `rabbitmqctl set_user_tags admin administrator`
->
-> 
->
-> 开启web管理界面
-> `rabbitmq-plugins enable rabbitmq_management`
->
-> 
->
-> 浏览器访问ip: 15672
-> 用admin，密码password即可登录
->
-> http://192.168.198.128:15672/#/
->
-> ![image-20230426205955159](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image-20230426205955159.png)
->
-> 停止RabbitMQ
-> $rabbitmqctl stop
->
-> 设置开机启动
-> $ systemctl enable rabbitmq-server
->
-> 启动RabbitMQ
-> $ systemctl start rabbitmq-server
->
-> 看看端口有没有起来，查看状态
->
-> $ rabbitmqctl status
->
-> 要检查RabbitMQ服务器的状态，请运行：
->
-> systemctl status rabbitmq-server
-
-
-
-### 传输
-
-将在 Windows 或 Mac 下载好的安装包传输到 Linux 中。
-
-首先在 Linux 的 `/usr/local` 目录下创建一个文件夹 `rabbitmq`。请根据需求自定义路径
-
-```sh
-mkdir /usr/local/rabbitmq
-```
-
-利用 `xftp` 工具将两个 `.rpm` 文件传输到刚刚创建的文件夹里
-
-![image](https://cdn.staticaly.com/gh/xustudyxu/image-hosting1@master/20220723/image.6smxk7gp2ig0.webp)
-
-### 安装Erlang
-
-进入 `/usr/local/rabbitmq` 目录，解压安装 Erlang
-
-```sh
-cd /usr/local/rabbitmq
-rpm -ivh erlang-21.3-1.el7.x86_64.rpm
-```
-
-```sh
-[root@master rabbitmq]# rpm -ivh erlang-21.3-1.el7.x86_64.rpm
-警告：erlang-21.3-1.el7.x86_64.rpm: 头V4 RSA/SHA1 Signature, 密钥 ID 6026dfca: NOKEY
-准备中...                          ################################# [100%]
-正在升级/安装...
-   1:erlang-21.3-1.el7                ################################# [100%]
-```
-
-安装完成后输入指令查看到版本号，代表成功
-
-```sh
-erl -v
-```
-
-```sh
-[root@master rabbitmq]# erl -v
-Erlang/OTP 21 [erts-10.3] [source] [64-bit] [smp:1:1] [ds:1:1:10] [async-threads:1] [hipe]
-
-Eshell V10.3  (abort with ^G)
-1>
-```
-
-**问题记录**
-
-如果安装 Erlang 过程出现了如下问题：
-
-![image](https://cdn.staticaly.com/gh/xustudyxu/image-hosting1@master/20220723/image.1urtg7o1ntfk.webp)
-
-出现这个错误的主要原因是没有`libcrypto.so.10(OPENSSL_1.0.2)(64bit)`依赖，我们去下载一个就可以了
-
-下载地址：[libcrypto.so.10(OPENSSL_1.0.2)(64bit)](https://rpmfind.net/linux/rpm2html/search.php?query=libcrypto.so.10%28OPENSSL_1.0.2%29%2864bit%29&submit=Search%20...&system=&arch=)
-
-滑到最下面，下载最后一个
-
-![image](https://cdn.staticaly.com/gh/xustudyxu/image-hosting1@master/20220723/image.mrtslwlzvg0.webp)
-
-下载到本地后通过 `Xftp` 上传到 Linux 中，传输目录一致。接着使用命令安装
-
-```sh
-rpm -ivh openssl-libs-1.0.2k-19.el7.x86_64.rpm --force
-```
-
-安装好这个后，再次安装 Erlang 即可成功
-
-![image](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image.1or3k1972l6o.webp)
-
 ### 安装RabbitMQ
 
-在 `RabiitMQ` 安装过程中需要依赖 `socat` 插件，首先安装该插件
+```sh
+echo "export LC_ALL=en_US.UTF-8"  >>  /etc/profile
+source /etc/profile
+```
+
+下面两个安装方法，任选其一即可，推荐方法一：
+2 方法一（推荐）
+第一步：执行
 
 ```sh
-yum install socat -y
+curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
 ```
 
-解压 `RabbitMQ` 安装包
+第二步，执行：
 
 ```sh
-rpm -ivh rabbitmq-server-3.8.8-1.el7.noarch.rpm
+curl -s https://packagecloud.io/install/repositories/rabbitmq/erlang/script.rpm.sh | sudo bash
 ```
 
-```java
-[root@master rabbitmq]# rpm -ivh rabbitmq-server-3.8.8-1.el7.noarch.rpm
-警告：rabbitmq-server-3.8.8-1.el7.noarch.rpm: 头V4 RSA/SHA256 Signature, 密钥 ID 6026dfca: NOKEY
-准备中...                          ################################# [100%]
-正在升级/安装...
-   1:rabbitmq-server-3.8.8-1.el7      ################################# [100%]
+第三步：
+
+```sh
+sudo yum install rabbitmq-server-3.8.2-1.el7.noarch
 ```
 
-`i` 代表 install
 
-`vh` 代表显示安装进度过程
 
 ### 启动
 
 ```shell
-# 启动服务
-systemctl start rabbitmq-server
+# 启动RabbitMQ
+$ systemctl start rabbitmq-server
+#停止RabbitMQ
+$rabbitmqctl stop
 # 查看服务状态
-systemctl status rabbitmq-server
+$ rabbitmqctl status
+# 要检查RabbitMQ服务器的状态，请运行：
+$ systemctl status rabbitmq-server
 ```
 
 启动 `RabbitMQ` 服务后，查看该服务状态，显示绿色的 `active` 则表示服务安装并启动成功
@@ -420,7 +289,33 @@ rabbitmq-plugins enable rabbitmq_management
 systemctl restart rabbitmq-server
 ```
 
-通过 `http://ip:15672` 访问，ip 为 Linux 的 ip。`rabbitmq` 有一个默认的账号密码 `guest`，但是登录该账号密码会出现权限问题
+通过 `http://localhost:15672` 访问，ip 为 Linux 的 ip。`rabbitmq` 有一个默认的账号密码 `guest`，但是登录该账号密码会出现权限问题
+
+> 查看状态：
+>
+> ```sh
+> [root@localhost ~]# systemctl status rabbitmq-server
+> ● rabbitmq-server.service - RabbitMQ broker
+>    Loaded: loaded (/usr/lib/systemd/system/rabbitmq-server.service; disabled; vendor preset: disabled)
+>    Active: active (running) since Thu 2023-04-27 11:20:06 CST; 8s ago
+>   Process: 73343 ExecStop=/usr/sbin/rabbitmqctl shutdown (code=exited, status=0/SUCCESS)
+>  Main PID: 73396 (beam.smp)
+>    CGroup: /system.slice/rabbitmq-server.service
+>            ├─73396 /usr/lib64/erlang/erts-11.2.2.10/bin/beam.smp -W w -MBas ageffc...
+>            ├─73411 erl_child_setup 32768
+>            ├─73463 inet_gethost 4
+>            └─73464 inet_gethost 4
+> ```
+>
+> 
+
+> 还可以关闭防火墙：
+>
+> ```sh
+> systemctl stop firewalld
+> ```
+>
+> 
 
 ![image](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image.1irradyf2v28.webp)
 
@@ -438,6 +333,12 @@ rabbitmqctl set_user_tags 用户名 角色
 rabbitmqctl set_permissions -p "/" y ".*" ".*" ".*"
 // Make sure to add code blocks to your code group
 ```
+
+添加admin用户：
+`rabbitmqctl add_user admin password`
+`rabbitmqctl set_user_tags admin administrator`
+
+
 
 角色固定有四种级别：
 
@@ -474,7 +375,7 @@ docker run -d --name myRabbitMQ -e RABBITMQ_DEFAULT_USER=用户名 -e RABBITMQ_D
 
 # 4.RabbitMQ 入门案例
 
-[[toc]]
+
 
 ## Hello RabbitMQ
 
@@ -656,6 +557,11 @@ channel.basicPublish("", QUEUE_NAME, properties, message.getBytes());
 创建一个类作为消费者，消费 RabbitMQ 队列的消息
 
 ```java
+import com.rabbitmq.client.*;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
 /**
  * @author frx
  * @version 1.0
@@ -711,6 +617,16 @@ Hello,world
 channel.basicConsume(队列名字/String, 是否自动签收/boolean, 消费时的回调/接口类, 无法消费的回调/接口类);
 ```
 
+## Work Queues多个接受信息的
+
+```java
+
+```
+
+
+
+
+
 ## Work Queues
 
 Work Queues 是工作队列（又称任务队列）的主要思想是避免立即执行资源密集型任务，而不得不等待它完成。相反我们安排任务在之后执行。我们把任务封装为消息并将其发送到队列。在后台运行的工作进程将弹出任务并最终执行作业。当有多个工作线程时，这些工作线程将一起处理这些任务。
@@ -719,7 +635,7 @@ Work Queues 是工作队列（又称任务队列）的主要思想是避免立�
 
 轮询消费消息指的是轮流消费消息，即每个工作队列都会获取一个消息进行消费，并且获取的次数按照顺序依次往下轮流。
 
-案例中生产者叫做 Task，一个消费者就是一个工作队列，启动两个工作队列消费消息，这个两个工作队列会以轮询的方式消费消息。
+案例中生产者叫做 NewTask，一个消费者就是一个工作队列，启动两个工作队列消费消息，这个两个工作队列会以轮询的方式消费消息。
 
 ![image](https://cdn.staticaly.com/gh/xustudyxu/image-hosting1@master/20220723/image.3iwquz975vw0.webp)
 
@@ -728,6 +644,15 @@ Work Queues 是工作队列（又称任务队列）的主要思想是避免立�
 - 首先把 RabbitMQ 的配置参数封装为一个工具类：`RabbitMQUtils`
 
 ```java
+package utils;
+
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
 /**
  * @author frx
  * @version 1.0
@@ -741,11 +666,11 @@ public class RabbitMQUtils {
         //创建一个连接工厂
         ConnectionFactory factory = new ConnectionFactory();
         //工厂IP 连接RabbitMQ对列
-        factory.setHost("192.168.91.200");
+        factory.setHost("192.168.198.130");
         //用户名
-        factory.setUsername("root");
+        factory.setUsername("admin");
         //密码
-        factory.setPassword("123");
+        factory.setPassword("password");
 
         //创建连接
         Connection connection = factory.newConnection();
@@ -757,27 +682,24 @@ public class RabbitMQUtils {
 }
 ```
 
-+ 创建两个工作队列，并且启动
++ 创建两个工作队列worker，这是负责接受消息的worker
 
 ```java
-/**
- * @author frx
- * @version 1.0
- * @date 2022/7/23  22:51
- * desc:这是一个工作线程，相当于之间的Consumer
- */
-public class Work01 {
+package workqueues;
 
-    //队列的名称
-    public static final String QUEUE_NAME="hello";
+import com.rabbitmq.client.*;
+import utils.RabbitMQUtils;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
+public class worker {
+    public static final String QUEUE_NAME="task_queue";
 
-    //接收消息
     public static void main(String[] args) throws IOException, TimeoutException {
         Channel channel = RabbitMQUtils.getChannel();
-
-        //消息的接受
-        DeliverCallback deliverCallback = (consumerTag,message) ->{
+        channel.queueDeclare(QUEUE_NAME,true,false,false,null);
+        System.out.println("开始接受信息");
+        DeliverCallback deliverCallback = (consumerTag, message) ->{
             System.out.println("接收到的消息:"+new String(message.getBody()));
         };
 
@@ -785,56 +707,101 @@ public class Work01 {
         CancelCallback cancelCallback = consumerTag -> {
             System.out.println(consumerTag+"消息被消费者取消消费接口回调逻辑");
         };
-
-        //消息的接受
         channel.basicConsume(QUEUE_NAME,true,deliverCallback,cancelCallback);
     }
 }
+
 ```
 
 创建好一个工作队列，只需要以多线程方式启动两次该 main 函数即可，以 first、second 区别消息队列。
 
 要开启多线程功能，首先启动该消息队列，然后如图开启多线程：
 
-![1658588553672](https://cdn.staticaly.com/gh/xustudyxu/image-hosting1@master/20220723/1658588553672.629xpapm6wg0.webp)
+![image-20230427115518031](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image-20230427115518031.png)
+
+
 
 两个工作队列都启动后
 
 ![image](https://cdn.staticaly.com/gh/xustudyxu/image-hosting1@master/20220723/image.3fh698ujarc0.webp)
 
-+ 创建一个生产者，发送消息进程
++ 创建一个生产者NewTask，发送消息进程
+
+- - 发送十条消息
 
 ```java
-/**
- * @author frx
- * @version 1.0
- * @date 2022/7/23  23:07
- * desc:生产者：可以发送大量的消息
- */
-public class Task01 {
+package workqueues;
 
-    //队列名称
-    public static final String QUEUE_NAME="hello";
+import com.rabbitmq.client.*;
+import utils.RabbitMQUtils;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
-    //发送大量消息
+
+public class NewTask {
+    public static final String QUEUE_NAME="task_queue";
+    //接受消息
     public static void main(String[] args) throws IOException, TimeoutException {
-
-        Channel channel = RabbitMQUtils.getChannel();
-        //队列的声明
-        channel.queueDeclare(QUEUE_NAME,false,false,false,null);
-
-        //发送消息
-        //从控制台当中接受信息
-        Scanner scanner = new Scanner(System.in);
-        while (scanner.hasNext()) {
-            String message = scanner.next();
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("192.168.198.130");
+        factory.setUsername("admin");
+        factory.setPassword("password");
+        Connection connection = factory.newConnection();
+        Channel channel = connection.createChannel();
+//前面都是一样的
+        channel.queueDeclare(QUEUE_NAME,true,false,false,null);
+        for (int i = 0; i < 10; i++) {
+//            发十个消息
+            String message = "消息："+i+"..";
+            /**
+             * 发送一个消息
+             * 1.发送到哪个交换机
+             * 2.路由的key值是哪个本次是队列的名称
+             * 3.其他参数信息
+             * 4.发送消息的消息体
+             */
             channel.basicPublish("",QUEUE_NAME,null,message.getBytes());
-            System.out.println("消息发送完成:"+message);
+            System.out.println("发送了消息： message = " + message);
         }
+        channel.close();
     }
-    
+
 }
+
 ```
+
+> ```java
+> import com.rabbitmq.client.*;
+> import utils.RabbitMQUtils;
+> import java.io.IOException;
+> import java.util.concurrent.TimeoutException;
+> 
+> public class NewTask2 {
+> 
+>     //队列名称
+>     public static final String QUEUE_NAME="task_queue";
+> 
+>     //发送大量消息
+>     public static void main(String[] args) throws IOException, TimeoutException {
+> 
+>         Channel channel = RabbitMQUtils.getChannel();
+>         //队列的声明
+>         channel.queueDeclare(QUEUE_NAME,false,false,false,null);
+> 
+>         //发送消息
+>         //从控制台当中接受信息
+>         Scanner scanner = new Scanner(System.in);
+>         while (scanner.hasNext()) {
+>             String message = scanner.next();
+>             channel.basicPublish("",QUEUE_NAME,null,message.getBytes());
+>             System.out.println("消息发送完成:"+message);
+>         }
+>     }
+>     
+> }
+> ```
+>
+> 
 
 + 结果演示
 
@@ -846,7 +813,7 @@ public class Task01 {
 
 进入自己的 RabbitMQ Web 页面，点击 Queues 菜单
 
-![image](https://cdn.staticaly.com/gh/xustudyxu/image-hosting1@master/20220723/image.701dj3uqk400.webp)
+![image](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image.701dj3uqk400.webp)
 
 1. 点击 `Queues` 菜单
 2. 点击 `Add a new queue`，弹出下拉菜单
@@ -1549,7 +1516,7 @@ public class ConfirmMessage3 {
 
 
 
-# 6.RabbitMQ 交换机
+# 6.<mark>RabbitMQ 交换机</mark>
 
 [[toc]]
 
@@ -1559,17 +1526,19 @@ RabbitMQ 消息传递模型的核心思想是: **生产者生产的消息从不�
 
 相反，**生产者只能将消息发送到交换机(exchange)**，交换机工作的内容非常简单，一方面它接收来自生产者的消息，另一方面将它们推入队列。交换机必须确切知道如何处理收到的消息。是应该把这些消息放到特定队列还是说把他们到许多队列中还是说应该丢弃它们。这就的由交换机的类型来决定。
 
-![image](https://cdn.staticaly.com/gh/xustudyxu/image-hosting1@master/20220724/image.54tzwxwrqco.webp)
+
+
+<img src="https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image.54tzwxwrqco.webp" alt="image" style="zoom: 33%;" />
 
 
 
-### Exchanges的类型
+### Exchanges(交换机)的类型
 
 - **直接(direct)**：处理路由键。需要将一个队列绑定到交换机上，要求该消息与一个特定的路由键完全匹配。这是一个完整的匹配。如果一个队列绑定到该交换机上要求路由键 abc ，则只有被标记为 abc 的消息才被转发，不会转发 abc.def，也不会转发 dog.ghi，只会转发 abc。
 
 - **主题(topic)**：将路由键和某模式进行匹配。此时队列需要绑定要一个模式上。符号“#”匹配一个或多个词，符号 * 匹配不多不少一个词。因此 abc.# 能够匹配到 abc.def.ghi，但是 abc.* 只会匹配到 abc.def。
 
-- **标题(headers)**：不处理路由键。而是根据发送的消息内容中的headers属性进行匹配。在绑定 Queue 与 Exchange 时指定一组键值对；当消息发送到RabbitMQ 时会取到该消息的 headers 与 Exchange 绑定时指定的键值对进行匹配；如果完全匹配则消息会路由到该队列，否则不会路由到该队列。headers 属性是一个键值对，可以是 Hashtable，键值对的值可以是任何类型。而 fanout，direct，topic 的路由键都需要要字符串形式的。
+- **标题(headers)**<这个用的少，不要求掌握>：不处理路由键。而是根据发送的消息内容中的headers属性进行匹配。在绑定 Queue 与 Exchange 时指定一组键值对；当消息发送到RabbitMQ 时会取到该消息的 headers 与 Exchange 绑定时指定的键值对进行匹配；如果完全匹配则消息会路由到该队列，否则不会路由到该队列。headers 属性是一个键值对，可以是 Hashtable，键值对的值可以是任何类型。而 fanout，direct，topic 的路由键都需要要字符串形式的。
 
   匹配规则 x-match 有下列两种类型：
 
@@ -1578,6 +1547,8 @@ RabbitMQ 消息传递模型的核心思想是: **生产者生产的消息从不�
   x-match = any ：表示只要有键值对匹配就能接受到消息
 
 - **扇出(fanout)**：不处理路由键。你只需要简单的将队列绑定到交换机上。一个发送到交换机的消息都会被转发到与该交换机绑定的所有队列上。很像子网广播，每台子网内的主机都获得了一份复制的消息。Fanout 交换机转发消息是最快的。
+
+![image-20230427144629975](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image-20230427144629975.png)
 
 ### 默认exchange
 
@@ -1625,58 +1596,13 @@ Logs 和临时队列的绑定关系如下图
 
 ![image](https://cdn.staticaly.com/gh/xustudyxu/image-hosting1@master/20220724/image.4bl530c0ox20.webp)
 
-::: warning 注意
-
-先启动两个消费者再启动生产者。
-
-生产者生产消息后，如果没有对应的消费者接收，则该消息是遗弃的消息
-
-:::
-
-`ReceiveLogs01` 将接收到的消息打印在控制台
-
-`ReceiveLogs02` 把消息写出到文件
-
-```java
-/**
- * @author frx
- * @version 1.0
- * @date 2022/7/24  21:20
- */
-//消费者1
-public class ReceiveLogs01 {
-
-    //交换机名称
-    private static  final String EXCHANGE_NAME = "logs";
-
-    public static void main(String[] args) throws IOException, TimeoutException {
-        Channel channel = RabbitMQUtils.getChannel();
-        //声明一个交换机
-        channel.exchangeDeclare(EXCHANGE_NAME,"fanout");
-        //声明一个队列 临时队列
-        /**
-         * 生成一个临时的队列，队列的名称是随机的
-         * 当消费者断开与队列的连接的时候 队列就自动删除
-         */
-        String queueName = channel.queueDeclare().getQueue();
-        /**
-         * 绑定交换机与队列
-         */
-        channel.queueBind(queueName,EXCHANGE_NAME,"");
-        System.out.println("等待接收消息，把接收到的消息打印在屏幕上...");
-        //接收消息
-        //消费者取消消息时回调接口
-        DeliverCallback deliverCallback = (consumerTag,message) ->{
-            System.out.println("控制台打印接收到的消息:"+new String(message.getBody(),"UTF-8"));
-        };
-        channel.basicConsume(queueName,true,deliverCallback,consumerTag -> {});
-    }
-}
-```
-
 生产者`EmitLog` 发送消息给两个消费者进行消费
 
 ```java
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.DeliverCallback;
+import utils.RabbitMQUtils;
+
 /**
  * @author frx
  * @version 1.0
@@ -1708,9 +1634,63 @@ public class EmitLog {
 
 ![image](https://raw.githubusercontent.com/52chen/imagebed2023/main/picgo/image.5kb833agark0.webp)
 
+
+
+日志用临时队列是一种常见的实现方式，用于实现日志传输和处理的并行化。
+
+`ReceiveLogs01` 将接收到的消息打印在控制台
+
+`ReceiveLogs02` 把消息写出到文件
+
+```java
+package fanout;
+
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.DeliverCallback;
+import utils.RabbitMQUtils;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+//消费者1
+public class ReceiveLogs01 {
+
+    //交换机名称
+    private static  final String EXCHANGE_NAME = "logs";
+
+    public static void main(String[] args) throws IOException, TimeoutException {
+        Channel channel = RabbitMQUtils.getChannel();
+        //声明一个交换机
+        channel.exchangeDeclare(EXCHANGE_NAME,"fanout");
+        //channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.FANOUT);这样可以，这个FANOUT是一个枚举类型用来指定一个字符串
+
+        //声明一个队列 临时队列
+        /**
+         * 生成一个临时的队列，队列的名称是随机的
+         * 当消费者断开与队列的连接的时候 队列就自动删除
+         */
+        String queueName = channel.queueDeclare().getQueue();
+//        每次得到的queue都是不同的。
+        /**
+         * 绑定交换机与队列
+         */
+        channel.queueBind(queueName,EXCHANGE_NAME,"");
+        System.out.println("等待接收消息，把接收到的消息打印在屏幕上...");
+        //接收消息
+        //消费者取消消息时回调接口
+        DeliverCallback deliverCallback = (consumerTag, message) ->{
+            System.out.println("控制台打印接收到的消息:"+new String(message.getBody(),"UTF-8"));
+        };
+        channel.basicConsume(queueName,true,deliverCallback,consumerTag -> {});
+    }
+}
+```
+
+
+
 > 一个发送，多个接受，发布/订阅模式
 
-## Direct exchange
+## Direct 交换机
 
 在上一节中，我们构建了一个简单的日志记录系统。我们能够向许多接收者广播日志消息。在本节我们将向其中添加一些特别的功能——让某个消费者订阅发布的部分消息。例如我们只把严重错误消息定向存储到日志文件(以节省磁盘空间)，同时仍然能够在控制台上打印所有日志消息。
 
@@ -1720,7 +1700,7 @@ public class EmitLog {
 
 ### Direct介绍
 
-上一节中的我们的日志系统将所有消息广播给所有消费者，对此我们想做一些改变，例如我们希望将日志消息写入磁盘的程序仅接收严重错误(errros)，而不存储哪些警告(warning)或信息(info)日志 消息避免浪费磁盘空间。Fanout 这种交换类型并不能给我们带来很大的灵活性-它只能进行无意识的广播，在这里我们将使用 direct 这种类型来进行替换，这种类型的工作方式是，消息只去到它绑定的 routingKey 队列中去。
+上一节中的我们的日志系统将所有消息广播给所有消费者，对此我们想做一些改变，例如我们希望将日志消息写入磁盘的程序<mark>仅接收严重错误(errros)，而不存储哪些警告(warning)或信息(info)日志</mark> 消息避免浪费磁盘空间。Fanout 这种交换类型并不能给我们带来很大的灵活性-它只能进行无意识的广播，在这里我们将使用 direct 这种类型来进行替换，这种类型的工作方式是，消息只去到它绑定的 routingKey 队列中去。
 
 ![image](https://raw.githubusercontent.com/52chen/imagebed2023/main/picgo/image.gi5bzb0sygo.webp)
 
@@ -1753,11 +1733,14 @@ C2 消费者：绑定 disk 队列，routingKey 为 error
 **生产者**
 
 ```java
-/**
- * @author frx
- * @version 1.0
- * @date 2022/7/24  21:59
- */
+package direct;
+import com.rabbitmq.client.*;
+import utils.RabbitMQUtils;
+
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.concurrent.TimeoutException;
+
 public class DirectLogs {
 
     //交换机名称
@@ -1765,30 +1748,35 @@ public class DirectLogs {
 
     public static void main(String[] args) throws IOException, TimeoutException {
         Channel channel = RabbitMQUtils.getChannel();
-
-
+        channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.DIRECT);
         Scanner scanner = new Scanner(System.in);
+        String message = "info:message";
+        channel.basicPublish(EXCHANGE_NAME,"warning",null,"waring信息".getBytes("UTF-8"));
+        System.out.println("生产者waring发出消息:"+message);
         while (scanner.hasNext()){
-            String message = scanner.next();
+            message = scanner.next();
             channel.basicPublish(EXCHANGE_NAME,"info",null,message.getBytes("UTF-8"));
-            System.out.println("生产者发出消息:"+message);
+            System.out.println("生产者发出info消息:"+message);
         }
     }
 }
+
 ```
 
 **消费者1**
 
 ```java {15-17}
-/**
- * @author frx
- * @version 1.0
- * @date 2022/7/24  21:50
- */
+package direct;
+import com.rabbitmq.client.*;
+import utils.RabbitMQUtils;
+
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.concurrent.TimeoutException;
+
 public class ReceiveLogsDirect01 {
-
     public static final String EXCHANGE_NAME="direct_logs";
-
+//    接受info类型的接受的信息
     public static void main(String[] args) throws IOException, TimeoutException {
         Channel channel = RabbitMQUtils.getChannel();
         //声明一个direct交换机
@@ -1796,58 +1784,58 @@ public class ReceiveLogsDirect01 {
         //声明一个队列
         channel.queueDeclare("console",false,false,false,null);
         channel.queueBind("console",EXCHANGE_NAME,"info");
-        channel.queueBind("console",EXCHANGE_NAME,"warning");
         //接收消息
         DeliverCallback deliverCallback = (consumerTag,message) -> {
-          System.out.println("ReceiveLogsDirect01控制台打印接收到的消息:"+new String(message.getBody(),"UTF-8"));
+            System.out.println("ReceiveLogsDirect01控制台打印接收到的消息:"+new String(message.getBody(),"UTF-8"));
         };
         //消费者取消消息时回调接口
         channel.basicConsume("console",true,deliverCallback,consumerTag -> {});
 
     }
 }
+
 ```
 
 **消费者2**
 
-```java {15-16}
-/**
- * @author frx
- * @version 1.0
- * @date 2022/7/24  21:50
- */
+```java
+package direct;
+import com.rabbitmq.client.*;
+import utils.RabbitMQUtils;
+
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.concurrent.TimeoutException;
+
 public class ReceiveLogsDirect02 {
-
     public static final String EXCHANGE_NAME="direct_logs";
-
+    //    接受warning类型的接受的信息
     public static void main(String[] args) throws IOException, TimeoutException {
         Channel channel = RabbitMQUtils.getChannel();
         //声明一个direct交换机
         channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.DIRECT);
         //声明一个队列
-        channel.queueDeclare("disk",false,false,false,null);
-        channel.queueBind("disk",EXCHANGE_NAME,"error");
-
+        channel.queueDeclare("console",false,false,false,null);
+        channel.queueBind("console",EXCHANGE_NAME,"warning");
         //接收消息
         DeliverCallback deliverCallback = (consumerTag,message) -> {
-          System.out.println("ReceiveLogsDirect02控制台打印接收到的消息:"+new String(message.getBody(),"UTF-8"));
+            System.out.println("ReceiveLogsDirect01控制台打印接收到的消息:"+new String(message.getBody(),"UTF-8"));
         };
         //消费者取消消息时回调接口
-        channel.basicConsume("disk",true,deliverCallback,consumerTag -> {});
+        channel.basicConsume("console",true,deliverCallback,consumerTag -> {});
 
     }
 }
+
 ```
 
-+ 让消费者1接收,结果
++ 
 
-![image](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image.3fdmnb63j0o0.webp)
-
-## Topics exchange
+## Topics 交换机
 
 ### Topic的介绍
 
-在上一个小节中，我们改进了日志记录系统。我们没有使用只能进行随意广播的 fanout 交换机，而是使用了 direct 交换机，从而有能实现有选择性地接收日志。
+在上一个小节中，我们改进了日志记录系统。我们没有使用只能进行随意广播的 fanout 交换机，而是使用了 direct 交换机，**从而有能实现有选择性地接收日志。**
 
 尽管使用 direct 交换机改进了我们的系统，但是它仍然存在局限性——比方说我们想接收的日志类型有 info.base 和 info.advantage，某个队列只想 info.base 的消息，那这个时候direct 就办不到了。这个时候就只能使用 **topic** 类型
 
@@ -1859,19 +1847,19 @@ public class ReceiveLogsDirect02 {
 
 当然这个单词列表最多不能超过 255 个字节。
 
-在这个规则列表中，其中有两个替换符是大家需要注意的：
+在这个规则列表中，模糊匹配：
 
-- ***(星号)可以代替一个位置**
-- **#(井号)可以替代零个或多个位置**
+- ***(星号)可以代替一个单词**
+- **#(井号)可以替代零个或多个单词**
 
 ### Topic匹配案例
 
 下图绑定关系如下
 
-![image](https://cdn.staticaly.com/gh/xustudyxu/image-hosting1@master/20220724/image.6a89pabmhtg0.webp)
+![image](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image.6a89pabmhtg0.webp)
 
 - Q1-->绑定的是
-  - 中间带 orange 带 3 个单词的字符串 `(*.orange.*)`
+  - 中间带 orange 带 3 个**单词**的字符串 `(*.orange.*)`
 - Q2-->绑定的是
   - 最后一个单词是 rabbit 的 3 个单词 `(*.*.rabbit)`
   - 第一个单词是 lazy 的多个单词 `(lazy.#)`
@@ -1889,13 +1877,9 @@ public class ReceiveLogsDirect02 {
 | quick.orange.male.rabbit | 是四个单词不匹配任何绑定会被丢弃           |
 | lazy.orange.male.rabbit  | 是四个单词但匹配 Q2                        |
 
-::: tip 笔记
-
-当一个队列绑定键是 #，那么这个队列将接收所有数据，就有点像 fanout 了
-
-如果队列绑定键当中没有 # 和 * 出现，那么该队列绑定类型就是 direct 了
-
-:::
+> 当一个队列绑定键是 #，那么这个队列将接收所有数据，就有点像 fanout 了
+>
+> 如果队列绑定键当中没有 # 和 * 出现，那么该队列绑定类型就是 direct 了
 
 ### Topic实战
 
@@ -1949,13 +1933,15 @@ public class EmitLogTopic {
 **消费者C1**
 
 ```java {21}
-/**
- * @author frx
- * @version 1.0
- * @date 2022/7/24  22:31
- * desc:声明主题交换机及相关队列
- *      消费者C1
- */
+package topic;
+
+import com.rabbitmq.client.*;
+import utils.RabbitMQUtils;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.TimeoutException;
+
 public class ReceiveLogsTopic01 {
 
     //交换机的名称
@@ -1985,13 +1971,15 @@ public class ReceiveLogsTopic01 {
 **消费者C2**
 
 ```java {21,22}
-/**
- * @author frx
- * @version 1.0
- * @date 2022/7/24  22:31
- * desc:声明主题交换机及相关队列
- *      消费者C2
- */
+package topic;
+
+import com.rabbitmq.client.*;
+import utils.RabbitMQUtils;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.TimeoutException;
+
 public class ReceiveLogsTopic02 {
 
     //交换机的名称
@@ -2928,6 +2916,159 @@ public class DelayQueueConsumer {
 
 在生产环境中由于一些不明原因，导致 RabbitMQ 重启，在 RabbitMQ 重启期间生产者消息投递失败，导致消息丢失，需要手动处理和恢复。于是，我们开始思考，如何才能进行 RabbitMQ 的消息可靠投递呢？
 
+## 简单测试案例（同一个项目内）
+
+### 配置：
+
+application.properties
+
+```properties
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/mybatis?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+spring.datasource.username=root
+spring.datasource.password=root
+
+#配置生产者消费之
+
+
+spring.rabbitmq.addresses=192.168.198.131
+spring.rabbitmq.port=5672
+spring.rabbitmq.username=admin
+spring.rabbitmq.password=password
+spring.rabbitmq.virtual-host=/
+spring.rabbitmq.connection-timeout=15000
+spring.rabbitmq.publisher-confirm-type=correlated
+
+
+```
+
+
+
+```java
+package com.mcxgroup.testspringboot.producer;
+
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class TopicRabbitConfig {
+    @Bean
+    public Queue queue1(){
+        return new Queue("queue1");
+    }
+    @Bean
+    public Queue queue2(){
+        return new Queue("queue2");
+    }
+//    实现topic的交换机
+    //定义交换机
+    @Bean
+    public TopicExchange exchange(){
+        return new TopicExchange("bootExchange");
+    }
+    //绑定
+    @Bean
+    public Binding bindingExchange1(Queue queue1, TopicExchange exchange){
+        return BindingBuilder.bind(queue1).to(exchange).with("dog.red");
+    }
+    //绑定
+    @Bean
+    public Binding bindingExchange2(Queue queue2, TopicExchange exchange){
+        return BindingBuilder.bind(queue2).to(exchange).with("dog.#");
+    }
+}
+
+```
+
+
+
+
+
+### 生产者和消费者类
+
+```java
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ * 发送消息
+ */
+@Component
+public class MsgSender {
+    @Autowired
+    private AmqpTemplate rabbitTemplate;
+
+    public void send1(){
+        String message = "This is msg1,routingKey is dog.red";
+        System.out.println("message = " + message);
+        this.rabbitTemplate.convertAndSend("bootExchange","dog.red",message);
+    }
+    public void send2(){
+        String message = "This is msg2,routingKey is dog.black";
+        System.out.println("message = " + message);
+        this.rabbitTemplate.convertAndSend("bootExchange","dog.black",message);
+    }
+}
+
+```
+
+
+
+
+
+```java
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Component;
+
+@Component
+@RabbitListener(queues = "queue1")
+public class Reciver01 {
+    @RabbitHandler
+    public void process(String message){
+        System.out.println("Reciver01 message = " + message);
+    }
+}
+
+```
+
+
+
+### 测试类
+
+```java
+package com.mcxgroup.testspringboot;
+
+import com.mcxgroup.testspringboot.producer.MsgSender;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class TestSpringBootApplicationTests {
+
+    @Autowired
+    MsgSender msgSender;
+    @Test
+    public void send1(){
+        msgSender.send1();
+    }
+    @Test
+    public void send2(){
+        msgSender.send2();
+    }
+}
+```
+
+
+
+
+
 ## 发布确认SpringBoot版本
 
 简单的发布确认机制在[应答与签收](/middleware/RabbitMQ/RabbitMQ_Message_responseAndrelease/)已经介绍，本内容将介绍整合了 SpringBoot 的发布确认机制。
@@ -2952,21 +3093,32 @@ public class DelayQueueConsumer {
 
 在配置文件当中需要添加：
 
-```yaml {9}
-server:
-  port: 8888
-spring:
-  rabbitmq:
-    host: 192.168.91.200
-    port: 5672
-    username: root
-    password: 123
-    publisher-confirm-type: correlated
+```properties
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/mybatis?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+spring.datasource.username=root
+spring.datasource.password=root
+
+#配置生产者消费之
+spring.application.name=producer
+
+spring.rabbitmq.addresses=192.168.198.131
+spring.rabbitmq.port=5672
+spring.rabbitmq.username=admin
+spring.rabbitmq.password=password
+spring.rabbitmq.virtual-host=/
+spring.rabbitmq.connection-timeout=15000
+spring.rabbitmq.publisher-confirm-type=correlated
+
 ```
 
 - `NONE` 值是禁用发布确认模式，是默认值
 - `CORRELATED` 值是发布消息成功到交换器后会触发回调方法
 - `SIMPLE` 值经测试有两种效果，其一效果和 CORRELATED 值一样会触发回调方法，其二在发布消息成功后使用 rabbitTemplate 调用 waitForConfirms 或 waitForConfirmsOrDie 方法等待 broker 节点返回发送结果，根据返回结果来判定下一步的逻辑，要注意的点是 waitForConfirmsOrDie 方法如果返回 false 则会关闭 channel，则接下来无法发送消息到 broker;
+
+
+
+
 
 ### 添加配置类
 
