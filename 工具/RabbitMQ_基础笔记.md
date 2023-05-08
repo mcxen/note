@@ -2916,7 +2916,7 @@ public class DelayQueueConsumer {
 
 在生产环境中由于一些不明原因，导致 RabbitMQ 重启，在 RabbitMQ 重启期间生产者消息投递失败，导致消息丢失，需要手动处理和恢复。于是，我们开始思考，如何才能进行 RabbitMQ 的消息可靠投递呢？
 
-## 简单测试案例（同一个项目内）
+## 简单测试案例（同一个项目内）SpringBoot版本
 
 ### 配置：
 
@@ -3069,7 +3069,7 @@ class TestSpringBootApplicationTests {
 
 
 
-## 发布确认SpringBoot版本
+## 复杂测试案例
 
 简单的发布确认机制在[应答与签收](/middleware/RabbitMQ/RabbitMQ_Message_responseAndrelease/)已经介绍，本内容将介绍整合了 SpringBoot 的发布确认机制。
 

@@ -1,8 +1,8 @@
-###  RocketMQ4.X详解
+#  RocketMQ4.X详解
 
-#### JMS介绍和消息中间件的核心知识
+## JMS介绍和消息中间件的核心知识
 
-##### JMS消息服务介绍和应用场景
+### JMS消息服务介绍和应用场景
 
 - JMS：Java Message Service ，Java平台关于面向消息中间件的接口
 - JMS是一种与厂商无关的API，用来访问消息，收发系统消息，它类似于JDBC
@@ -15,7 +15,7 @@
   - 分布式事务、最终一致性
   - RPC调用上下游对接，数据源变动 -> 通知下属
 
-##### 消息中间件的常见概念和编程模型
+### 消息中间件的常见概念和编程模型
 
 **常见概念**
 
@@ -36,9 +36,9 @@
 - Destination：消息的目的地，消息发送给谁
 - MessageConsumer / MessageProducer：消息消费者/消息生产者
 
-#### RocketMQ4.X基础介绍和阿里云Linux服务器快速部署
+## RocketMQ4.X基础介绍和阿里云Linux服务器快速部署
 
-##### 阿里巴巴开源的RocketMQ4.X介绍
+### 阿里巴巴开源的RocketMQ4.X介绍
 
 Apache RocketMQ作为阿里开源的一款高性能、高吞吐的分布式消息中间件
 
@@ -58,22 +58,32 @@ Apache RocketMQ作为阿里开源的一款高性能、高吞吐的分布式消�
 **概念** 
 
 - Producer：消息生产者
-- Producer Group：消息生产组，发送同类消息的一个消息生产组
-- Consumer：消费者
-- Consumer Group：消费同类消息的多个实例
-- Tag：标签、子主题（二级分类）对topic的进一步细化，用于区别同一个主题下的不同的业务消息
-- Topic：主题，如订单类消息，queue是消息的物理管理单位，而topic是逻辑管理单位，一个Topic下有多个queue，默认自动创建是4个，手动创建的是8个 
-- Message：消息，每个Message必须指定一个Topic
-- Broker：MQ程序，接收生产的消息、
-- Name Server：给生产者和消费者提供路由信息， 提供轻量级的服务发现、路由、元数据信息，可以多个部署，相互独立（比Zookeeper更轻量）
-- Offset：偏移量，可以理解为消息进度
-- commit log ：消息存储会写在Commit log 文件里面
-- 走读官网地址，学会如何学习新技术 http://rocketmq.apache.org/
-- 学习资源
-  - http://jm.taobao.org/2017/01/12/rocketmq-quick-start-in-10-minutes/
-  - https://www.jianshu.com/p/453c6e7ff81c
 
-##### RocketMQ4.x的本地源码部署
+- Producer Group：消息生产组，发送同类消息的一个消息生产组
+
+- Consumer：消费者
+
+- Consumer Group：消费同类消息的多个实例
+
+- Tag：标签、子主题（二级分类）对topic的进一步细化，用于区别同一个主题下的不同的业务消息
+
+- Topic：主题，如订单类消息，queue是消息的物理管理单位，而topic是逻辑管理单位，一个Topic下有多个queue，默认自动创建是4个，手动创建的是8个 
+
+- Message：消息，每个Message必须指定一个Topic
+
+- Broker：MQ程序，接收生产的消息、
+
+- Name Server：给生产者和消费者提供路由信息， 提供轻量级的服务发现、路由、元数据信息，可以多个部署，相互独立<mark>（比Zookeeper更轻量）</mark>
+
+- Offset：偏移量，可以理解为消息进度
+
+- commit log ：消息存储会写在Commit log 文件里面
+
+- 走读官网地址，学会如何学习新技术 http://rocketmq.apache.org/
+
+  
+
+### RocketMQ4.x的本地源码部署
 
 **安装前提条件（推荐）**
 
@@ -81,7 +91,6 @@ Apache RocketMQ作为阿里开源的一款高性能、高吞吐的分布式消�
 - 64 bit jdk 1.8+
 - maven 3.2+
 -  官网：下载 https://rocketmq.apache.org/ 
-
 
 **安装**
 
@@ -130,9 +139,9 @@ JAVA_OPT="${JAVA_OPT} -server -Xms528m -Xmx528m -Xmn256m"
 
   - 守护进程方式启动 nohup java -jar rocketmq-console-ng-1.0.0.jar &
 
-#### SpringBoot2.x整合RocketMQ4.X
+### SpringBoot2.x整合RocketMQ4.X
 
-##### 发送消息
+#### 发送消息
 
 - 必须先启动 nameserver和broker
 
@@ -259,7 +268,7 @@ public class PayController {
 
 ```
 
-##### 消费消息 
+#### 消费消息 
 
 - 代码实现
 
@@ -321,9 +330,9 @@ public class PayConsumer {
 	https://blog.csdn.net/a906423355/article/details/78192828
 ```
 
-#### RocketMQ4.X集群架构讲解
+### RocketMQ4.X集群架构讲解
 
-##### 简介：多种集群模式
+#### 简介：多种集群模式
 
 **单节点**
 
@@ -476,7 +485,7 @@ scp root@192.168.0.106:/Users/xdclass/Desktop/xdclass/消息队列/data/第3章/
 -  客户端消费可以从master和slave消费，默认消费者都从master消费，如果在master挂后，客户端从NameServer中感知到Broker宕机，就会从slave消费, 感知非实时，存在一定的滞后性，slave不能保证master的消息100%都同步过来了，会有少量的消息丢失。但一旦master恢复，未同步过去的消息会被最终消费掉 
 -  如果consumer实例的数量比message queue的总数量还多的话，多出来的consumer实例将无法分到queue，也就无法消费到消息，也就无法起到分摊负载的作用，所以需要控制让queue的总数量大于等于consumer的数量 
 
-#### RocketMQ生产者核心配置和核心知识讲解
+## RocketMQ生产者核心配置和核心知识讲解
 
 ##### 生产者常见核心配置
 
@@ -678,7 +687,7 @@ public MessageQueue select(List<MessageQueue> mqs, Message msg, Object arg) {
   - 扩展思维：为什么高并发情况下ConcurrentHashMap比HashTable和HashMap更高效且线程安全？
   - 提示：分段锁Segment
 
-#### RocketMQ消费者核心配置和核心知识讲解
+## RocketMQ消费者核心配置和核心知识讲解
 
 ##### 消息队列RocketMQ4.X消费者核心配置讲解
 
@@ -768,7 +777,7 @@ slave节点配置：vim conf/2m-2s-async/broker-a-s.properties
   - 灵活性高可控性强，但是编码复杂度会高
   - 优雅关闭：主要是释放资源和保存Offset，需用程序自己保存好Offset，特别是异常处理的时候
 
-#### 消息队列Offset和CommitLog
+## 消息队列Offset和CommitLog
 
 ##### 消息偏移量Offset
 
@@ -857,7 +866,7 @@ slave节点配置：vim conf/2m-2s-async/broker-a-s.properties
       - Java中的TransferTo()实现了Zero-Copy
       - 应用：Kafka、Netty、RocketMQ等都采用了零拷贝技术
 
-#### RocketMQ4.x分布式事务消息
+## RocketMQ4.x分布式事务消息
 
 ##### 什么是分布式事务消息
 
@@ -912,7 +921,7 @@ slave节点配置：vim conf/2m-2s-async/broker-a-s.properties
 
   - 事务消息consumer端的消费方式和普通消息是一样的，RocketMQ能保证消息能被consumer收到（消息重试等机制，最后也存在consumer消费失败的情况，这种情况出现的概率极低）。
 
-#### 双主双从高性能RocketMQ服务搭建
+## 双主双从高性能RocketMQ服务搭建
 
 ##### 搭建高可用集群，避免单点故障问题
 
@@ -1115,7 +1124,7 @@ systemctl stop firewalld.service
   - 磁盘: iostat -xdm 1
   - JVM: jstack、jinfo、MAT
 
-#### 消息队列面试专题
+## 消息队列面试专题
 
 ##### 为什么使用消息队列，消息队列选型问题
 
