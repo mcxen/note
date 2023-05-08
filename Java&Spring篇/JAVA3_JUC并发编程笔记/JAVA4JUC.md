@@ -1,6 +1,40 @@
 # JUC并发编程
 # 线程池
 
+线程池节省创建线程开支，一次打印1000条日期
+
+```java
+public class ThreadLocalUseage {
+    public static ExecutorService threadPool = Executors.newFixedThreadPool(10);
+
+    public static void main(String[] args) {
+        //线程一
+        for (int i = 0; i < 1000; i++) {
+            int finalI = i;
+            threadPool.submit(new Runnable() {
+                @Override
+                public void run() {
+                    String date = new ThreadLocalUseage().date(finalI+100);
+                    System.out.println("date = " + date);
+                }
+            });
+        }
+        threadPool.shutdown();
+    }
+    //用两个线程打印生日日期
+    public String date(int seconds){
+        //毫秒，从1970-1-1 ：0：0:0
+        Date date = new Date(1000 * seconds);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        return sdf.format(date);
+    }
+}
+```
+
+
+
+
+
 ## 线程池基本概念
 
 **概念**：线程池主要是控制运行线程的数量，将待处理任务放到等待队列，然后创建线程执行这些任务。如果超过了最大线程数，则等待。
@@ -53,6 +87,27 @@ public static ExecutorService newCachedThreadPool() {
 }
 ```
 
+## 线程池的行为常用方法
+
+JUC中的线程池提供了一系列方法来管理和控制线程池的行为，其中包括：
+
+1. `execute(Runnable task)`：将一个任务提交到线程池中执行。
+2. `submit(Callable task)`：将一个Callable任务提交到线程池中执行，并返回一个Future对象，可以使用该对象来获取任务的执行结果。
+3. `shutdown()`：关闭线程池，不再接受新任务，但是会处理已经提交到任务队列中的任务。
+4. `shutdownNow()`：立即关闭线程池，尝试中断所有正在执行的任务并清空任务队列。
+5. `isShutdown()`：判断线程池是否已经关闭。
+6. `isTerminated()`：判断线程池是否已经彻底终止。
+7. `awaitTermination(long timeout, TimeUnit unit)`：等待线程池终止，直到超时或者所有任务都完成。
+8. `getActiveCount()`：获取当前活动的线程数。
+9. `getPoolSize()`：获取当前线程池的大小。
+10. `getTaskCount()`：获取已经提交到线程池的任务数量。
+11. `prestartCoreThread()`：预启动一个核心线程，如果线程池中的线程数少于核心线程数，则会创建一个新的线程。
+12. `prestartAllCoreThreads()`：预启动所有核心线程，如果线程池中的线程数少于核心线程数，则会创建一个或多个新的线程。
+
+需要注意的是，在使用线程池时，需要根据具体情况选取合适的方法来管理和控制线程池的行为。例如，在关闭线程池前需要等待所有任务都执行完毕并且线程池处于终止状态才能安全地关闭线程池。
+
+
+
 ## 线程池创建的七个参数
 
 | 参数            | 类型                     | 含义                 |
@@ -103,6 +158,12 @@ public static ExecutorService newCachedThreadPool() {
 
 当一个线程无事可做一段时间`keepAliveTime`后，如果正在运行的线程数大于`corePoolSize`，则关闭非核心线程。
 
+JUC**线程池实现线任务复用的原理**
+
+线程池中包含一组工作线程，这些工作线程都处于等待状态，并且在任务队列中获取任务进行处理。当有新的任务被提交时，线程池会按照一定的策略从线程池中选择一个空闲的线程来执行该任务。如果所有的线程都正在执行任务或者任务队列已满，则线程池会根据预设的拒绝策略对新任务进行拒绝或抛出异常。
+
+通过使用线程池技术，可以避免创建大量的线程并减少线程的上下文切换开销，从而提高程序的性能和稳定性。同时，线程池还可以根据应用程序的需求动态调整线程数量、任务队列长度以及其他参数，以适应不同的负载情况和性能要求。
+
 
 
 线程池是一种用于管理和复用线程的机制，它可以提高应用程序的性能和稳定性。**线程池通常由以下几个组成部分**：
@@ -150,6 +211,8 @@ public static ExecutorService newCachedThreadPool() {
 
 在这个继承和实现关系的流程图中，还可以看到`ScheduledFuture`接口表示一个可以周期性执行的延迟计算结果，并且它扩展了`Future`接口。`FutureTask`类实现了`RunnableFuture`接口，也就是同时实现了`Runnable`接口和`Future`接口，因此它既可以作为一个任务提交给线程池执行，也可以通过调用`get()`方法获取计算结果。
 
+
+
 ### **Executors工具类**
 
 `java.util.concurrent.Executors`类是JUC中一个非常重要的工具类，它提供了一组静态方法用于创建不同类型的线程池。`Executors`类中定义了一些有用的工厂方法，可以简化线程池的创建过程并提高程序的可读性和可维护性。
@@ -167,6 +230,20 @@ public static ExecutorService newCachedThreadPool() {
 5. `newSingleThreadScheduledExecutor()`：创建一个只有一个线程的线程池，该线程池能够以固定时间间隔周期性地执行任务。
 
 <mark>使用`Executors`类创建线程池不仅可以大大简化线程池的创建过程，并且还能够提高程序的可读性和可维护性。</mark>当需要创建一个新的线程池时，开发人员可以选择合适的工厂方法，并使用该方法返回的线程池对象对任务进行管理和执行。
+
+
+
+### JUC中的线程池状态
+
+
+
+1. `RUNNING`：表示线程池处于正常运行状态，接受新任务并处理队列中的任务。
+2. `SHUTDOWN`：表示线程池**正在关闭**，不再接受新的任务，但是会继续处理已经提交到任务队列中的任务。
+3. `STOP`：表示线程池已经停止**，不再接受新任务，也不再处理**队列中的任务，并且会尝试中断正在执行的任务。
+4. `TIDYING`：表示线程池**正在清理队列和资源**，等待所有任务都被完成。
+5. `TERMINATED`：表示线程池已经**彻底终止**，所有的任务都已经完成。
+
+这些状态是通过线程池的控**制状态位（ctl）**来进行设置和管理的。在`ThreadPoolExecutor`类中，使用了`CAS`操作来更新控制状态位，保证了状态的正确性和一致性。同时，`ThreadPoolExecutor`类还提供了一些方法用于获取当前线程池的状态，例如`isShutdown()`、`isTerminated()`等方法。
 
 ## 线程池的拒绝策略
 
@@ -456,6 +533,892 @@ while (!executorService.isTerminated()) {
 ```
 
 这个代码块中，我们使用ExecutorService的awaitTermination()方法等待线程池终止，然后我们使用isTerminated()方法检查它是否已经完成。如果没有完成，那么我们会继续等待，直到线程池完成所有任务并停止。
+
+
+
+# ThreadLocal
+
+## 带着BAT大厂的面试问题去理解
+
+提示
+
+请带着这些问题继续后文，会很大程度上帮助你更好的理解相关知识点。pdai
+
+- 什么是ThreadLocal? 用来解决什么问题的?
+- 说说你对ThreadLocal的理解
+- ThreadLocal是如何实现线程隔离的?
+- 为什么ThreadLocal会造成内存泄露? 如何解决
+- 还有哪些使用ThreadLocal的应用场景?
+
+##  ThreadLocal简介
+
+我们在[Java 并发 - 并发理论基础]()总结过线程安全(是指广义上的共享资源访问安全性，因为线程隔离是通过副本保证本线程访问资源安全性，它不保证线程之间还存在共享关系的狭义上的安全性)的解决思路：
+
+- 互斥同步: synchronized 和 ReentrantLock
+- 非阻塞同步: CAS, AtomicXXXX
+- 无同步方案: 栈封闭，本地存储(Thread Local)，可重入代码
+
+这个章节将详细的讲讲 本地存储(Thread Local)。官网的解释是这样的：
+
+> This class provides thread-local variables. These variables differ from their normal counterparts in that each thread that accesses one (via its {@code get} or {@code set} method) has its own, independently initialized copy of the variable. {@code ThreadLocal} instances are typically private static fields in classes that wish to associate state with a thread (e.g., a user ID or Transaction ID) 
+>
+> 该类提供了线程局部 (thread-local) 变量。这些变量不同于它们的普通对应物，因为访问某个变量(通过其 get 或 set 方法)的每个线程都有自己的局部变量，它独立于变量的初始化副本。ThreadLocal 实例通常是类中的 private static 字段，它们希望将状态与某一个线程(例如，用户 ID 或事务 ID)相关联。
+
+总结而言：ThreadLocal是一个将在多线程中为每一个线程创建单独的变量副本的类; 当使用ThreadLocal来维护变量时, ThreadLocal会为每个线程创建单独的变量副本, 避免因多线程操作共享变量而导致的数据不一致的情况。
+
+## ThreadLocal代入场景
+
+### 场景一
+
+```java
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class ThreadLocalUseage {
+    public static ExecutorService threadPool = Executors.newFixedThreadPool(10);
+
+    public static void main(String[] args) {
+        //线程一
+        for (int i = 0; i < 1000; i++) {
+            int finalI = i;
+            threadPool.submit(new Runnable() {
+                @Override
+                public void run() {
+                    String date = new ThreadLocalUseage().date(finalI+100);
+                    System.out.println("date = " + date);
+                }
+            });
+        }
+        threadPool.shutdown();
+    }
+    //用两个线程打印生日日期
+    public String date(int seconds){
+        //毫秒，从1970-1-1 ：0：0:0
+        Date date = new Date(1000 * seconds);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        return sdf.format(date);
+    }
+}
+
+```
+
+> 问题就是想不需要sdf反复重新生成
+
+于是我们把sdf时间格式放在前面，但是报错了。
+
+![image-20230508170832798](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image-20230508170832798.png)
+
+
+
+- 2 个线程分别用自己的 SimpleDateFormat，没有问题。
+- 延伸到 10 个没有问题。
+- 但是当需求变成了 1000 个，那么必然要用到**线程池**（不用到线程池将被创建1000次format）。
+- 所有的线程都**共用同一个** SimpleDateFormat 对象（会发生线程不安全,出现并发问题，同一次时间出现，用 synchronized 加锁进行安全处理 => 加锁后正常，但是效率变低）。
+
+<img src="https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/v2-c8a68a19e0f9518448dfdb6d1d592533_r.jpg" alt="img" style="zoom: 33%;" />
+
+解决方法一：lock一下解决线程安全
+
+<img src="https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image-20230508171927015.png" alt="image-20230508171927015" style="zoom:67%;" />
+
+解决方法二：ThreadLocal一下
+
+![image-20230508172144942](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image-20230508172144942.png)
+
+```java
+static class ThreadSafeFormatter{
+//        这个类就是要生产出来线程安全的DateFormat
+        //方法一
+        public static ThreadLocal<SimpleDateFormat> dateFormatThreadLocal =
+                new ThreadLocal<SimpleDateFormat>(){
+                    //进行初始化函数
+                    @Override
+                    protected SimpleDateFormat initialValue() {
+                        return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                    }
+                };
+
+        //方法二:Lambda 表达式
+        public static ThreadLocal<SimpleDateFormat> dateFormatThreadLocal2
+                = ThreadLocal.withInitial(()->new SimpleDateFormat("yyyy-MM-dd hh:mm:ss"));
+
+    }
+```
+
+
+
+
+
+全部：
+
+```java
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class ThreadLocalUseage {
+    public static ExecutorService threadPool = Executors.newFixedThreadPool(10);
+
+//    移到这里之后，时间会出错
+
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    public static void main(String[] args) {
+        //线程一
+        for (int i = 0; i < 1000; i++) {
+            int finalI = i;
+            threadPool.submit(new Runnable() {
+                @Override
+                public void run() {
+                    String date = new ThreadLocalUseage().date(finalI+100);
+                    System.out.println("date = " + date);
+                }
+            });
+        }
+        threadPool.shutdown();
+    }
+    //用两个线程打印生日日期
+    public String date(int seconds){
+        //毫秒，从1970-1-1 ：0：0:0
+        Date date = new Date(1000 * seconds);
+        String format;
+//        synchronized (ThreadLocalUseage.class){
+//            format= sdf.format(date);
+//        }
+        SimpleDateFormat ssdf = ThreadSafeFormatter.dateFormatThreadLocal.get();
+        format = ssdf.format(date);
+        return format;
+    }
+
+    static class ThreadSafeFormatter{
+//        这个类就是要生产出来线程安全的DateFormat
+        //方法一
+        public static ThreadLocal<SimpleDateFormat> dateFormatThreadLocal =
+                new ThreadLocal<SimpleDateFormat>(){
+                    //进行初始化函数
+                    @Override
+                    protected SimpleDateFormat initialValue() {
+                        return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                    }
+                };
+
+        //方法二:Lambda 表达式
+        public static ThreadLocal<SimpleDateFormat> dateFormatThreadLocal2
+                = ThreadLocal.withInitial(()->new SimpleDateFormat("yyyy-MM-dd hh:mm:ss"));
+
+    }
+}
+```
+
+
+
+### 场景二
+
+典型场景2：每个线程内需要保存**全局变量**（例如在拦截器中获取**用户信息**），可以让**不同方法直接使用**，**避免参数传递**的麻烦
+
+我们的目标：每个线程内需要保存全局变量，可以让不同方法直接使用，避免参数传递的麻烦
+
+#### 2.1 举例证明：
+
+##### 2.1.1 当前用户信息需要被线程内所有方法共享
+
+实例一：
+
+- 一个比较繁琐的解决方案是把 user 作为参数**层层传递**，从 service-1() 传递到 service-2() ，再从 service-2() 传到 service-3() ，以此类推，但是这样做会导致**代码冗余**且**不易维护**
+
+![img](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/v2-e5372da8fae439f6820a88860f503cf4_r.jpg)
+
+实例二：
+
+- 在此基础上，使用UserMap
+
+![img](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/v2-046959ef3feb8bb08103f5e1a757b608_r.jpg)
+
+
+
+- 当多线程同时工作时，我们需要保证线程安全，可以用 **synchronized**，也可以用 **ConcurrentHashMap**，但无论用什么，都会对**性能**有所影响
+
+![img](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/v2-87558daf8ae03a8b1aa7a5d5df099129_r.jpg)
+
+
+
+##### 2.1.2 采用更好的方法
+
+更好的办法就是使用 ThreadLocal ，这样无需 **synchronized**，可以再不影响性能的情况下，也无需层层传递参数，就可达到保存当前线程对应的用户信息的目的
+
+#### 2.2 使用方法：
+
+- 用 ThreadLocal 保存一些业务内容（用户权限信息，从用户系统获取到的用户名，UserId等）。
+- 这些信息在**同一个线程内相同**，但是不i同的线程使用的业务内容**不相同的**。
+- **在线程生命周期内**，都通过这个静态 ThreadLocal 实例的 get() 方法取得自己 set 过的那个对象，**避免**了将这个对象(例如 User对象)作为**参数传递**的麻烦
+- 此方法强调的是同一个请求内（同一个线程内）**不同方法**间的共享
+- 不需重写 initialValue() 方法，但是必须手动调用 set() 方法
+
+```text
+//演示 ThreadLocal 用法2：避免传递参数的麻烦
+public class ThreadLocalNormalUsage06 {
+    public static void main(String[] args) {
+        new Service1().process();
+    }
+}
+//读取到用户信息
+class Service1{
+    public void process(){
+        User user = new User("万机");
+        UserContextHolder.holder.set(user);
+        new Service2().process();
+    }
+}
+class Service2{
+    public void process(){
+        UserContextHolder.holder.get();
+        User user = UserContextHolder.holder.get();
+        System.out.println("Service2 => " + user.name);
+        new Service3().process();
+    }
+}
+class Service3{
+    public void process(){
+        UserContextHolder.holder.get();
+        User user = UserContextHolder.holder.get();
+        System.out.println("Service3 => " + user.name);
+    }
+}
+class UserContextHolder{
+    public static ThreadLocal<User> holder = new ThreadLocal<>();
+}
+class User{
+    String name;
+
+    public User(String name) {
+        this.name = name;
+    }
+}
+```
+
+### ThreadLocal 的两个作用
+
+- 让某个需要用到的对象再**线程间隔离**（每个线程都有自己的独立的对象）
+- 在任何方法中都可以**轻松获取**到该对象
+- 回顾前面的两个场景，对应到这两个作用
+
+根据共享对象的生成时机不同，选择 initialValue 或 set 来保存对象
+
+场景一：initialValue
+
+- 在 ThreadLocal 第一次 get 的时候把对象给初始化出来，对象的初始化时机可以**由我们控制**
+
+场景二：set
+
+- 如果需要保存到 ThreadLocal 里的对象的生成时机不由我们随意控制，例如拦截器生成的用户信息。
+- 用 ThreadLocal.set 直接放到我们的 ThreadLocal 中去，以便后续使用。
+
+### 使用 ThreadLocal 到来的好处
+
+- 达到线程安全
+- 不需要加锁，提高执行效率
+- 更高效的利用内存，节省开销
+- 相比于每个任务都新建一个 SimpleDateFormat ，显然用 ThreadLocal 可以节省内存和开销
+- 免去传参的繁琐
+- 不需要每次都传统样的参数
+- Thread Local 是的代码耦合度更低，更优雅
+
+### 主要方法解析
+
+- initialValue()：初始化
+
+- - 该方法会返回当前线程对用的“初始值”，这是一个延迟加载的方法，只有在调用 get 的时候，才会触发
+
+  - - 不重写方法，返回值为 null
+
+![img](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/v2-c68e98b47c6cf7addf2d41370e98bf0f_r.jpg)
+
+
+
+- 当线程第一次使用 get 方法访问变量时，将调用此方法
+
+- - 每次线程最多调用一次此方法，但如果已经调用了 remove() 后，再调用 get() ，则可以再次调用此方法
+  - 如果不重写本方法，这个方法会返回 null 。一般使用匿名内部类的方法来重写 initialValue() 方法
+
+- void set(T t)：为这个线程设置一个新值
+
+- T get()：得到这个线程对应的 value。如果是首次调用 get() ，则会调用 initialize 来得到这个值
+
+- void remove()：删除对应这个线程的值
+
+```text
+class Service2{
+    public void process(){
+        UserContextHolder.holder.get();
+        User user = UserContextHolder.holder.get();
+        System.out.println("Service2 => " + user.name);
+        UserContextHolder.holder.remove();
+        user = new User("王姐");
+        UserContextHolder.holder.set(user);
+        new Service3().process();
+    }
+}
+```
+
+### 一图胜千言
+
+- 搞清楚 Thread，ThreadLocal 以及 ThreadLocalMap 三者之间的关系
+- 每个 Thread 对象中都持有一个 ThreadLocalMap 成员变量
+
+![img](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/v2-8aad71096b1ccb41786942b0579da433_r.jpg)
+
+### Thread:ocean:local方法
+
+**get 方法：**
+
+- get 方法是先取出当前线程的 **ThreadLocalMap**
+- 然后调用 map.getEntry 方法，把本 ThreadLocal 的引用作为参数传入
+- 取出 map 中属于本 ThreadLocal 的 value
+- **注意：**这个 map 以及 map 中的 key 和 value 都是**保存在线程中**的，而不是保存在 ThreadLocal 中
+
+**initialValue 方法：**
+
+- 没有默认实现
+- 如果要用 initialValue 方法，需要自己实现
+- 通常使用匿名内部类的方式实现
+
+**ThreadLocalMap 类：**
+
+ThreadLocalMap 类，也就是 Thread.threadLocals
+
+- ThreadLocalMap 类是每个线程 Thread 类里面的变量，里面最重要的是一个键值对数组 Entry[] table，可以认为是一个 map，键值对：
+
+- - 键：这个 ThreadLocal
+  - 值：实际需要的成员变量，比如 User 或者 SimpleDateFormat对象
+
+- ThreadLocalMap 这里采用的是线性探测法，也就是如果发生冲突，就继续找下一个空位置，而不是用链表拉链
+
+### 两种使用场景殊途同归
+
+- 通过源码分析可以看出，setInitialValue 和直接 set 最后都是利用 **map.set()** 方法来设置值
+- 也就是说，最后都会对应到 ThreadLOcalMap 的一个 Entry ，只不过是**起点和入口不一样**
+
+### ThreadLocal 注意点
+
+- 内存泄漏
+
+- - 什么是内存泄漏：某个对象不再有用，但是占用的内存却不能被回收
+
+  - key 的泄漏： ThreadLocalMap 中的 Entry 继承自 WeakReference，是**弱引用**
+
+  - - 弱引用的特点：如果这个对象只被弱引用关联（没有任何强引用关联），那么这个对象就可以被回收
+
+  - Value 的泄漏：
+
+  - - ThreadLocalMap 的每个 Entry 都是一个对 key 的弱引用，同时，每个 Entry 都包含了一个对 value 的强引用
+
+    - 正常情况下，当线程终止，保存在 ThreadLocal 里的 value 会被垃圾回收，因为没有任何强引用了
+
+    - 但是，如果线程不终止（比如线程需要保持很久），那么 key 对应的 value 就不能被回收，因为有以下的调用链：
+
+    - - Thread => ThreadLocalMap => Entry（key 为 null） => Value
+
+    - 因为 value 和 Thread 之间还存在这个强引用链路，所以导致 value 无法回收，就可能会出现 OOM
+
+    - jdk 设计，扫描 key 为 null 的 Entry，并把对应的 value 设置为 null
+
+    - 如果一个 ThreadLocal 不被使用，就可能导致 value 的内存泄漏
+
+- 如何避免内存泄漏（阿里规约）
+
+- - 调用 **remove** 方法，就会删除对应的 Entry 对象，可以避免内存泄漏，所以使用完 ThreadLocal 之后，应该调用 remove 方法
+
+- 空指针异常
+
+```text
+public class ThreadLocalNPE {
+    ThreadLocal<Long> longThreadLocal = new ThreadLocal<>();
+
+    public void set(){
+        longThreadLocal.set(Thread.currentThread().getId());
+    }
+    public Long get(){
+        return longThreadLocal.get();
+    }
+
+    public static void main(String[] args) {
+        ThreadLocalNPE threadLocalNPE = new ThreadLocalNPE();
+        System.out.println(threadLocalNPE.get());
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                threadLocalNPE.set();
+                System.out.println(threadLocalNPE.get());
+            }
+        });
+        thread.start();
+
+    }
+}
+```
+
+- 如果 get 方法为 long ，则报空指针异常，有装箱拆箱导致的，不是 ThreadLocal的问题
+- 共享对象
+- 如果可以不使用 ThreadLocal 就解决问题，那么不要强行使用
+- 优先使用框架的支持，而不是自己创造
+
+
+
+## ThreadLocal理解
+
+> 提到ThreadLocal被提到应用最多的是session管理和数据库链接管理，这里以数据访问为例帮助你理解ThreadLocal：
+
+- 如下数据库管理类在单线程使用是没有任何问题的
+
+```java
+class ConnectionManager {
+    private static Connection connect = null;
+
+    public static Connection openConnection() {
+        if (connect == null) {
+            connect = DriverManager.getConnection();
+        }
+        return connect;
+    }
+
+    public static void closeConnection() {
+        if (connect != null)
+            connect.close();
+    }
+}
+```
+
+很显然，在多线程中使用会存在线程安全问题：第一，这里面的2个方法都没有进行同步，很可能在openConnection方法中会多次创建connect；第二，由于connect是共享变量，那么必然在调用connect的地方需要使用到同步来保障线程安全，因为很可能一个线程在使用connect进行数据库操作，而另外一个线程调用closeConnection关闭链接。
+
+- 为了解决上述线程安全的问题，第一考虑：互斥同步
+
+你可能会说，将这段代码的两个方法进行同步处理，并且在调用connect的地方需要进行同步处理，比如用Synchronized或者ReentrantLock互斥锁。
+
+- 这里再抛出一个问题：这地方到底需不需要将connect变量进行共享?
+
+事实上，是不需要的。假如每个线程中都有一个connect变量，各个线程之间对connect变量的访问实际上是没有依赖关系的，即一个线程不需要关心其他线程是否对这个connect进行了修改的。即改后的代码可以这样：
+
+```java
+class ConnectionManager {
+    private Connection connect = null;
+
+    public Connection openConnection() {
+        if (connect == null) {
+            connect = DriverManager.getConnection();
+        }
+        return connect;
+    }
+
+    public void closeConnection() {
+        if (connect != null)
+            connect.close();
+    }
+}
+
+class Dao {
+    public void insert() {
+        ConnectionManager connectionManager = new ConnectionManager();
+        Connection connection = connectionManager.openConnection();
+
+        // 使用connection进行操作
+
+        connectionManager.closeConnection();
+    }
+}
+```
+
+这样处理确实也没有任何问题，由于每次都是在方法内部创建的连接，那么线程之间自然不存在线程安全问题。但是这样会有一个致命的影响：导致服务器压力非常大，并且严重影响程序执行性能。由于在方法中需要频繁地开启和关闭数据库连接，这样不仅严重影响程序执行效率，还可能导致服务器压力巨大。
+
+- 这时候ThreadLocal登场了
+
+那么这种情况下使用ThreadLocal是再适合不过的了，因为ThreadLocal在每个线程中对该变量会创建一个副本，即每个线程内部都会有一个该变量，且在线程内部任何地方都可以使用，线程之间互不影响，这样一来就不存在线程安全问题，也不会严重影响程序执行性能。下面就是网上出现最多的例子：
+
+```java
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class ConnectionManager {
+
+    private static final ThreadLocal<Connection> dbConnectionLocal = new ThreadLocal<Connection>() {
+        @Override
+        protected Connection initialValue() {
+            try {
+                return DriverManager.getConnection("", "", "");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    };
+
+    public Connection getConnection() {
+        return dbConnectionLocal.get();
+    }
+}
+```
+
+- 再注意下ThreadLocal的修饰符
+
+ThreaLocal的JDK文档中说明：ThreadLocal instances are typically private static fields in classes that wish to associate state with a thread。如果我们希望通过某个类将状态(例如用户ID、事务ID)与线程关联起来，那么通常在这个类中定义private static类型的ThreadLocal 实例。
+
+> 但是要注意，虽然ThreadLocal能够解决上面说的问题，但是由于在每个线程中都创建了副本，所以要考虑它对资源的消耗，比如内存的占用会比不使用ThreadLocal要大。
+
+##  ThreadLocal原理
+
+### 如何实现线程隔离
+
+主要是用到了Thread对象中的一个ThreadLocalMap类型的变量threadLocals, 负责存储当前线程的关于Connection的对象, dbConnectionLocal(以上述例子中为例) 这个变量为Key, 以新建的Connection对象为Value; 这样的话, 线程第一次读取的时候如果不存在就会调用ThreadLocal的initialValue方法创建一个Connection对象并且返回;
+
+具体关于为线程分配变量副本的代码如下:
+
+```java
+public T get() {
+    Thread t = Thread.currentThread();
+    ThreadLocalMap threadLocals = getMap(t);
+    if (threadLocals != null) {
+        ThreadLocalMap.Entry e = threadLocals.getEntry(this);
+        if (e != null) {
+            @SuppressWarnings("unchecked")
+            T result = (T)e.value;
+            return result;
+        }
+    }
+    return setInitialValue();
+}
+```
+
+- 首先获取当前线程对象t, 然后从线程t中获取到ThreadLocalMap的成员属性threadLocals
+- 如果当前线程的threadLocals已经初始化(即不为null) 并且存在以当前ThreadLocal对象为Key的值, 则直接返回当前线程要获取的对象(本例中为Connection);
+- 如果当前线程的threadLocals已经初始化(即不为null)但是不存在以当前ThreadLocal对象为Key的的对象, 那么重新创建一个Connection对象, 并且添加到当前线程的threadLocals Map中,并返回
+- 如果当前线程的threadLocals属性还没有被初始化, 则重新创建一个ThreadLocalMap对象, 并且创建一个Connection对象并添加到ThreadLocalMap对象中并返回。
+
+如果存在则直接返回很好理解, 那么对于如何初始化的代码又是怎样的呢?
+
+```java
+private T setInitialValue() {
+    T value = initialValue();
+    Thread t = Thread.currentThread();
+    ThreadLocalMap map = getMap(t);
+    if (map != null)
+        map.set(this, value);
+    else
+        createMap(t, value);
+    return value;
+}
+```
+
+- 首先调用我们上面写的重载过后的initialValue方法, 产生一个Connection对象
+- 继续查看当前线程的threadLocals是不是空的, 如果ThreadLocalMap已被初始化, 那么直接将产生的对象添加到ThreadLocalMap中, 如果没有初始化, 则创建并添加对象到其中;
+
+同时, ThreadLocal还提供了直接操作Thread对象中的threadLocals的方法
+
+```java
+public void set(T value) {
+    Thread t = Thread.currentThread();
+    ThreadLocalMap map = getMap(t);
+    if (map != null)
+        map.set(this, value);
+    else
+        createMap(t, value);
+}
+```
+
+这样我们也可以不实现initialValue, 将初始化工作放到DBConnectionFactory的getConnection方法中:
+
+```java
+public Connection getConnection() {
+    Connection connection = dbConnectionLocal.get();
+    if (connection == null) {
+        try {
+            connection = DriverManager.getConnection("", "", "");
+            dbConnectionLocal.set(connection);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    return connection;
+}
+```
+
+那么我们看过代码之后就很清晰的知道了为什么ThreadLocal能够实现变量的多线程隔离了; 其实就是用了Map的数据结构给当前线程缓存了, 要使用的时候就从本线程的threadLocals对象中获取就可以了, key就是当前线程;
+
+当然了在当前线程下获取当前线程里面的Map里面的对象并操作肯定没有线程并发问题了, 当然能做到变量的线程间隔离了;
+
+现在我们知道了ThreadLocal到底是什么了, 又知道了如何使用ThreadLocal以及其基本实现原理了是不是就可以结束了呢? 其实还有一个问题就是ThreadLocalMap是个什么对象, 为什么要用这个对象呢?
+
+### ThreadLocalMap对象是什么
+
+本质上来讲, 它就是一个Map, 但是这个ThreadLocalMap与我们平时见到的Map有点不一样
+
+- 它没有实现Map接口;
+- 它没有public的方法, 最多有一个default的构造方法, 因为这个ThreadLocalMap的方法仅仅在ThreadLocal类中调用, 属于静态内部类
+- ThreadLocalMap的Entry实现继承了WeakReference<ThreadLocal<?>>
+- 该方法仅仅用了一个Entry数组来存储Key, Value; Entry并不是链表形式, 而是每个bucket里面仅仅放一个Entry;
+
+要了解ThreadLocalMap的实现, 我们先从入口开始, 就是往该Map中添加一个值:
+
+```java
+private void set(ThreadLocal<?> key, Object value) {
+
+    // We don't use a fast path as with get() because it is at
+    // least as common to use set() to create new entries as
+    // it is to replace existing ones, in which case, a fast
+    // path would fail more often than not.
+
+    Entry[] tab = table;
+    int len = tab.length;
+    int i = key.threadLocalHashCode & (len-1);
+
+    for (Entry e = tab[i];
+         e != null;
+         e = tab[i = nextIndex(i, len)]) {
+        ThreadLocal<?> k = e.get();
+
+        if (k == key) {
+            e.value = value;
+            return;
+        }
+
+        if (k == null) {
+            replaceStaleEntry(key, value, i);
+            return;
+        }
+    }
+
+    tab[i] = new Entry(key, value);
+    int sz = ++size;
+    if (!cleanSomeSlots(i, sz) && sz >= threshold)
+        rehash();
+}
+```
+
+先进行简单的分析, 对该代码表层意思进行解读:
+
+- 看下当前threadLocal的在数组中的索引位置 比如: `i = 2`, 看 `i = 2` 位置上面的元素(Entry)的`Key`是否等于threadLocal 这个 Key, 如果等于就很好说了, 直接将该位置上面的Entry的Value替换成最新的就可以了;
+- 如果当前位置上面的 Entry 的 Key为空, 说明ThreadLocal对象已经被回收了, 那么就调用replaceStaleEntry
+- 如果清理完无用条目(ThreadLocal被回收的条目)、并且数组中的数据大小 > 阈值的时候对当前的Table进行重新哈希 所以, 该HashMap是处理冲突检测的机制是向后移位, 清除过期条目 最终找到合适的位置;
+
+了解完Set方法, 后面就是Get方法了:
+
+```java
+private Entry getEntry(ThreadLocal<?> key) {
+    int i = key.threadLocalHashCode & (table.length - 1);
+    Entry e = table[i];
+    if (e != null && e.get() == key)
+        return e;
+    else
+        return getEntryAfterMiss(key, i, e);
+}
+```
+
+先找到ThreadLocal的索引位置, 如果索引位置处的entry不为空并且键与threadLocal是同一个对象, 则直接返回; 否则去后面的索引位置继续查找。
+
+## ThreadLocal造成内存泄露的问题
+
+网上有这样一个例子：
+
+```java
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+public class ThreadLocalDemo {
+    static class LocalVariable {
+        private Long[] a = new Long[1024 * 1024];
+    }
+
+    // (1)
+    final static ThreadPoolExecutor poolExecutor = new ThreadPoolExecutor(5, 5, 1, TimeUnit.MINUTES,
+            new LinkedBlockingQueue<>());
+    // (2)
+    final static ThreadLocal<LocalVariable> localVariable = new ThreadLocal<LocalVariable>();
+
+    public static void main(String[] args) throws InterruptedException {
+        // (3)
+        Thread.sleep(5000 * 4);
+        for (int i = 0; i < 50; ++i) {
+            poolExecutor.execute(new Runnable() {
+                public void run() {
+                    // (4)
+                    localVariable.set(new LocalVariable());
+                    // (5)
+                    System.out.println("use local varaible" + localVariable.get());
+                    localVariable.remove();
+                }
+            });
+        }
+        // (6)
+        System.out.println("pool execute over");
+    }
+}
+```
+
+如果用线程池来操作ThreadLocal 对象确实会造成内存泄露, 因为对于线程池里面不会销毁的线程, 里面总会存在着`<ThreadLocal, LocalVariable>`的强引用, 因为final static 修饰的 ThreadLocal 并不会释放, 而ThreadLocalMap 对于 Key 虽然是弱引用, 但是强引用不会释放, 弱引用当然也会一直有值, 同时创建的LocalVariable对象也不会释放, 就造成了内存泄露; 如果LocalVariable对象不是一个大对象的话, 其实泄露的并不严重, `泄露的内存 = 核心线程数 * LocalVariable`对象的大小;
+
+所以, 为了避免出现内存泄露的情况, ThreadLocal提供了一个清除线程中对象的方法, 即 remove, 其实内部实现就是调用 ThreadLocalMap 的remove方法:
+
+```java
+private void remove(ThreadLocal<?> key) {
+    Entry[] tab = table;
+    int len = tab.length;
+    int i = key.threadLocalHashCode & (len-1);
+    for (Entry e = tab[i];
+         e != null;
+         e = tab[i = nextIndex(i, len)]) {
+        if (e.get() == key) {
+            e.clear();
+            expungeStaleEntry(i);
+            return;
+        }
+    }
+}
+```
+
+找到Key对应的Entry, 并且清除Entry的Key(ThreadLocal)置空, 随后清除过期的Entry即可避免内存泄露。
+
+## ThreadLocal应用场景
+
+除了上述的数据库管理类的例子，我们再看看其它一些应用：
+
+### [#](#每个线程维护了一个-序列号) 每个线程维护了一个“序列号”
+
+> 再回想上文说的，如果我们希望通过某个类将状态(例如用户ID、事务ID)与线程关联起来，那么通常在这个类中定义private static类型的ThreadLocal 实例。
+
+每个线程维护了一个“序列号”
+
+```java
+public class SerialNum {
+    // The next serial number to be assigned
+    private static int nextSerialNum = 0;
+
+    private static ThreadLocal serialNum = new ThreadLocal() {
+        protected synchronized Object initialValue() {
+            return new Integer(nextSerialNum++);
+        }
+    };
+
+    public static int get() {
+        return ((Integer) (serialNum.get())).intValue();
+    }
+}
+```
+
+### [#](#session的管理) Session的管理
+
+经典的另外一个例子：
+
+```java
+private static final ThreadLocal threadSession = new ThreadLocal();  
+  
+public static Session getSession() throws InfrastructureException {  
+    Session s = (Session) threadSession.get();  
+    try {  
+        if (s == null) {  
+            s = getSessionFactory().openSession();  
+            threadSession.set(s);  
+        }  
+    } catch (HibernateException ex) {  
+        throw new InfrastructureException(ex);  
+    }  
+    return s;  
+}  
+```
+
+### [#](#在线程内部创建threadlocal) 在线程内部创建ThreadLocal
+
+还有一种用法是在线程类内部创建ThreadLocal，基本步骤如下：
+
+- 在多线程的类(如ThreadDemo类)中，创建一个ThreadLocal对象threadXxx，用来保存线程间需要隔离处理的对象xxx。
+- 在ThreadDemo类中，创建一个获取要隔离访问的数据的方法getXxx()，在方法中判断，若ThreadLocal对象为null时候，应该new()一个隔离访问类型的对象，并强制转换为要应用的类型。
+- 在ThreadDemo类的run()方法中，通过调用getXxx()方法获取要操作的数据，这样可以保证每个线程对应一个数据对象，在任何时刻都操作的是这个对象。
+
+```java
+public class ThreadLocalTest implements Runnable{
+    
+    ThreadLocal<Student> StudentThreadLocal = new ThreadLocal<Student>();
+
+    @Override
+    public void run() {
+        String currentThreadName = Thread.currentThread().getName();
+        System.out.println(currentThreadName + " is running...");
+        Random random = new Random();
+        int age = random.nextInt(100);
+        System.out.println(currentThreadName + " is set age: "  + age);
+        Student Student = getStudentt(); //通过这个方法，为每个线程都独立的new一个Studentt对象，每个线程的的Studentt对象都可以设置不同的值
+        Student.setAge(age);
+        System.out.println(currentThreadName + " is first get age: " + Student.getAge());
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println( currentThreadName + " is second get age: " + Student.getAge());
+        
+    }
+    
+    private Student getStudentt() {
+        Student Student = StudentThreadLocal.get();
+        if (null == Student) {
+            Student = new Student();
+            StudentThreadLocal.set(Student);
+        }
+        return Student;
+    }
+
+    public static void main(String[] args) {
+        ThreadLocalTest t = new ThreadLocalTest();
+        Thread t1 = new Thread(t,"Thread A");
+        Thread t2 = new Thread(t,"Thread B");
+        t1.start();
+        t2.start();
+    }
+    
+}
+
+class Student{
+    int age;
+    public int getAge() {
+        return age;
+    }
+    public void setAge(int age) {
+        this.age = age;
+    }
+    
+}
+```
+
+### [#](#java-开发手册中推荐的-threadlocal) java 开发手册中推荐的 ThreadLocal
+
+看看阿里巴巴 java 开发手册中推荐的 ThreadLocal 的用法:
+
+```java
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+ 
+public class DateUtils {
+    public static final ThreadLocal<DateFormat> df = new ThreadLocal<DateFormat>(){
+        @Override
+        protected DateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd");
+        }
+    };
+}
+```
+
+然后我们再要用到 DateFormat 对象的地方，这样调用：
+
+```java
+DateUtils.df.get().format(new Date());
+```
+
+------
+
+
 
 
 
