@@ -966,7 +966,51 @@ public class ThreadLocalNPE {
 - 如果可以不使用 ThreadLocal 就解决问题，那么不要强行使用
 - 优先使用框架的支持，而不是自己创造
 
+## ThreadLocal如何在spring中使用
 
+在Spring中，ThreadLocal是一个很有用的工具，可以让我们在多线程环境下安全地共享数据。以下是在Spring中使用ThreadLocal的步骤：
+
+1. 创建一个ThreadLocal对象
+   ```java
+   private ThreadLocal<T> threadLocal = new ThreadLocal<>();
+   ```
+
+2. 编写需要使用ThreadLocal的方法，并将需要共享的数据保存到ThreadLocal中。
+   ```
+   public void setData(T data) {
+     threadLocal.set(data);
+   }
+   ```
+
+3. 在需要获取共享数据的方法中，从ThreadLocal中获取数据。
+   ```
+   public T getData() {
+     return threadLocal.get();
+   }
+   ```
+
+4. 在Spring中，我们可以将ThreadLocal对象作为一个Bean注入到其他Bean中，这样同一个线程下的多个Bean就可以共享ThreadLocal中的数据了。
+   ```
+   @Bean
+   public ThreadLocal<T> threadLocal() {
+     return new ThreadLocal<>();
+   }
+   
+   @Component
+   public class MyComponent {
+     @Autowired
+     private ThreadLocal<T> threadLocal;
+   
+     public void someMethod() {
+       T data = threadLocal.get();
+       // do something with data
+     }
+   }
+   ```
+
+注意事项：
+- 要确保在使用完ThreadLocal后清理数据，避免内存泄漏。
+- 由于ThreadLocal是以线程为单位进行数据隔离的，因此要确保在同一线程内使用相同的ThreadLocal对象。
 
 ## ThreadLocal理解
 
@@ -1420,7 +1464,344 @@ DateUtils.df.get().format(new Date());
 
 
 
+# Java锁
 
+Java一共分为两类锁:
+
+* 一类是由synchornized修饰的锁
+
+* 一类是JUC里提供的锁，核心就是ReentrantLock
+
+AQS锁分为独占锁和共享锁两种：
+
+* 独占锁：锁在一个时间点只能被一个线程占有。
+  根据锁的获取机制，又分为“公平锁”和“非公平锁”。
+  等待队列中按照FIFO的原则获取锁，等待时间越长的线程越先获取到锁，这就是公平的获取锁，即公平锁。
+  而非公平锁，线程获取的锁的时候，无视等待队列直接获取锁。ReentrantLock和ReentrantReadWriteLock.Writelock是独占锁。
+
+* 共享锁：同一个时候能够被多个线程获取的锁，能被共享的锁。
+  JUC包中ReentrantReadWriteLock.ReadLock，CyclicBarrier，CountDownLatch和Semaphore都是共享锁。
+
+## ReentrantLock
+
+ReentrantLock,它实现是一种自旋锁，通过循环调用CAS操作来实现加锁，性能较好的原因是在于**避免进入进程的内核态
+的阻塞状态**。
+想尽办法避免进入内核态的阻塞状态是我们设计锁的关键。
+
+* synchronized与ReentrantLock的区别
+
+|       \        |                         synchronized                         | ReentrantLock |
+| :------------: | :----------------------------------------------------------: | :-----------: |
+|    可重入性    |                            可重入                            |    可重入     |
+|    锁的实现    |               JVM实现，很难操作源码，得到实现                |    JDK实现    |
+|      性能      | 在引入轻量级锁（偏向锁，自旋锁）后性能大大提升，建议都可以选择的时候选择synchornized |       -       |
+|    功能区别    |              方便简洁，由编译器负责加锁和释放锁              |   手工操作    |
+|      粒度      |                      细粒度，可灵活控制                      |               |
+| 可否指定公平锁 |                        只能是非公平锁                        |     可以      |
+|   可否放弃锁   |                            不可以                            |     可以      |
+
+以下是ReentrantLock的一些常用方法：
+
+- `lock()`: 获取锁，如果锁不可用就阻塞当前线程。
+- `lockInterruptibly()`: 获取锁，但如果当前线程被中断，则放弃获取锁并抛出InterruptedException异常。
+- `tryLock()`: 尝试获取锁，如果锁不可用则返回false。
+- `tryLock(long timeout, TimeUnit unit)`: 尝试在给定时间内获取锁。如果在超时之前未能获得锁，则返回false，否则返回true。
+- `unlock()`: 释放锁。
+- `getHoldCount()`: 返回当前线程保持此锁定的数量，也就是调用lock()方法的次数。
+- `isHeldByCurrentThread()`: 判断当前线程是否保持此锁。
+- `isLocked()`: 判断锁是否被任意线程持有。
+
+
+
+* ReentrantLock独有的功能：
+
+1、 可以指定为公平锁（先等待的线程先获得锁）或非公平锁；
+
+```java
+/**
+      默认实现了非公平锁
+     * Creates an instance of {@code ReentrantLock}.
+     * This is equivalent to using {@code ReentrantLock(false)}.
+     */
+    public ReentrantLock() {
+        sync = new NonfairSync();
+    }
+```
+
+2、提供了一个Condition（条件）类，可以分组唤醒需要唤醒的线程；
+
+3、提供了能够中断等待锁的线程机制，`lock.lockInterruptibly()`，sync不可以被打断。
+
+使用synchronized计数：
+
+```java
+public class CountExample {
+
+    //请求总数
+    public static int clientTotal=5000;
+
+    //同时并发执行的线程数
+    public static int threadTotal=200;
+
+    public static volatile int count=0;
+
+    public static void main(String[] args) throws InterruptedException {
+        //创建线程池
+        ExecutorService executorService= Executors.newCachedThreadPool();
+        //定义信号量，闭锁
+        final Semaphore semaphore=new Semaphore(threadTotal);
+
+        final CountDownLatch countDownLatch=new CountDownLatch(clientTotal);
+        //模拟并发
+        for (int i = 0; i < clientTotal; i++) {
+            executorService.execute(()->{
+                try {
+                    semaphore.acquire();
+                    add();
+                    semaphore.release();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                countDownLatch.countDown();
+
+            });
+        }
+        //确保线程全部执行结束，阻塞进程，并保证
+        countDownLatch.await();
+        executorService.shutdown();
+        System.out.println("count:{"+count+"}");
+    }
+
+    private static synchronized void add(){
+        count++;
+    }
+}
+//输出结果：count:{5000}
+```
+
+使用ReentrantLock计数：
+
+```java
+public class CountExample2 {
+
+    //请求总数
+    public static int clientTotal=5000;
+
+    //同时并发执行的线程数
+    public static int threadTotal=200;
+
+    public static volatile int count=0;
+
+    private final static ReentrantLock lock=new ReentrantLock();
+
+    public static void main(String[] args) throws InterruptedException {
+        //创建线程池
+        ExecutorService executorService= Executors.newCachedThreadPool();
+        //定义信号量，闭锁
+        final Semaphore semaphore=new Semaphore(threadTotal);
+
+        final CountDownLatch countDownLatch=new CountDownLatch(clientTotal);
+        //模拟并发
+        for (int i = 0; i < clientTotal; i++) {
+            executorService.execute(()->{
+                try {
+                    semaphore.acquire();
+                    add();
+                    semaphore.release();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                countDownLatch.countDown();
+
+            });
+        }
+        //确保线程全部执行结束，阻塞进程，并保证
+        countDownLatch.await();
+        executorService.shutdown();
+        System.out.println("count:{"+count+"}");
+    }
+
+    private static void add(){
+        lock.lock();
+        try {
+            count++;
+        }finally {
+            lock.unlock();
+        }
+    }
+}
+//count:{5000}
+```
+
+
+
+### ReentrantReadWriteLock
+
+ReentrantLock是一个排他锁，同一时间只允许一个线程访问，
+而ReentrantReadWriteLock允许多个读线程同时访问，但不允许写线程和读线程、写线程和写线程同时访问。相对于排他锁，提高了并发性。
+
+在实际应用中，大部分情况下对共享数据（如缓存）的访问都是读操作远多于写操作，
+这时ReentrantReadWriteLock能够提供比排他锁更好的并发性和吞吐量。
+
+读写锁内部维护了两个锁，一个用于读操作，一个用于写操作。
+所有 ReadWriteLock实现都必须保证 writeLock操作的内存同步效果也要保持与相关 readLock的联系。
+也就是说，**成功获取读锁的线程会看到写入锁之前版本所做的所有更新**。
+
+- 分装
+
+```java
+public class LockExample {
+    private final Map<String,Data> map=new TreeMap();
+
+    private final static ReentrantReadWriteLock lock=new ReentrantReadWriteLock();
+
+    private final static Lock readLock=lock.readLock();
+
+    private final static Lock writeLock=lock.writeLock();
+
+    public  Data get(String key){
+        readLock.lock();
+        try {
+            return map.get(key);
+        }finally {
+            readLock.unlock();
+        }
+
+    }
+
+    public Set<String> getAllKeys(){
+        readLock.lock();
+        try {
+            return map.keySet();
+        }finally {
+            readLock.unlock();
+        }
+
+    }
+
+    public Data put(String key,Data value){
+        writeLock.lock();
+        try{
+            return map.put(key,value);
+        }finally {
+            writeLock.unlock();
+        }
+    }
+    
+    class Data{
+    
+    }
+}
+```
+
+### StampedLock
+
+它控制锁有三种模式：写、读和**乐观读**
+
+状态由版本和模式两个部分组成，锁获取方法是一个数字，作为票据（Stamped）。
+它用相应的锁的状态来表示和控制当前的访问，数字0表示没有写锁被授权访问。
+
+StampedLock首先调用tryOptimisticRead方法,此时会获得一个“印戳”。然后读取值并检查票据（Stamped），是否仍然有效(例如其他线程已经获得了一个读锁)。
+如果有效,就可以使用这个值。
+如果无效,就会获得一个读锁(它会阻塞所有的写锁)
+
+在读锁上分为悲观读和乐观读：
+
+乐观读：如果读的操作很多，写操作很少的情况下，我们可以乐观的认为，读写同时发生的几率很小，因此不悲观的使用完全的读取锁定，
+程序可以在查看相关的状态之后，判断有没有写操作的变更，再采取相应的措施，这一小小的改进，可以大大提升执行效率。
+
+```java
+public class CountExample3 {
+
+    //请求总数
+    public static int clientTotal=5000;
+
+    //同时并发执行的线程数
+    public static int threadTotal=200;
+
+    public static volatile int count=0;
+
+    private final static StampedLock lock=new StampedLock();
+
+    public static void main(String[] args) throws InterruptedException {
+        //创建线程池
+        ExecutorService executorService= Executors.newCachedThreadPool();
+        //定义信号量，闭锁
+        final Semaphore semaphore=new Semaphore(threadTotal);
+
+        final CountDownLatch countDownLatch=new CountDownLatch(clientTotal);
+        //模拟并发
+        for (int i = 0; i < clientTotal; i++) {
+            executorService.execute(()->{
+                try {
+                    semaphore.acquire();
+                    add();
+                    semaphore.release();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                countDownLatch.countDown();
+
+            });
+        }
+        //确保线程全部执行结束，阻塞进程，并保证
+        countDownLatch.await();
+        executorService.shutdown();
+        System.out.println("count:{"+count+"}");
+    }
+
+    private static void add(){
+        long stamp=lock.writeLock();
+        try {
+            count++;
+        }finally {
+            lock.unlock(stamp);
+        }
+    }
+}
+//count:{5000}
+```
+
+
+
+
+
+## 可重入锁/递归锁
+
+可重入锁又叫递归锁，指的同一个线程在**外层方法**获得锁时，进入**内层方法**会自动获取锁。也就是说，线程可以进入任何一个它已经拥有锁的代码块。比如`get`方法里面有`set`方法，两个方法都有同一把锁，得到了`get`的锁，就自动得到了`set`的锁。
+
+就像有了家门的锁，厕所、书房、厨房就为你敞开了一样。可重入锁可以**避免死锁**的问题。
+
+详见[ReentrantLockDemo](https://github.com/MaJesTySA/JVM-JUC-Core/blob/master/src/thread/ReentrantLockDemo.java)。
+
+### 锁的配对
+
+锁之间要配对，加了几把锁，最后就得解开几把锁，下面的代码编译和运行都没有任何问题。但锁的数量不匹配会导致死循环。
+
+```java
+lock.lock();
+lock.lock();
+try{
+    someAction();
+}finally{
+    lock.unlock();
+}
+```
+
+## 自旋锁
+
+所谓自旋锁，就是尝试获取锁的线程不会**立即阻塞**，而是采用**循环的方式去尝试获取**。自己在那儿一直循环获取，就像“**自旋**”一样。这样的好处是减少**线程切换的上下文开销**，缺点是会**消耗CPU**。CAS底层的`getAndAddInt`就是**自旋锁**思想。
+
+```java
+//跟CAS类似，一直循环比较。
+while (!atomicReference.compareAndSet(null, thread)) { }
+```
+
+详见[SpinLockDemo](https://github.com/MaJesTySA/JVM-JUC-Core/blob/master/src/thread/SpinLockDemo.java)。
+
+
+
+1. 
 
 # JMM
 
@@ -1757,66 +2138,7 @@ public CopyOnWriteArraySet() {
 
 关于集合不安全类请看[ContainerNotSafeDemo](https://github.com/MaJesTySA/JVM-JUC-Core/blob/master/src/thread/ContainerNotSafeDemo.java)。
 
-# Java锁
-
-## 公平锁/非公平锁
-
-**概念**：所谓**公平锁**，就是多个线程按照**申请锁的顺序**来获取锁，类似排队，先到先得。而**非公平锁**，则是多个线程抢夺锁，会导致**优先级反转**或**饥饿现象**。
-
-**区别**：公平锁在获取锁时先查看此锁维护的**等待队列**，**为空**或者当前线程是等待队列的**队首**，则直接占有锁，否则插入到等待队列，FIFO原则。非公平锁比较粗鲁，上来直接**先尝试占有锁**，失败则采用公平锁方式。非公平锁的优点是**吞吐量**比公平锁更大。
-
-`synchronized`和`juc.ReentrantLock`默认都是**非公平锁**。`ReentrantLock`在构造的时候传入`true`则是**公平锁**。
-
-## 可重入锁/递归锁
-
-可重入锁又叫递归锁，指的同一个线程在**外层方法**获得锁时，进入**内层方法**会自动获取锁。也就是说，线程可以进入任何一个它已经拥有锁的代码块。比如`get`方法里面有`set`方法，两个方法都有同一把锁，得到了`get`的锁，就自动得到了`set`的锁。
-
-就像有了家门的锁，厕所、书房、厨房就为你敞开了一样。可重入锁可以**避免死锁**的问题。
-
-详见[ReentrantLockDemo](https://github.com/MaJesTySA/JVM-JUC-Core/blob/master/src/thread/ReentrantLockDemo.java)。
-
-### 锁的配对
-
-锁之间要配对，加了几把锁，最后就得解开几把锁，下面的代码编译和运行都没有任何问题。但锁的数量不匹配会导致死循环。
-
-```java
-lock.lock();
-lock.lock();
-try{
-    someAction();
-}finally{
-    lock.unlock();
-}
-```
-
-## 自旋锁
-
-所谓自旋锁，就是尝试获取锁的线程不会**立即阻塞**，而是采用**循环的方式去尝试获取**。自己在那儿一直循环获取，就像“**自旋**”一样。这样的好处是减少**线程切换的上下文开销**，缺点是会**消耗CPU**。CAS底层的`getAndAddInt`就是**自旋锁**思想。
-
-```java
-//跟CAS类似，一直循环比较。
-while (!atomicReference.compareAndSet(null, thread)) { }
-```
-
-详见[SpinLockDemo](https://github.com/MaJesTySA/JVM-JUC-Core/blob/master/src/thread/SpinLockDemo.java)。
-
-## 读写锁/独占/共享锁
-
-**读锁**是**共享的**，**写锁**是**独占的**。`juc.ReentrantLock`和`synchronized`都是**独占锁**，独占锁就是**一个锁**只能被**一个线程**所持有。有的时候，需要**读写分离**，那么就要引入读写锁，即`juc.ReentrantReadWriteLock`。
-
-比如缓存，就需要读写锁来控制。缓存就是一个键值对，以下Demo模拟了缓存的读写操作，读的`get`方法使用了`ReentrantReadWriteLock.ReadLock()`，写的`put`方法使用了`ReentrantReadWriteLock.WriteLock()`。这样避免了写被打断，实现了多个线程同时读。
-
-[ReadWriteLockDemo](https://github.com/MaJesTySA/JVM-JUC-Core/blob/master/src/thread/ReadWriteLockDemo.java)
-
-## Synchronized和Lock的区别
-
-`synchronized`关键字和`java.util.concurrent.locks.Lock`都能加锁，两者有什么区别呢？
-
-1. **原始构成**：`sync`是JVM层面的，底层通过`monitorenter`和`monitorexit`来实现的。`Lock`是JDK API层面的。（`sync`一个enter会有两个exit，一个是正常退出，一个是异常退出）
-2. **使用方法**：`sync`不需要手动释放锁，而`Lock`需要手动释放。
-3. **是否可中断**：`sync`不可中断，除非抛出异常或者正常运行完成。`Lock`是可中断的，通过调用`interrupt()`方法。
-4. **是否为公平锁**：`sync`只能是非公平锁，而`Lock`既能是公平锁，又能是非公平锁。
-5. **绑定多个条件**：`sync`不能，只能随机唤醒。而`Lock`可以通过`Condition`来绑定多个条件，精确唤醒。
+5. 
 
 # CountDownLatch/CyclicBarrier/Semaphore
 
