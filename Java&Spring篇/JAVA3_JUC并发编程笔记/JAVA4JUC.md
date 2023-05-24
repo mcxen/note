@@ -538,7 +538,7 @@ while (!executorService.isTerminated()) {
 
 # ThreadLocal
 
-## 带着BAT大厂的面试问题去理解
+## 面试问题
 
 提示
 
@@ -566,7 +566,7 @@ while (!executorService.isTerminated()) {
 
 总结而言：ThreadLocal是一个将在多线程中为每一个线程创建单独的变量副本的类; 当使用ThreadLocal来维护变量时, ThreadLocal会为每个线程创建单独的变量副本, 避免因多线程操作共享变量而导致的数据不一致的情况。
 
-## ThreadLocal代入场景
+## ThreadLocal理解-举例1
 
 ### 场景一
 
@@ -864,155 +864,7 @@ class Service2{
 }
 ```
 
-### 一图胜千言
-
-- 搞清楚 Thread，ThreadLocal 以及 ThreadLocalMap 三者之间的关系
-- 每个 Thread 对象中都持有一个 ThreadLocalMap 成员变量
-
-![img](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/v2-8aad71096b1ccb41786942b0579da433_r.jpg)
-
-### Thread:ocean:local方法
-
-**get 方法：**
-
-- get 方法是先取出当前线程的 **ThreadLocalMap**
-- 然后调用 map.getEntry 方法，把本 ThreadLocal 的引用作为参数传入
-- 取出 map 中属于本 ThreadLocal 的 value
-- **注意：**这个 map 以及 map 中的 key 和 value 都是**保存在线程中**的，而不是保存在 ThreadLocal 中
-
-**initialValue 方法：**
-
-- 没有默认实现
-- 如果要用 initialValue 方法，需要自己实现
-- 通常使用匿名内部类的方式实现
-
-**ThreadLocalMap 类：**
-
-ThreadLocalMap 类，也就是 Thread.threadLocals
-
-- ThreadLocalMap 类是每个线程 Thread 类里面的变量，里面最重要的是一个键值对数组 Entry[] table，可以认为是一个 map，键值对：
-
-- - 键：这个 ThreadLocal
-  - 值：实际需要的成员变量，比如 User 或者 SimpleDateFormat对象
-
-- ThreadLocalMap 这里采用的是线性探测法，也就是如果发生冲突，就继续找下一个空位置，而不是用链表拉链
-
-### 两种使用场景殊途同归
-
-- 通过源码分析可以看出，setInitialValue 和直接 set 最后都是利用 **map.set()** 方法来设置值
-- 也就是说，最后都会对应到 ThreadLOcalMap 的一个 Entry ，只不过是**起点和入口不一样**
-
-### ThreadLocal 注意点
-
-- 内存泄漏
-
-- - 什么是内存泄漏：某个对象不再有用，但是占用的内存却不能被回收
-
-  - key 的泄漏： ThreadLocalMap 中的 Entry 继承自 WeakReference，是**弱引用**
-
-  - - 弱引用的特点：如果这个对象只被弱引用关联（没有任何强引用关联），那么这个对象就可以被回收
-
-  - Value 的泄漏：
-
-  - - ThreadLocalMap 的每个 Entry 都是一个对 key 的弱引用，同时，每个 Entry 都包含了一个对 value 的强引用
-
-    - 正常情况下，当线程终止，保存在 ThreadLocal 里的 value 会被垃圾回收，因为没有任何强引用了
-
-    - 但是，如果线程不终止（比如线程需要保持很久），那么 key 对应的 value 就不能被回收，因为有以下的调用链：
-
-    - - Thread => ThreadLocalMap => Entry（key 为 null） => Value
-
-    - 因为 value 和 Thread 之间还存在这个强引用链路，所以导致 value 无法回收，就可能会出现 OOM
-
-    - jdk 设计，扫描 key 为 null 的 Entry，并把对应的 value 设置为 null
-
-    - 如果一个 ThreadLocal 不被使用，就可能导致 value 的内存泄漏
-
-- 如何避免内存泄漏（阿里规约）
-
-- - 调用 **remove** 方法，就会删除对应的 Entry 对象，可以避免内存泄漏，所以使用完 ThreadLocal 之后，应该调用 remove 方法
-
-- 空指针异常
-
-```text
-public class ThreadLocalNPE {
-    ThreadLocal<Long> longThreadLocal = new ThreadLocal<>();
-
-    public void set(){
-        longThreadLocal.set(Thread.currentThread().getId());
-    }
-    public Long get(){
-        return longThreadLocal.get();
-    }
-
-    public static void main(String[] args) {
-        ThreadLocalNPE threadLocalNPE = new ThreadLocalNPE();
-        System.out.println(threadLocalNPE.get());
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                threadLocalNPE.set();
-                System.out.println(threadLocalNPE.get());
-            }
-        });
-        thread.start();
-
-    }
-}
-```
-
-- 如果 get 方法为 long ，则报空指针异常，有装箱拆箱导致的，不是 ThreadLocal的问题
-- 共享对象
-- 如果可以不使用 ThreadLocal 就解决问题，那么不要强行使用
-- 优先使用框架的支持，而不是自己创造
-
-## ThreadLocal如何在spring中使用
-
-在Spring中，ThreadLocal是一个很有用的工具，可以让我们在多线程环境下安全地共享数据。以下是在Spring中使用ThreadLocal的步骤：
-
-1. 创建一个ThreadLocal对象
-   ```java
-   private ThreadLocal<T> threadLocal = new ThreadLocal<>();
-   ```
-
-2. 编写需要使用ThreadLocal的方法，并将需要共享的数据保存到ThreadLocal中。
-   ```
-   public void setData(T data) {
-     threadLocal.set(data);
-   }
-   ```
-
-3. 在需要获取共享数据的方法中，从ThreadLocal中获取数据。
-   ```
-   public T getData() {
-     return threadLocal.get();
-   }
-   ```
-
-4. 在Spring中，我们可以将ThreadLocal对象作为一个Bean注入到其他Bean中，这样同一个线程下的多个Bean就可以共享ThreadLocal中的数据了。
-   ```
-   @Bean
-   public ThreadLocal<T> threadLocal() {
-     return new ThreadLocal<>();
-   }
-   
-   @Component
-   public class MyComponent {
-     @Autowired
-     private ThreadLocal<T> threadLocal;
-   
-     public void someMethod() {
-       T data = threadLocal.get();
-       // do something with data
-     }
-   }
-   ```
-
-注意事项：
-- 要确保在使用完ThreadLocal后清理数据，避免内存泄漏。
-- 由于ThreadLocal是以线程为单位进行数据隔离的，因此要确保在同一线程内使用相同的ThreadLocal对象。
-
-## ThreadLocal理解
+## ThreadLocal理解-举例2
 
 > 提到ThreadLocal被提到应用最多的是session管理和数据库链接管理，这里以数据访问为例帮助你理解ThreadLocal：
 
@@ -1262,6 +1114,13 @@ private Entry getEntry(ThreadLocal<?> key) {
 
 先找到ThreadLocal的索引位置, 如果索引位置处的entry不为空并且键与threadLocal是同一个对象, 则直接返回; 否则去后面的索引位置继续查找。
 
+- 搞清楚 Thread，ThreadLocal 以及 ThreadLocalMap 三者之间的关系
+- 每个 Thread 对象中都持有一个 ThreadLocalMap 成员变量
+
+![img](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/v2-8aad71096b1ccb41786942b0579da433_r.jpg)
+
+
+
 ## ThreadLocal造成内存泄露的问题
 
 网上有这样一个例子：
@@ -1329,7 +1188,7 @@ private void remove(ThreadLocal<?> key) {
 
 除了上述的数据库管理类的例子，我们再看看其它一些应用：
 
-### [#](#每个线程维护了一个-序列号) 每个线程维护了一个“序列号”
+### 每个线程维护了一个“序列号”
 
 > 再回想上文说的，如果我们希望通过某个类将状态(例如用户ID、事务ID)与线程关联起来，那么通常在这个类中定义private static类型的ThreadLocal 实例。
 
@@ -1352,7 +1211,7 @@ public class SerialNum {
 }
 ```
 
-### [#](#session的管理) Session的管理
+### Session的管理
 
 经典的另外一个例子：
 
@@ -1464,7 +1323,7 @@ DateUtils.df.get().format(new Date());
 
 
 
-# Java锁
+# Java锁🔒 ☕️
 
 Java一共分为两类锁:
 
@@ -1472,17 +1331,122 @@ Java一共分为两类锁:
 
 * 一类是JUC里提供的锁，核心就是ReentrantLock
 
-AQS锁分为独占锁和共享锁两种：
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/7f749fc8.png)
 
-* 独占锁：锁在一个时间点只能被一个线程占有。
-  根据锁的获取机制，又分为“公平锁”和“非公平锁”。
-  等待队列中按照FIFO的原则获取锁，等待时间越长的线程越先获取到锁，这就是公平的获取锁，即公平锁。
-  而非公平锁，线程获取的锁的时候，无视等待队列直接获取锁。ReentrantLock和ReentrantReadWriteLock.Writelock是独占锁。
 
-* 共享锁：同一个时候能够被多个线程获取的锁，能被共享的锁。
-  JUC包中ReentrantReadWriteLock.ReadLock，CyclicBarrier，CountDownLatch和Semaphore都是共享锁。
 
-## ReentrantLock
+## 乐观锁 vs 悲观锁
+
+乐观锁与悲观锁是一种广义上的概念，体现了看待线程同步的不同角度。在Java和数据库中都有此概念对应的实际应用。
+
+先说概念。对于同一个数据的并发操作，**悲观锁认为自己在使用数据的时候一定有别的线程来修改数据，因此在获取数据的时候会先加锁，确保数据不会被别的线程修改。**Java中，**synchronized关键字和Lock**的实现类都是悲观锁。
+
+而**乐观锁认为自己在使用数据时不会有别的线程修改数据，所以不会添加锁，**只是在**更新数据**的时候去判断之前有没有别的线程更新了这个数据。如果这个数据没有被更新，当前线程将自己修改的数据成功写入。如果数据已经被其他线程更新，则根据不同的实现方式执行不同的操作（例如报错或者自动重试）。乐观锁在Java中是通过使用无锁编程来实现，最常采用的是CAS算法，Java原子类中的递增操作就通过CAS自旋实现的。
+
+
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/c8703cd9.png)
+
+根据从上面的概念描述我们可以发现：
+
+- **悲观锁适合写操作多的场景**，先加锁可以保证写操作时数据正确。
+- 乐观锁适合读操作多的场景，不加锁的特点能够使其读操作的性能大幅提升。
+
+光说概念有些抽象，我们来看下乐观锁和悲观锁的调用方式示例：
+
+```Java
+// ------------------------- 悲观锁的调用方式 -------------------------
+// synchronized
+public synchronized void testMethod() {
+	// 操作同步资源
+}
+// ReentrantLock
+private ReentrantLock lock = new ReentrantLock(); // 需要保证多个线程使用的是同一个锁
+public void modifyPublicResources() {
+	lock.lock();
+	// 操作同步资源
+	lock.unlock();
+}
+
+// ------------------------- 乐观锁的调用方式 -------------------------
+private AtomicInteger atomicInteger = new AtomicInteger();  // 需要保证多个线程使用的是同一个AtomicInteger
+atomicInteger.incrementAndGet(); //执行自增1
+```
+
+通过调用方式示例，我们可以发现悲观锁基本都是在显式的锁定之后再操作同步资源，而乐观锁则直接去操作同步资源。那么，为何乐观锁能够做到不锁定同步资源也可以正确的实现线程同步呢？我们通过介绍乐观锁的主要实现方式 “CAS” 的技术原理来为大家解惑。
+
+CAS全称 Compare And Swap（比较与交换），是一种无锁算法。在不使用锁（没有线程被阻塞）的情况下实现多线程之间的变量同步。java.util.concurrent包中的原子类就是通过CAS来实现了乐观锁。
+
+CAS算法涉及到三个操作数：
+
+- 需要读写的内存值 V。
+- 进行比较的值 A。
+- 要写入的新值 B。
+
+当且仅当 V 的值等于 A 时，CAS通过原子方式用新值B来更新V的值（“比较+更新”整体是一个原子操作），否则不会执行任何操作。一般情况下，“更新”是一个不断重试的操作。
+
+之前提到java.util.concurrent包中的原子类，就是通过CAS来实现了乐观锁，那么我们进入原子类AtomicInteger的源码，看一下AtomicInteger的定义：
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/feda866e.png)
+
+根据定义我们可以看出各属性的作用：
+
+- unsafe： 获取并操作内存的数据。
+- valueOffset： 存储value在AtomicInteger中的偏移量。
+- value： 存储AtomicInteger的int值，该属性需要借助volatile关键字保证其在线程间是可见的。
+
+接下来，我们查看AtomicInteger的自增函数incrementAndGet()的源码时，发现自增函数底层调用的是unsafe.getAndAddInt()。但是由于JDK本身只有Unsafe.class，只通过class文件中的参数名，并不能很好的了解方法的作用，所以我们通过OpenJDK 8 来查看Unsafe的源码：
+
+```Java
+// ------------------------- JDK 8 -------------------------
+// AtomicInteger 自增方法
+public final int incrementAndGet() {
+  return unsafe.getAndAddInt(this, valueOffset, 1) + 1;
+}
+
+// Unsafe.class
+public final int getAndAddInt(Object var1, long var2, int var4) {
+  int var5;
+  do {
+      var5 = this.getIntVolatile(var1, var2);
+  } while(!this.compareAndSwapInt(var1, var2, var5, var5 + var4));
+  return var5;
+}
+
+// ------------------------- OpenJDK 8 -------------------------
+// Unsafe.java
+public final int getAndAddInt(Object o, long offset, int delta) {
+   int v;
+   do {
+       v = getIntVolatile(o, offset);
+   } while (!compareAndSwapInt(o, offset, v, v + delta));
+   return v;
+}
+```
+
+根据OpenJDK 8的源码我们可以看出，getAndAddInt()循环获取给定对象o中的偏移量处的值v，然后判断内存值是否等于v。如果相等则将内存值设置为 v + delta，否则返回false，继续循环进行重试，直到设置成功才能退出循环，并且将旧值返回。整个“比较+更新”操作封装在compareAndSwapInt()中，在JNI里是借助于一个CPU指令完成的，属于原子操作，可以保证多个线程都能够看到同一个变量的修改值。
+
+后续JDK通过CPU的cmpxchg指令，去比较寄存器中的 A 和 内存中的值 V。如果相等，就把要写入的新值 B 存入内存中。如果不相等，就将内存值 V 赋值给寄存器中的值 A。然后通过Java代码中的while循环再次调用cmpxchg指令进行重试，直到设置成功为止。
+
+CAS虽然很高效，但是它也存在三大问题，这里也简单说一下：
+
+1. ABA问题
+
+   。CAS需要在操作值的时候检查内存值是否发生变化，没有发生变化才会更新内存值。但是如果内存值原来是A，后来变成了B，然后又变成了A，那么CAS进行检查时会发现值没有发生变化，但是实际上是有变化的。ABA问题的解决思路就是在变量前面添加版本号，每次变量更新的时候都把版本号加一，这样变化过程就从“A－B－A”变成了“1A－2B－3A”。
+
+   - JDK从1.5开始提供了AtomicStampedReference类来解决ABA问题，具体操作封装在compareAndSet()中。compareAndSet()首先检查当前引用和当前标志与预期引用和预期标志是否相等，如果都相等，则以原子方式将引用值和标志的值设置为给定的更新值。
+
+2. **循环时间长开销大**。CAS操作如果长时间不成功，会导致其一直自旋，给CPU带来非常大的开销。
+
+3. 只能保证一个共享变量的原子操作
+
+   。对一个共享变量执行操作时，CAS能够保证原子操作，但是对多个共享变量操作时，CAS是无法保证操作的原子性的。
+
+   - Java从1.5开始JDK提供了AtomicReference类来保证引用对象之间的原子性，可以把多个变量放在一个对象里来进行CAS操作。
+
+
+
+## Reentrant Lock
 
 ReentrantLock,它实现是一种自旋锁，通过循环调用CAS操作来实现加锁，性能较好的原因是在于**避免进入进程的内核态
 的阻塞状态**。
@@ -1492,7 +1456,7 @@ ReentrantLock,它实现是一种自旋锁，通过循环调用CAS操作来实现
 
 |       \        |                         synchronized                         | ReentrantLock |
 | :------------: | :----------------------------------------------------------: | :-----------: |
-|    可重入性    |                            可重入                            |    可重入     |
+|    可重入性    |                            可重入                            |  **可重入**   |
 |    锁的实现    |               JVM实现，很难操作源码，得到实现                |    JDK实现    |
 |      性能      | 在引入轻量级锁（偏向锁，自旋锁）后性能大大提升，建议都可以选择的时候选择synchornized |       -       |
 |    功能区别    |              方便简洁，由编译器负责加锁和释放锁              |   手工操作    |
@@ -1507,7 +1471,7 @@ ReentrantLock,它实现是一种自旋锁，通过循环调用CAS操作来实现
 - `tryLock()`: 尝试获取锁，如果锁不可用则返回false。
 - `tryLock(long timeout, TimeUnit unit)`: 尝试在给定时间内获取锁。如果在超时之前未能获得锁，则返回false，否则返回true。
 - `unlock()`: 释放锁。
-- `getHoldCount()`: 返回当前线程保持此锁定的数量，也就是调用lock()方法的次数。
+- `getHoldCount()`: **返回当前线程保持此锁定的数量，也就是调用lock()方法的次数。**可以不解锁的情况下继续lock表示是可重入的。
 - `isHeldByCurrentThread()`: 判断当前线程是否保持此锁。
 - `isLocked()`: 判断锁是否被任意线程持有。
 
@@ -1766,52 +1730,852 @@ public class CountExample3 {
 
 
 
-## 可重入锁/递归锁
+**Abstract Queued Synchronizer**
 
-可重入锁又叫递归锁，指的同一个线程在**外层方法**获得锁时，进入**内层方法**会自动获取锁。也就是说，线程可以进入任何一个它已经拥有锁的代码块。比如`get`方法里面有`set`方法，两个方法都有同一把锁，得到了`get`的锁，就自动得到了`set`的锁。
+AQS是一个用来构建锁和同步器的框架，使用AQS能简单且高效地构造出应用广泛的大量的同步器，比如我们提到的ReentrantLock，Semaphore，其他的诸如ReentrantReadWriteLock，SynchronousQueue，FutureTask等等皆是基于AQS的。当然，我们自己也能利用AQS非常轻松容易地构造出符合我们自己需求的同步器。
 
-就像有了家门的锁，厕所、书房、厨房就为你敞开了一样。可重入锁可以**避免死锁**的问题。
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/979960-20180428192803668-307881475.png)
 
-详见[ReentrantLockDemo](https://github.com/MaJesTySA/JVM-JUC-Core/blob/master/src/thread/ReentrantLockDemo.java)。
+AQS锁分为独占锁和共享锁两种：
 
-### 锁的配对
+* 独占锁：锁在一个时间点只能被一个线程占有。
+  根据锁的获取机制，又分为“公平锁”和“非公平锁”。
+  等待队列中按照FIFO的原则获取锁，等待时间越长的线程越先获取到锁，**这就是公平的获取锁，即公平锁。**
+  而非公平锁，线程获取的锁的时候，无视等待队列直接获取锁。ReentrantLock和ReentrantReadWriteLock.Writelock是独占锁。
 
-锁之间要配对，加了几把锁，最后就得解开几把锁，下面的代码编译和运行都没有任何问题。但锁的数量不匹配会导致死循环。
+* 共享锁：同一个时候能够被多个线程获取的锁，能被共享的锁。
+  JUC包中ReentrantReadWriteLock.ReadLock，CyclicBarrier，CountDownLatch和Semaphore都是共享锁。
+
+​	
+
+## 公平锁 VS 非公平锁
+
+公平锁是指多个线程按照申请锁的顺序来获取锁，线程直接进入队列中排队，队列中的第一个线程才能获得锁。公平锁的优点是等待锁的线程不会饿死。缺点是整体吞吐效率相对非公平锁要低，等待队列中除第一个线程以外的所有线程都会阻塞，CPU唤醒阻塞线程的开销比非公平锁大。
+
+非公平锁是多个线程加锁时直接尝试获取锁，获取不到才会到等待队列的队尾等待。但如果此时锁刚好可用，那么这个线程可以无需阻塞直接获取到锁，所以非公平锁有可能出现后申请锁的线程先获取锁的场景。**非公平锁的优点是可以减少唤起线程的开销，整体的吞吐效率高，**因为线程有几率不阻塞直接获得锁，CPU不必唤醒所有线程。缺点是处于等待队列中的线程可能会饿死，或者等很久才会获得锁。
+
+直接用语言描述可能有点抽象，这里作者用从别处看到的一个例子来讲述一下公平锁和非公平锁。
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/a23d746a.png)
+
+如上图所示，假设有一口水井，有管理员看守，管理员有一把锁，只有拿到锁的人才能够打水，打完水要把锁还给管理员。每个过来打水的人都要管理员的允许并拿到锁之后才能去打水，如果前面有人正在打水，那么这个想要打水的人就必须排队。管理员会查看下一个要去打水的人是不是队伍里排最前面的人，如果是的话，才会给你锁让你去打水；如果你不是排第一的人，就必须去队尾排队，这就是公平锁。
+
+但是对于非公平锁，管理员对打水的人没有要求。即使等待队伍里有排队等待的人，但如果在上一个人刚打完水把锁还给管理员而且管理员还没有允许等待队伍里下一个人去打水时，刚好来了一个插队的人，这个插队的人是可以直接从管理员那里拿到锁去打水，不需要排队，原本排队等待的人只能继续等待。如下图所示：
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/4499559e.png)
+
+接下来我们通过`ReentrantLock`的源码来讲解公平锁和非公平锁，如果是
 
 ```java
-lock.lock();
-lock.lock();
-try{
-    someAction();
-}finally{
-    lock.unlock();
+private ReentrantLock lock = new ReentrantLock(true);
+```
+
+![image-20230523221256104](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230523221256104.png)
+
+就是公平的。
+
+
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/6edea205-20230523220905143.png)
+
+根据代码可知，ReentrantLock里面有一个内部类Sync，Sync继承AQS（AbstractQueuedSynchronizer），添加锁和释放锁的大部分操作实际上都是在Sync中实现的。它有公平锁FairSync和非公平锁NonfairSync两个子类。ReentrantLock默认使用非公平锁，也可以通过构造器来显示的指定使用公平锁。
+
+下面我们来看一下公平锁与非公平锁的加锁方法的源码:
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/bc6fe583.png)
+
+通过上图中的源代码对比，我们可以明显的看出公平锁与非公平锁的lock()方法唯一的区别就在于公平锁在获取同步状态时多了一个限制条件：`hasQueuedPredecessors()`。
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/bd0036bb-20230523220856188.png)
+
+再进入`hasQueuedPredecessors()`，可以看到该方法主要做一件事情：**主要是判断当前线程是否位于同步队列中的第一个。**如果是则返回true，否则返回false。
+
+综上，公平锁就是通过同步队列来实现多个线程按照申请锁的顺序来获取锁，**从而实现公平的特性**。非公平锁加锁时不考虑排队等待问题，直接尝试获取锁，所以存在后申请却先获得锁的情况。
+
+## 可重入锁/递归锁
+
+可重入锁又名递归锁，是指在同一个线程在外层方法获取锁的时候，再进入该线程的内层方法会自动获取锁（前提锁对象得是同一个对象或者class），不会因为之前已经获取过还没释放而阻塞。Java中ReentrantLock和synchronized都是可重入锁，可重入锁的一个优点是可一定程度避免死锁。下面用示例代码来进行分析：
+
+```Java
+public class Widget {
+    public synchronized void doSomething() {
+        System.out.println("方法1执行...");
+        doOthers();
+    }
+
+    public synchronized void doOthers() {
+        System.out.println("方法2执行...");
+    }
 }
 ```
 
-## 自旋锁
+在上面的代码中，类中的两个方法都是被内置锁synchronized修饰的，doSomething()方法中调用doOthers()方法。因为内置锁是可重入的，所以同一个线程在调用doOthers()时可以直接获得当前对象的锁，进入doOthers()进行操作。
 
-所谓自旋锁，就是尝试获取锁的线程不会**立即阻塞**，而是采用**循环的方式去尝试获取**。自己在那儿一直循环获取，就像“**自旋**”一样。这样的好处是减少**线程切换的上下文开销**，缺点是会**消耗CPU**。CAS底层的`getAndAddInt`就是**自旋锁**思想。
+如果是一个不可重入锁，那么当前线程在调用doOthers()之前需要将执行doSomething()时获取当前对象的锁释放掉，实际上该对象锁已被当前线程所持有，且无法释放。所以此时会出现死锁。
 
-```java
-//跟CAS类似，一直循环比较。
-while (!atomicReference.compareAndSet(null, thread)) { }
+而为什么可重入锁就可以在嵌套调用时可以自动获得锁呢？我们通过图示和源码来分别解析一下。
+
+还是打水的例子，有多个人在排队打水，此时管理员允许锁和同一个人的多个水桶绑定。这个人用多个水桶打水时，第一个水桶和锁绑定并打完水之后，第二个水桶也可以直接和锁绑定并开始打水，所有的水桶都打完水之后打水人才会将锁还给管理员。这个人的所有打水流程都能够成功执行，后续等待的人也能够打到水。这就是可重入锁。
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/58fc5bc9.png)
+
+但如果是非可重入锁的话，此时管理员只允许锁和同一个人的一个水桶绑定。第一个水桶和锁绑定打完水之后并不会释放锁，导致第二个水桶不能和锁绑定也无法打水。当前线程出现死锁，整个等待队列中的所有线程都无法被唤醒。
+
+![img](https://awps-assets.meituan.net/mit-x/blog-images-bundle-2018b/ea597a0c.png)
+
+之前我们说过ReentrantLock和synchronized都是重入锁，那么我们通过重入锁ReentrantLock以及非可重入锁NonReentrantLock的源码来对比分析一下为什么非可重入锁在重复调用同步资源时会出现死锁。
+
+首先ReentrantLock和NonReentrantLock都继承父类AQS，其父类AQS中维护了一个同步状态status来计数重入次数，status初始值为0。
+
+当线程尝试获取锁时，可重入锁先尝试获取并更新status值，如果status == 0表示没有其他线程在执行同步代码，则把status置为1，当前线程开始执行。如果status != 0，则判断当前线程是否是获取到这个锁的线程，如果是的话执行status+1，且当前线程可以再次获取锁。而非可重入锁是直接去获取并尝试更新当前status的值，如果status != 0的话会导致其获取锁失败，当前线程阻塞。
+
+释放锁时，可重入锁同样先获取当前status的值，在当前线程是持有锁的线程的前提下。如果status-1 == 0，则表示当前线程所有重复获取锁的操作都已经执行完毕，然后该线程才会真正释放锁。而非可重入锁则是在确定当前线程是持有锁的线程之后，直接将status置为0，将锁释放。
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/32536e7a.png)
+
+
+
+## 独享锁(排他锁) VS 共享锁 -  读写锁
+
+独享锁和共享锁同样是一种概念。我们先介绍一下具体的概念，然后通过ReentrantLock和ReentrantReadWriteLock的源码来介绍独享锁和共享锁。
+
+独享锁也叫排他锁，是指该锁一次只能被一个线程所持有。<mark>如果线程T对数据A加上排它锁后，则其他线程不能再对A加任何类型的锁。</mark>**获得排它锁的线程即能读数据又能修改数据。**JDK中的`synchronized`和JUC中`Lock`的实现类就是`互斥锁`。
+
+共享锁是指该锁可被多个线程所持有。如果线程T对数据A加上共享锁后，**则其他线程只能对A再加共享锁，不能加排它锁。**获得**共享锁的线程只能读数据，不能修改数据。**
+
+独享锁与共享锁也是通过**AQS**来实现的，通过实现不同的方法，来实现独享或者共享。
+
+
+
+下图为ReentrantReadWriteLock的部分源码：
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/762a042b.png)
+
+我们看到`ReentrantReadWriteLock`有两把锁：ReadLock和WriteLock，由词知意，一个读锁一个写锁，合称“读写锁”。再进一步观察可以发现**ReadLock和WriteLock是靠内部类Sync实现的锁。**Sync是AQS的一个子类，这种结构在CountDownLatch、ReentrantLock、Semaphore里面也都存在。
+
+在`ReentrantReadWriteLock`里面，读锁和写锁的锁主体都是Sync，但读锁和写锁的加锁方式不一样。读锁是共享锁，写锁是独享锁。读锁的共享锁可保证并发读非常高效，而读写、写读、写写的过程互斥，因为读锁和写锁是分离的。所以ReentrantReadWriteLock的并发性相比一般的互斥锁有了很大提升。
+
+那读锁和写锁的具体加锁方式有什么区别呢？在了解源码之前我们需要回顾一下其他知识。 在最开始提及AQS的时候我们也提到了state字段（int类型，32位），该字段用来描述有多少线程获持有锁。
+
+在独享锁中这个值通常是0或者1（如果是重入锁的话state值就是重入的次数），在共享锁中state就是持有锁的数量。但是在ReentrantReadWriteLock中有读、写两把锁，所以需要在一个整型变量state上分别描述读锁和写锁的数量（或者也可以叫状态）。于是将state变量“按位切割”切分成了两个部分，高16位表示读锁状态（读锁个数），低16位表示写锁状态（写锁个数）。如下图所示：
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/8793e00a.png)
+
+了解了概念之后我们再来看代码，先看写锁的加锁源码：
+
+```Java
+protected final boolean tryAcquire(int acquires) {
+	Thread current = Thread.currentThread();
+	int c = getState(); // 取到当前锁的个数
+	int w = exclusiveCount(c); // 取写锁的个数w
+	if (c != 0) { // 如果已经有线程持有了锁(c!=0)
+    // (Note: if c != 0 and w == 0 then shared count != 0)
+		if (w == 0 || current != getExclusiveOwnerThread()) 
+      // 如果写线程数（w）为0（换言之存在读锁） 或者持有锁的线程不是当前线程就返回失败
+			return false;
+		if (w + exclusiveCount(acquires) > MAX_COUNT)    
+      // 如果写入锁的数量大于最大数（65535，2的16次方-1）就抛出一个Error。
+      throw new Error("Maximum lock count exceeded");
+		// Reentrant acquire
+    setState(c + acquires);
+    return true;
+  }
+  if (writerShouldBlock() || !compareAndSetState(c, c + acquires)) 
+    // 如果当且写线程数为0，并且当前线程需要阻塞那么就返回失败；或者如果通过CAS增加写线程数失败也返回失败。
+		return false;
+	setExclusiveOwnerThread(current); // 如果c=0，w=0或者c>0，w>0（重入），则设置当前线程或锁的拥有者
+	return true;
+}
 ```
 
-详见[SpinLockDemo](https://github.com/MaJesTySA/JVM-JUC-Core/blob/master/src/thread/SpinLockDemo.java)。
+- 这段代码首先取到当前锁的个数c，然后再通过c来获取写锁的个数w。因为写锁是低16位，所以取低16位的最大值与当前的c做与运算（ int w = exclusiveCount©; ），高16位和0与运算后是0，剩下的就是低位运算的值，同时也是持有写锁的线程数目。
+- 在取到写锁线程的数目后，首先判断是否已经有线程持有了锁。如果已经有线程持有了锁(c!=0)，则查看当前写锁线程的数目，如果写线程数为0（即此时存在读锁）或者持有锁的线程不是当前线程就返回失败（涉及到公平锁和非公平锁的实现）。
+- 如果写入锁的数量大于最大数（65535，2的16次方-1）就抛出一个Error。
+- 如果当且写线程数为0（那么读线程也应该为0，因为上面已经处理c!=0的情况），并且当前线程需要阻塞那么就返回失败；如果通过CAS增加写线程数失败也返回失败。
+- 如果c=0,w=0或者c>0,w>0（重入），则设置当前线程或锁的拥有者，返回成功！
+
+tryAcquire()除了重入条件（当前线程为获取了写锁的线程）之外，增加了一个读锁是否存在的判断。如果存在读锁，则写锁不能被获取，原因在于：必须确保写锁的操作对读锁可见，如果允许读锁在已被获取的情况下对写锁的获取，那么正在运行的其他读线程就无法感知到当前写线程的操作。
+
+因此，只有等待其他读线程都释放了读锁，写锁才能被当前线程获取，而写锁一旦被获取，则其他读写线程的后续访问均被阻塞。写锁的释放与ReentrantLock的释放过程基本类似，每次释放均减少写状态，当写状态为0时表示写锁已被释放，然后等待的读写线程才能够继续访问读写锁，同时前次写线程的修改对后续的读写线程可见。
+
+接着是读锁的代码：
+
+```Java
+protected final int tryAcquireShared(int unused) {
+    Thread current = Thread.currentThread();
+    int c = getState();
+    if (exclusiveCount(c) != 0 &&
+        getExclusiveOwnerThread() != current)
+        return -1;                                   // 如果其他线程已经获取了写锁，则当前线程获取读锁失败，进入等待状态
+    int r = sharedCount(c);
+    if (!readerShouldBlock() &&
+        r < MAX_COUNT &&
+        compareAndSetState(c, c + SHARED_UNIT)) {
+        if (r == 0) {
+            firstReader = current;
+            firstReaderHoldCount = 1;
+        } else if (firstReader == current) {
+            firstReaderHoldCount++;
+        } else {
+            HoldCounter rh = cachedHoldCounter;
+            if (rh == null || rh.tid != getThreadId(current))
+                cachedHoldCounter = rh = readHolds.get();
+            else if (rh.count == 0)
+                readHolds.set(rh);
+            rh.count++;
+        }
+        return 1;
+    }
+    return fullTryAcquireShared(current);
+}
+```
+
+可以看到在tryAcquireShared(int unused)方法中，如果其他线程已经获取了写锁，则当前线程获取读锁失败，进入等待状态。如果当前线程获取了写锁或者写锁未被获取，则当前线程（线程安全，依靠CAS保证）增加读状态，成功获取读锁。读锁的每次释放（线程安全的，可能有多个读线程同时释放读锁）均减少读状态，减少的值是“1<<16”。所以读写锁才能实现读读的过程共享，而读写、写读、写写的过程互斥。
+
+此时，我们再回头看一下互斥锁ReentrantLock中公平锁和非公平锁的加锁源码：
+
+![img](https://awps-assets.meituan.net/mit-x/blog-images-bundle-2018b/8b7878ec.png)
+
+我们发现在ReentrantLock虽然有公平锁和非公平锁两种，但是它们添加的都是独享锁。根据源码所示，当某一个线程调用lock方法获取锁时，如果同步资源没有被其他线程锁住，那么当前线程在使用CAS更新state成功后就会成功抢占该资源。而如果公共资源被占用且不是被当前线程占用，那么就会加锁失败。所以可以确定ReentrantLock无论读操作还是写操作，添加的锁都是都是独享锁。
+
+### 读写锁在公平和非公平下的策略
+
+ 如果是公平锁，我们就在ReentrantReadWriteLock构造函数的参数中传入 true，如果是非公平锁，就在构造函数的参数中传入 false，默认是非公平锁。在获取读锁之前，线程会检查 readerShouldBlock() 方法，同样，在获取写锁之前，线程会检查 writerShouldBlock() 方法，来决定是否需要插队或者是去排队。
+
+首先看公平锁对于这两个方法的实现：
+
+```java
+final boolean writerShouldBlock() {
+    return hasQueuedPredecessors();
+}
+final boolean readerShouldBlock() {
+    return hasQueuedPredecessors();
+}
+```
+
+
+​    很明显，在公平锁的情况下，只要等待队列中有线程在等待，也就是 hasQueuedPredecessors() 返回 true 的时候，那么 writer 和 reader 都会 block，也就是一律不允许插队，都乖乖去排队，这也符合公平锁的思想。
+
+下面让我们来看一下**非公平锁的实现**：
+
+```java
+final boolean writerShouldBlock() {
+    return false; // writers can always barge
+}
+final boolean readerShouldBlock() {
+    return apparentlyFirstQueuedIsExclusive();
+}
+```
+
+
+​    在` writerShouldBlock() `这个方法中始终返回 `false`，可以看出，对于想获取写锁的线程而言，由于返回值是 false，所**以它是随时可以插队的**，这就和我们的` ReentrantLock` 的设计思想是一样的，但是读锁却不一样。这里实现的策略很有意思，先让我们来看下面这种场景：
+
+> 假设线程 2 和线程 4 正在同时读取，线程 3 想要写入，但是由于线程 2 和线程 4 已经持有读锁了，所以线程 3 就进入等待队列进行等待。此时，线程 5 突然跑过来想要插队获取**读锁**：
+>
+> ![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/v2-5ec7bfbcada50f623c6124d4f992a751_r.jpg)
+
+
+面对这种情况有两种应对策略：
+
+- 第一种策略：允许插队
+
+由于现在有线程在读，而线程 5 又不会特别增加它们读的负担，因为线程们可以共用这把锁，所以**第一种策略就是让线程 5 直接加入到线程 2 和线程 4 一起去读取。**
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/v2-6808ab62a31b43539ea961d92f09f0ee_r.jpg)
+
+这种策略看上去增加了效率，但是有一个严重的问题，那就是如果想要读取的线程不停地增加，比如线程 6，那么线程  6 也可以插队，这就会导致读锁长时间内不会被释放，导致线程 3 长时间内拿不到写锁，也就是那个需要拿到写锁的线程会陷入“饥饿”状态，它将在长时间内得不到执行。
+
+- 第二种策略：不允许插队
+- ![img](https://pic2.zhimg.com/v2-7d00dd892d3941025ab03f53611bec49_r.jpg)
+
+这种策略认为由于线程 3 已经提前等待了，所以虽然线程 5 如果直接插队成功，可以提高效率，但是我们依然让线程 5 去排队等待， 按照这种策略线程 5 会被放入等待队列中，并且排在线程 3 的后面，让线程 3 优先于线程 5 执行，这样可以避免“饥饿”状态，这对于程序的健壮性是很有好处的，**直到写入的线程 3 运行完毕**，线程 5 才有机会运行，这样谁都不会等待太久的时间。
+
+> 写入线程在非公平的情况下具有优先权。
+
+所以我们可以看出，即便是非公平锁，**只要等待队列的头结点是尝试获取写锁的线程，那么读锁的线程依然是不能插队的，目的是避免“饥饿”。**
+
+策略的选择取决于具体锁的实现，ReentrantReadWriteLock 的实现选择了策略 2 ，是很明智的。
 
 
 
-1. 
+```java
+public class ReadLockJumpQueue {
+ 
+    private static final ReentrantReadWriteLock reentrantReadWriteLock = new ReentrantReadWriteLock();
+    private static final ReentrantReadWriteLock.ReadLock readLock = reentrantReadWriteLock
+            .readLock();
+    private static final ReentrantReadWriteLock.WriteLock writeLock = reentrantReadWriteLock
+            .writeLock();
+ 
+    private static void read() {
+        readLock.lock();
+        try {
+            System.out.println(Thread.currentThread().getName() + "得到读锁，正在读取");
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            readLock.unlock();
+            System.out.println(Thread.currentThread().getName() + "释放读锁");
+        }
+    }
+ 
+    private static void write() {
+        writeLock.lock();
+        try {
+            System.out.println(Thread.currentThread().getName() + "得到写锁，正在写入");
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            writeLock.unlock();
+            System.out.println(Thread.currentThread().getName() + "释放写锁");
+        }
+    }
+ 
+    public static void main(String[] args) throws InterruptedException {
+        new Thread(() -> read(),"Thread-2").start();
+        new Thread(() -> read(),"Thread-4").start();
+        new Thread(() -> write(),"Thread-3").start();
+        new Thread(() -> read(),"Thread-5").start();
+    }
+}
 
-# JMM
+```
 
-JMM是指Java**内存模型**，不是Java**内存布局**，不是所谓的栈、堆、方法区。
 
-每个Java线程都有自己的**工作内存**。操作数据，首先从主内存中读，得到一份拷贝，操作完毕后再写回到主内存。
 
-![](https://raw.githubusercontent.com/MaJesTySA/JVM-JUC-Core/master/imgs/JMM.png)
+```sh
+Thread-2得到读锁，正在读取
+Thread-4得到读锁，正在读取
+Thread-2释放读锁
+Thread-4释放读锁
+Thread-3得到写锁，正在写入
+Thread-3释放写锁
+Thread-5得到读锁，正在读取
+Thread-5释放读锁
+```
 
-JMM可能带来**可见性**、**原子性**和**有序性**问题。所谓可见性，就是某个线程对主内存内容的更改，应该立刻通知到其它线程。原子性是指一个操作是不可分割的，不能执行到一半，就不执行了。所谓有序性，就是指令是有序的，不会被重排。
+从这个结果可以看出，ReentrantReadWriteLock 的实现选择了**“不允许插队”**的策略，这就大大减小了发生“饥饿”的概率。（如果运行结果和课程不一致，可以在每个线程启动后增加 100ms 的睡眠时间，以便保证线程的运行顺序）。
+
+### 升降级策略
+
+锁降级的意思就是**写锁降级为读锁**。而读锁是不可以升级为写锁的。如果当前线程拥有写锁，然后将其释放，最后再获取读锁，这种分段完成的过程不能称之为锁降级。锁降级是指把持住（当前拥有的）写锁，再获取到读锁，随后释放（先前拥有的）写锁的过程，最后释放读锁的过程。
+
+```java
+public class ReadWriteLockDemo2 {
+
+    public static void main(String[] args) {
+        ReentrantReadWriteLock reentrantReadWriteLock = new ReentrantReadWriteLock();
+        // 获取读锁
+        ReentrantReadWriteLock.WriteLock writeLock = reentrantReadWriteLock.writeLock();
+        // 获取写锁
+        ReentrantReadWriteLock.ReadLock readLock = reentrantReadWriteLock.readLock();
+        
+        //1、获取到写锁
+        writeLock.lock();
+        System.out.println("获取到了写锁");
+        
+        //2、获取到读锁
+        readLock.lock();
+        System.out.println("继续获取到读锁");
+        //3、释放写锁
+        writeLock.unlock();
+	   //4、 释放读锁
+        readLock.unlock();
+    }
+}
+
+```
+
+因为在线程持有读锁的情况下，该线程不能取得写锁（因为获取写锁的前提条件是，当前没有读者线程，也没有其他写者线程，如果发现当前的读锁被占用，就马上获取失败，不管读锁是不是被当前线程持有)。
+
+但是在线程持有写锁的情况下，该线程可以继续获取读锁（获取读锁时如果发现写锁被占用，只有写锁没有被当前线程占用的情况才会获取失败）。
+
+当线程获取读锁的时候，可能有其他线程同时也在持有读锁，因此不能把获取读锁的线程“升级”为写锁；而对于获得写锁的线程，它一定独占了读写锁，因此可以继续让它获取读锁，当它同时获取了写锁和读锁后，还可以先释放写锁继续持有读锁，这样一个写锁就“降级”为了读锁。
+
+
+
+**为什么不支持锁的升级？**
+
+我们知道读写锁的特点是如果线程都申请**读锁，是可以多个线程同时持有的**，可是如果是**写锁，只能有一个线程持有**，并且不可能存在读锁和写锁同时持有的情况。
+
+正是因为不可能有读锁和写锁同时持有的情况，所以升级写锁的过程中，需要等到所有的读锁都释放，此时才能进行升级。
+
+假设有 A，B 和 C 三个线程，它们都已持有读锁。假设线程 A 尝试从读锁升级到写锁。那么它必须等待 B 和 C 释放掉已经获取到的读锁。如果随着时间推移，B 和 C 逐渐释放了它们的读锁，此时线程 A 确实是可以成功升级并获取写锁。
+
+但是我们考虑一种特殊情况。假设线程 A 和 B 都想升级到写锁，那么对于线程 A 而言，它需要等待其他所有线程，包括线程 B 在内释放读锁。而线程 B 也需要等待所有的线程，包括线程 A 释放读锁。这就是一种非常典型的死锁的情况。谁都愿不愿意率先释放掉自己手中的锁。
+
+但是读写锁的升级并不是不可能的，也有可以实现的方案，如果我们保证每次只有一个线程可以升级，那么就可以保证线程安全。只不过最常见的 ReentrantReadWriteLock 对此并不支持。
+
+
+
+## 自旋锁 VS 适应性自旋锁
+
+在介绍自旋锁前，我们需要介绍一些前提知识来帮助大家明白自旋锁的概念。
+
+在JDK中的`java.util.concurrent.atomic`包中的类以CAS操作为基石构建出原子操作的封装类的功能，**Atomic的类基本都是自旋锁。**
+
+阻塞或唤醒一个Java线程需要操作系统切换CPU状态来完成，这种状态转换需要耗费处理器时间。如果同步代码块中的内容过于简单，状态转换消耗的时间有可能比用户代码执行的时间还要长。
+
+在许多场景中，同步资源的锁定时间很短，为了这一小段时间去切换线程，线程挂起和恢复现场的花费可能会让系统得不偿失。如果物理机器有多个处理器，能够让两个或以上的线程同时并行执行，我们就可以让后面那个请求锁的线程不放弃CPU的执行时间，看看持有锁的线程是否很快就会释放锁。
+
+而为了让当前线程“稍等一下”，我们需让当前线程进行自旋，如果在自旋完成后前面锁定同步资源的线程已经释放了锁，那么当前线程就可以不必阻塞而是直接获取同步资源，从而避免切换线程的开销。这就是自旋锁。
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/452a3363.png)
+
+自旋锁本身是有缺点的，它不能代替阻塞。自旋等待虽然避免了线程切换的开销，但它要占用处理器时间。如果锁被占用的时间很短，自旋等待的效果就会非常好。反之，如果锁被占用的时间很长，那么自旋的线程只会白浪费处理器资源。所以，自旋等待的时间必须要有一定的限度，如果自旋超过了限定次数（默认是10次，可以使用-XX:PreBlockSpin来更改）没有成功获得锁，就应当挂起线程。
+
+自旋锁的实现原理同样也是CAS，`AtomicInteger`中调用unsafe进行自增操作的源码中的`do-while`循环就是一个**自旋操作，如果修改数值失败则通过循环来执行自旋，直至修改成功**。
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/83b3f85e.png)
+
+自旋锁在JDK1.4.2中引入，使用-XX:+UseSpinning来开启。JDK 6中变为默认开启，并且引入了自适应的自旋锁（适应性自旋锁）。
+
+### 自适应锁🔒
+
+自适应意味着自旋的时间（次数）不再固定，而是由前一次在同一个锁上的自旋时间及锁的拥有者的状态来决定。如果在同一个锁对象上，自旋等待刚刚成功获得过锁，并且持有锁的线程正在运行中，那么虚拟机就会认为这次自旋也是很有可能再次成功，进而它将允许自旋等待持续相对更长的时间。如果对于某个锁，自旋很少成功获得过，那在以后尝试获取这个锁时将可能省略掉自旋过程，直接阻塞线程，避免浪费处理器资源。
+
+在自旋锁中 另有三种常见的锁形式:TicketLock、CLHlock和MCSlock，本文中仅做名词介绍，不做深入讲解，感兴趣的同学可以自行查阅相关资料。
+
+
+
+
+
+# Java 原子类🌍
+
+## 原子变量类简介
+
+### 为何需要原子变量类
+
+保证线程安全是 Java 并发编程必须要解决的重要问题。Java 从原子性、可见性、有序性这三大特性入手，确保多线程的数据一致性。
+
+- 确保线程安全最常见的做法是利用锁机制（`Lock`、`sychronized`）来对共享数据做互斥同步，这样在同一个时刻，只有一个线程可以执行某个方法或者某个代码块，那么操作必然是原子性的，线程安全的。互斥同步最主要的问题是线程阻塞和唤醒所带来的性能问题。
+- `volatile` 是轻量级的锁（自然比普通锁性能要好），它保证了共享变量在多线程中的可见性，但无法保证原子性。所以，它只能在一些特定场景下使用。
+- 为了兼顾原子性以及锁带来的性能问题，Java 引入了 CAS （主要体现在 `Unsafe` 类）来实现非阻塞同步（也叫乐观锁）。并基于 CAS ，提供了一套原子工具类。
+
+### 原子变量类的作用
+
+原子变量类 **比锁的粒度更细，更轻量级**，并且对于在多处理器系统上实现高性能的并发代码来说是非常关键的。原子变量将发生竞争的范围缩小到单个变量上。
+
+原子变量类相当于一种泛化的 `volatile` 变量，能够**支持原子的、有条件的读/改/写操**作。
+
+原子类在内部使用 CAS 指令（基于硬件的支持）来实现同步。这些指令通常比锁更快。
+
+原子变量类可以分为 4 组：
+
+- 基本类型
+  - `AtomicBoolean` - 布尔类型原子类
+  - `AtomicInteger` - 整型原子类
+  - `AtomicLong` - 长整型原子类
+- 引用类型
+  - `AtomicReference` - 引用类型原子类
+  - `AtomicMarkableReference` - 带有标记位的引用类型原子类
+  - `AtomicStampedReference` - 带有版本号的引用类型原子类
+- 数组类型
+  - `AtomicIntegerArray` - 整形数组原子类
+  - `AtomicLongArray` - 长整型数组原子类
+  - `AtomicReferenceArray` - 引用类型数组原子类
+- 属性更新器类型
+  - `AtomicIntegerFieldUpdater` - 整型字段的原子更新器。
+  - `AtomicLongFieldUpdater` - 长整型字段的原子更新器。
+  - `AtomicReferenceFieldUpdater` - 原子更新引用类型里的字段。
+
+
+
+## 基本类型
+
+这一类型的原子类是针对 Java 基本类型进行操作。
+
+- `AtomicBoolean` - 布尔类型原子类
+- `AtomicInteger` - 整型原子类
+- `AtomicLong` - 长整型原子类
+
+以上类都支持 CAS（[compare-and-swap](https://en.wikipedia.org/wiki/Compare-and-swap)）技术，此外，`AtomicInteger`、`AtomicLong` 还支持算术运算。
+
+> :bulb: 提示：:building_construction:
+>
+> 虽然 Java 只提供了 `AtomicBoolean` 、`AtomicInteger`、`AtomicLong`，但是可以模拟其他基本类型的原子变量。要想模拟其他基本类型的原子变量，可以将 `short` 或 `byte` 等类型与 `int` 类型进行转换，以及使用 `Float.floatToIntBits` 、`Double.doubleToLongBits` 来转换浮点数。
+>
+> 由于 `AtomicBoolean`、`AtomicInteger`、`AtomicLong` 实现方式、使用方式都相近，所以本文仅针对 `AtomicInteger` 进行介绍。
+
+### **`AtomicInteger` 用法**
+
+```java
+public final int get() // 获取当前值
+public final int getAndSet(int newValue) // 获取当前值，并设置新值
+public final int getAndIncrement()// 获取当前值，并自增
+public final int getAndDecrement() // 获取当前值，并自减
+public final int getAndAdd(int delta) // 获取当前值，并加上预期值
+boolean compareAndSet(int expect, int update) // 如果当前的值等于预期的数值expect，那将该值设置为输入值update
+public final void lazySet(int newValue) // 最终设置为 newValue，使用 lazySet 设置之后可能导致其他线程在之后的一小段时间内还是可以读到旧的值。
+```
+
+`AtomicInteger` 使用示例：
+
+```java
+public class AtomicIntegerDemo {
+
+    public static void main(String[] args) throws InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(5);
+        AtomicInteger count = new AtomicInteger(0);
+        for (int i = 0; i < 1000; i++) {
+            executorService.submit((Runnable) () -> {
+                System.out.println(Thread.currentThread().getName() + " count=" + count.get());
+                count.incrementAndGet();
+            });
+        }
+
+        executorService.shutdown();
+        executorService.awaitTermination(30, TimeUnit.SECONDS);
+        System.out.println("Final Count is : " + count.get());
+    }
+}
+```
+
+### **`AtomicInteger` 实现**
+
+阅读 `AtomicInteger` 源码，可以看到如下定义：
+
+```java
+private static final Unsafe unsafe = Unsafe.getUnsafe();
+private static final long valueOffset;
+
+static {
+	try {
+		valueOffset = unsafe.objectFieldOffset
+			(AtomicInteger.class.getDeclaredField("value"));
+	} catch (Exception ex) { throw new Error(ex); }
+}
+
+private volatile int value;
+```
+
+> 说明：
+>
+> - `value` - value 属性使用 `volatile` 修饰，使得对 value 的修改在并发环境下对所有线程可见。
+> - `valueOffset` - value 属性的偏移量，通过这个偏移量可以快速定位到 value 字段，这个是实现 AtomicInteger 的关键。
+> - `unsafe` - Unsafe 类型的属性，它为 `AtomicInteger` 提供了 CAS 操作。
+
+## 引用类型
+
+Java 数据类型分为 **基本数据类型** 和 **引用数据类型** 两大类（不了解 Java 数据类型划分可以参考： [Java 基本数据类型](https://dunwu.github.io/blog/pages/55d693/) ）。
+
+上一节中提到了针对基本数据类型的原子类，那么如果想针对引用类型做原子操作怎么办？Java 也提供了相关的原子类：
+
+- `AtomicReference` - 引用类型原子类
+- `AtomicMarkableReference` - 带有标记位的引用类型原子类
+- `AtomicStampedReference` - 带有版本号的引用类型原子类
+
+> `AtomicStampedReference` 类在引用类型原子类中，彻底地解决了 ABA 问题，其它的 CAS 能力与另外两个类相近，所以最具代表性。因此，本节只针对 `AtomicStampedReference` 进行说明。
+
+示例：基于 `AtomicReference` 实现一个简单的自旋锁
+
+```java
+public class AtomicReferenceDemo2 {
+
+    private static int ticket = 10;
+
+    public static void main(String[] args) {
+        threadSafeDemo();
+    }
+
+    private static void threadSafeDemo() {
+        SpinLock lock = new SpinLock();
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        for (int i = 0; i < 5; i++) {
+            executorService.execute(new MyThread(lock));
+        }
+        executorService.shutdown();
+    }
+
+    /**
+     * 基于 {@link AtomicReference} 实现的简单自旋锁
+     */
+    static class SpinLock {
+
+        private AtomicReference<Thread> atomicReference = new AtomicReference<>();
+
+        public void lock() {
+            Thread current = Thread.currentThread();
+            while (!atomicReference.compareAndSet(null, current)) {}
+        }
+
+        public void unlock() {
+            Thread current = Thread.currentThread();
+            atomicReference.compareAndSet(current, null);
+        }
+
+    }
+
+    /**
+     * 利用自旋锁 {@link SpinLock} 并发处理数据
+     */
+    static class MyThread implements Runnable {
+
+        private SpinLock lock;
+
+        public MyThread(SpinLock lock) {
+            this.lock = lock;
+        }
+
+        @Override
+        public void run() {
+            while (ticket > 0) {
+                lock.lock();
+                if (ticket > 0) {
+                    System.out.println(Thread.currentThread().getName() + " 卖出了第 " + ticket + " 张票");
+                    ticket--;
+                }
+                lock.unlock();
+            }
+        }
+
+    }
+
+}
+```
+
+原子类的实现基于 CAS 机制，而 CAS 存在 ABA 问题（不了解 ABA 问题，可以参考：[Java 并发基础机制 - CAS 的问题](https://dunwu.github.io/blog/pages/2c6488/#cas-%E7%9A%84%E9%97%AE%E9%A2%98)）。正是为了解决 ABA 问题，才有了 `AtomicMarkableReference` 和 `AtomicStampedReference`。
+
+`AtomicMarkableReference` 使用一个布尔值作为标记，修改时在 true / false 之间切换。这种策略不能根本上解决 ABA 问题，但是可以降低 ABA 发生的几率。常用于缓存或者状态描述这样的场景。
+
+```java
+public class AtomicMarkableReferenceDemo {
+
+    private final static String INIT_TEXT = "abc";
+
+    public static void main(String[] args) throws InterruptedException {
+
+        final AtomicMarkableReference<String> amr = new AtomicMarkableReference<>(INIT_TEXT, false);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        for (int i = 0; i < 10; i++) {
+            executorService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(Math.abs((int) (Math.random() * 100)));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    String name = Thread.currentThread().getName();
+                    if (amr.compareAndSet(INIT_TEXT, name, amr.isMarked(), !amr.isMarked())) {
+                        System.out.println(Thread.currentThread().getName() + " 修改了对象！");
+                        System.out.println("新的对象为：" + amr.getReference());
+                    }
+                }
+            });
+        }
+
+        executorService.shutdown();
+        executorService.awaitTermination(3, TimeUnit.SECONDS);
+    }
+
+}
+```
+
+**`AtomicStampedReference` 使用一个整型值做为版本号，每次更新前先比较版本号，如果一致，才进行修改**。通过这种策略，可以根本上解决 ABA 问题。
+
+```java
+public class AtomicStampedReferenceDemo {
+
+    private final static String INIT_REF = "pool-1-thread-3";
+
+    private final static AtomicStampedReference<String> asr = new AtomicStampedReference<>(INIT_REF, 0);
+
+    public static void main(String[] args) throws InterruptedException {
+
+        System.out.println("初始对象为：" + asr.getReference());
+
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        for (int i = 0; i < 3; i++) {
+            executorService.execute(new MyThread());
+        }
+
+        executorService.shutdown();
+        executorService.awaitTermination(3, TimeUnit.SECONDS);
+    }
+
+    static class MyThread implements Runnable {
+
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(Math.abs((int) (Math.random() * 100)));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            final int stamp = asr.getStamp();
+            if (asr.compareAndSet(INIT_REF, Thread.currentThread().getName(), stamp, stamp + 1)) {
+                System.out.println(Thread.currentThread().getName() + " 修改了对象！");
+                System.out.println("新的对象为：" + asr.getReference());
+            }
+        }
+
+    }
+
+}
+```
+
+## 数组类型
+
+Java 提供了以下针对数组的原子类：
+
+- `AtomicIntegerArray` - 整形数组原子类
+- `AtomicLongArray` - 长整型数组原子类
+- `AtomicReferenceArray` - 引用类型数组原子类
+
+已经有了针对基本类型和引用类型的原子类，为什么还要提供针对数组的原子类呢？
+
+数组类型的原子类为 **数组元素** 提供了 `volatile` 类型的访问语义，这是普通数组所不具备的特性——**`volatile` 类型的数组仅在数组引用上具有 `volatile` 语义**。
+
+示例：`AtomicIntegerArray` 使用示例（`AtomicLongArray` 、`AtomicReferenceArray` 使用方式也类似）
+
+```java
+public class AtomicIntegerArrayDemo {
+
+    private static AtomicIntegerArray atomicIntegerArray = new AtomicIntegerArray(10);
+
+    public static void main(final String[] arguments) throws InterruptedException {
+
+        System.out.println("Init Values: ");
+        for (int i = 0; i < atomicIntegerArray.length(); i++) {
+            atomicIntegerArray.set(i, i);
+            System.out.print(atomicIntegerArray.get(i) + " ");
+        }
+        System.out.println();
+
+        Thread t1 = new Thread(new Increment());
+        Thread t2 = new Thread(new Compare());
+        t1.start();
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        System.out.println("Final Values: ");
+        for (int i = 0; i < atomicIntegerArray.length(); i++) {
+            System.out.print(atomicIntegerArray.get(i) + " ");
+        }
+        System.out.println();
+    }
+
+    static class Increment implements Runnable {
+
+        @Override
+        public void run() {
+
+            for (int i = 0; i < atomicIntegerArray.length(); i++) {
+                int value = atomicIntegerArray.incrementAndGet(i);
+                System.out.println(Thread.currentThread().getName() + ", index = " + i + ", value = " + value);
+            }
+        }
+
+    }
+
+    static class Compare implements Runnable {
+
+        @Override
+        public void run() {
+            for (int i = 0; i < atomicIntegerArray.length(); i++) {
+                boolean swapped = atomicIntegerArray.compareAndSet(i, 2, 3);
+                if (swapped) {
+                    System.out.println(Thread.currentThread().getName() + " swapped, index = " + i + ", value = 3");
+                }
+            }
+        }
+
+    }
+
+}
+```
+
+## 属性更新器类型
+
+更新器类支持基于反射机制的更新字段值的原子操作。
+
+- `AtomicIntegerFieldUpdater` - 整型字段的原子更新器。
+- `AtomicLongFieldUpdater` - 长整型字段的原子更新器。
+- `AtomicReferenceFieldUpdater` - 原子更新引用类型里的字段。
+
+这些类的使用有一定限制：
+
+- 因为对象的属性修改类型原子类都是抽象类，所以每次使用都必须使用静态方法 `newUpdater()` 创建一个更新器，并且需要设置想要更新的类和属性。
+- 字段必须是 `volatile` 类型的；
+- 不能作用于静态变量（`static`）；
+- 不能作用于常量（`final`）；
+
+```java
+public class AtomicReferenceFieldUpdaterDemo {
+
+    static User user = new User("begin");
+
+    static AtomicReferenceFieldUpdater<User, String> updater =
+        AtomicReferenceFieldUpdater.newUpdater(User.class, String.class, "name");
+
+    public static void main(String[] args) {
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        for (int i = 0; i < 5; i++) {
+            executorService.execute(new MyThread());
+        }
+        executorService.shutdown();
+    }
+
+    static class MyThread implements Runnable {
+
+        @Override
+        public void run() {
+            if (updater.compareAndSet(user, "begin", "end")) {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(Thread.currentThread().getName() + " 已修改 name = " + user.getName());
+            } else {
+                System.out.println(Thread.currentThread().getName() + " 已被其他线程修改");
+            }
+        }
+
+    }
+
+    static class User {
+
+        volatile String name;
+
+        public User(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public User setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+    }
+
+}
+```
+
+## 原子化的累加器
+
+`DoubleAccumulator`、`DoubleAdder`、`LongAccumulator` 和 `LongAdder`，这四个类仅仅用来执行累加操作，相比原子化的基本数据类型，速度更快，但是不支持 `compareAndSet()` 方法。如果你仅仅需要累加操作，使用原子化的累加器性能会更好，代价就是会消耗更多的内存空间。
+
+`LongAdder` 内部由一个 `base` 变量和一个 `cell[]` 数组组成。
+
+- 当只有一个写线程，没有竞争的情况下，`LongAdder` 会直接使用 `base` 变量作为原子操作变量，通过 CAS 操作修改变量；
+- 当有多个写线程竞争的情况下，除了占用 `base` 变量的一个写线程之外，其它各个线程会将修改的变量写入到自己的槽 `cell[]` 数组中。
+
+我们可以发现，`LongAdder` 在操作后的返回值只是一个近似准确的数值，但是 `LongAdder` 最终返回的是一个准确的数值， 所以在一些对实时性要求比较高的场景下，`LongAdder` 并不能取代 `AtomicInteger` 或 `AtomicLong`。
+
+
 
 # volatile关键字
 
@@ -2066,7 +2830,9 @@ System.out.println(atomicReference.compareAndSet(user1,user2)); //false
 AtomicStampedReference.compareAndSet(expectedReference,newReference,oldStamp,newStamp);
 ```
 
-详见[ABADemo](https://github.com/MaJesTySA/JVM-JUC-Core/blob/master/src/thread/ABADemo.java)。
+
+
+
 
 # 集合类不安全问题
 
