@@ -13,6 +13,7 @@
 - 熟悉Spring、Spring Boot、Spring MVC、MyBatis等Java开发框架，熟悉MVC、IOC、AOP等企业级应用开发设计模式。
 - 熟练掌握Java Web开发技术，熟悉JSP、Servlet、Tomcat，了解HTML、CSS、JavaScript、jQuery等相关技术，熟悉RESTful API开发。
 - 熟悉MySQL，Redis数据库，能够进行高效的数据库设计，查询和调优等工作。
+- 对Java的JUC较熟悉，如共享模型、非共享模型、Java并发锁、AQS、Java并发工具类、Java并发容器等
 - 熟悉RabbitMQ消息队列的基本使用
 - 熟练掌握Git等版本控制工具，能够使用常见的开发工具（如IntelliJ IDEA、Eclipse等）进行代码开发和调试。
 
@@ -31,10 +32,7 @@
 - 国家励志奖学金 National Endeavor Scholarship 2020
 - 国家励志奖学金 National Endeavor Scholarship 2021
 - 本科特优生 Outstanding Student of Hust 2019
-
-- 本科总加权 90.42
-- CET6          611
-- TOEFL    84
+- 本科总加权 90.42    ｜ CET6          611   ｜ TOEFL    84
 ## Self-evaluation自我评价
 - 热爱编程，拥有坚实的Java编程基础，具备快速学习新技术的能力，能够在快节奏的开发环境中快速适应新的技术和工具；
 - 拥有良好的团队合作能力和沟通能力，能够与项目团队协作完成项目，能够及时、准确地沟通需求和解决问题，与同事和领导建立良好的合作关系；

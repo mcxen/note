@@ -281,6 +281,42 @@ MySQL的安装和配置是一件非常简单的事，但是在操作过程中也
 
 操作方法如下，在系统“搜索框”中输入“cmd”，按“Enter”（回车）键确认，弹出命令提示符界面。然后输入“sc delete MySQL服务名”,按“Enter”（回车）键，就能彻底删除残余的MySQL服务了。
 
+## #Mac的安装
+
+### MySQL安装目录说明
+
+MySQL 不同的版本安装目录会有一点不一致，但是大致会差不多，会有一点差异，我这个是 Mac OS X 系统中的安装目录，在这里`/usr/local/mysql`
+
+| 目录           | 目录内容                                 |
+| -------------- | ---------------------------------------- |
+| bin/           | 客户端程序和mysqld服务器，相关命令       |
+| data/          |                                          |
+| docs/          |                                          |
+| include/       | 包含头文件                               |
+| lib/           | 库                                       |
+| man/           |                                          |
+| share/         |                                          |
+| support-files/ | 存在一些默认配置文件，如`my-default.cnf` |
+
+### 配置文件的位置
+
+从命令行终端运行此命令，将在寻找Linux/BSD / OS X系统中的MySQL配置文件 my.cnf 文件：
+
+```bash
+mysql --help | grep 'Default options' -A 1
+```
+
+上面命令执行后，会有这样的输出：
+
+```bash
+Default options are read from the following files in the given order:
+/etc/my.cnf /etc/mysql/my.cnf /usr/local/etc/my.cnf ~/.my.cnf
+```
+
+现在，可以检查你正在使用的 my.cnf 文件是否存在。在 Mac OS X 中默认是没有 my.cnf 文件的。你可以从这个地方复制一份过去 `/usr/local/mysql/support-files/my-default.cnf` 每个版本都不一样，你只需要找到一个 `.cnf` 后缀结尾的文件即可。复制到`/etc/`目录下并重新命名为 `my.cnf`
+
+
+
 ## 3. MySQL的登录
 
 ### 3.1 服务的启动与停止

@@ -1,18 +1,5 @@
 # JUC并发编程
 ---
-title: Java线程基础
-date: 2019-12-24 23:52:25
-categories:
-  - Java
-  - JavaSE
-  - 并发
-tags:
-  - Java
-  - JavaSE
-  - 并发
-  - 线程
-permalink: /pages/fee2cc/
----
 
 # Java 线程基础
 
@@ -125,11 +112,37 @@ public class RunnableDemo {
 }
 ```
 
-### Callable、Future、FutureTask
+### Callable、Future、FutureTask - 解决缺陷
 
 **继承 Thread 类和实现 Runnable 接口这两种创建线程的方式都没有返回值**。所以，线程执行完后，无法得到执行结果。但如果期望得到执行结果该怎么做？
 
 为了解决这个问题，Java 1.5 后，提供了 `Callable` 接口和 `Future` 接口，通过它们，可以在线程执行结束后，返回执行结果。
+
+**举例：**
+
+```java
+public static void main(String[] args) {
+    ExecutorService service = Executors.newFixedThreadPool(10);
+    Future<Integer> future = service.submit(new CallableTask());
+    try {
+        System.out.println(future.get());
+    } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+    } catch (ExecutionException e) {
+        throw new RuntimeException(e);
+    }
+}
+static class CallableTask implements Callable<Integer>{
+
+    @Override
+    public Integer call() throws Exception {
+        Thread.sleep(3000);
+        return new Random().nextInt();
+    }
+}
+```
+
+
 
 #### Callable
 
@@ -2919,7 +2932,536 @@ public class ReadWriteLockDemo2 {
 
 在自旋锁中 另有三种常见的锁形式:TicketLock、CLHlock和MCSlock，本文中仅做名词介绍，不做深入讲解，感兴趣的同学可以自行查阅相关资料。
 
+## AQS
 
+> `AbstractQueuedSynchronizer`（简称 **AQS**）是**队列同步器**，顾名思义，其主要作用是处理同步。它是并发锁和很多同步工具类的实现基石（如 `ReentrantLock`、`ReentrantReadWriteLock`、`CountDownLatch`、`Semaphore`、`FutureTask` 等）。
+
+### AQS 的要点
+
+**AQS 提供了对独享锁与共享锁的支持**。
+
+在 `java.util.concurrent.locks` 包中的相关锁（常用的有 `ReentrantLock`、 `ReadWriteLock`）都是基于 AQS 来实现。这些锁都没有直接继承 AQS，而是定义了一个 `Sync` 类去继承 AQS。为什么要这样呢？因为锁面向的是使用用户，而同步器面向的则是线程控制，那么在锁的实现中聚合同步器而不是直接继承 AQS 就可以很好的隔离二者所关注的事情。
+
+### AQS 的应用
+
+**AQS 提供了对独享锁与共享锁的支持**。
+
+#### 独享锁 API
+
+获取、释放独享锁的主要 API 如下：
+
+```java
+public final void acquire(int arg)
+public final void acquireInterruptibly(int arg)
+public final boolean tryAcquireNanos(int arg, long nanosTimeout)
+public final boolean release(int arg)
+```
+
+- `acquire` - 获取独占锁。
+- `acquireInterruptibly` - 获取可中断的独占锁。
+- `tryAcquireNanos` - 尝试在指定时间内获取可中断的独占锁。在以下三种情况下回返回：
+  - 在超时时间内，当前线程成功获取了锁；
+  - 当前线程在超时时间内被中断；
+  - 超时时间结束，仍未获得锁返回 false。
+- `release` - 释放独占锁。
+
+#### 共享锁 API
+
+获取、释放共享锁的主要 API 如下：
+
+```java
+public final void acquireShared(int arg)
+public final void acquireSharedInterruptibly(int arg)
+public final boolean tryAcquireSharedNanos(int arg, long nanosTimeout)
+public final boolean releaseShared(int arg)
+```
+
+- `acquireShared` - 获取共享锁。
+- `acquireSharedInterruptibly` - 获取可中断的共享锁。
+- `tryAcquireSharedNanos` - 尝试在指定时间内获取可中断的共享锁。
+- `release` - 释放共享锁。
+
+### AQS 的原理
+
+> ASQ 原理要点：
+>
+> - AQS 使用一个整型的 `volatile` 变量来 **维护同步状态**。状态的意义由子类赋予。
+> - AQS 维护了一个 FIFO 的双链表，用来存储获取锁失败的线程。
+>
+> AQS 围绕同步状态提供两种基本操作“获取”和“释放”，并提供一系列判断和处理方法，简单说几点：
+>
+> - state 是独占的，还是共享的；
+> - state 被获取后，其他线程需要等待；
+> - state 被释放后，唤醒等待线程；
+> - 线程等不及时，如何退出等待。
+>
+> 至于线程是否可以获得 state，如何释放 state，就不是 AQS 关心的了，要由子类具体实现。
+
+#### AQS 的数据结构
+
+阅读 AQS 的源码，可以发现：AQS 继承自 `AbstractOwnableSynchronize`。
+
+```java
+public abstract class AbstractQueuedSynchronizer
+    extends AbstractOwnableSynchronizer
+    implements java.io.Serializable {
+
+    /** 等待队列的队头，懒加载。只能通过 setHead 方法修改。 */
+    private transient volatile Node head;
+    /** 等待队列的队尾，懒加载。只能通过 enq 方法添加新的等待节点。*/
+    private transient volatile Node tail;
+    /** 同步状态 */
+    private volatile int state;
+}
+```
+
+- `state` - AQS 使用一个整型的 `volatile` 变量来 **维护同步状态**。
+  - 这个整数状态的意义由子类来赋予，如`ReentrantLock` 中该状态值表示所有者线程已**经重复获取该锁的次数**，`Semaphore` 中该状态值表示**剩余的许可数量**。
+- `head` 和 `tail` - AQS **维护了一个 `Node` 类型（AQS 的内部类）的双链表来完成同步状态的管理**。这个双链表是一个双向的 FIFO 队列，通过 `head` 和 `tail` 指针进行访问。当 **有线程获取锁失败后，就被添加到队列末尾**。
+
+![img](https://raw.githubusercontent.com/dunwu/images/dev/cs/java/javacore/concurrent/aqs_1.png)
+
+再来看一下 `Node` 的源码
+
+```java
+static final class Node {
+    /** 该等待同步的节点处于共享模式 */
+    static final Node SHARED = new Node();
+    /** 该等待同步的节点处于独占模式 */
+    static final Node EXCLUSIVE = null;
+
+    /** 线程等待状态，状态值有: 0、1、-1、-2、-3 */
+    volatile int waitStatus;
+    static final int CANCELLED =  1;
+    static final int SIGNAL    = -1;
+    static final int CONDITION = -2;
+    static final int PROPAGATE = -3;
+
+    /** 前驱节点 */
+    volatile Node prev;
+    /** 后继节点 */
+    volatile Node next;
+    /** 等待锁的线程 */
+    volatile Thread thread;
+
+  	/** 和节点是否共享有关 */
+    Node nextWaiter;
+}
+```
+
+很显然，Node 是一个双链表结构。
+
+- `waitStatus` - `Node` 使用一个整型的 `volatile` 变量来 维护 AQS 同步队列中线程节点的状态。`waitStatus` 有五个状态值：
+  - `CANCELLED(1)` - 此状态表示：该节点的线程可能由于超时或被中断而 **处于被取消(作废)状态**，一旦处于这个状态，表示这个节点应该从等待队列中移除。
+  - `SIGNAL(-1)` - 此状态表示：**后继节点会被挂起**，因此在当前节点释放锁或被取消之后，必须唤醒(`unparking`)其后继结点。
+  - `CONDITION(-2)` - 此状态表示：该节点的线程 **处于等待条件状态**，不会被当作是同步队列上的节点，直到被唤醒(`signal`)，设置其值为 0，再重新进入阻塞状态。
+  - `PROPAGATE(-3)` - 此状态表示：下一个 `acquireShared` 应无条件传播。
+  - 0 - 非以上状态。
+
+#### 独占锁的获取和释放
+
+##### 获取独占锁
+
+AQS 中使用 `acquire(int arg)` 方法获取独占锁，其大致流程如下：
+
+1. 先尝试获取同步状态，如果获取同步状态成功，则结束方法，直接返回。
+2. 如果获取同步状态不成功，AQS 会不断尝试利用 CAS 操作将当前线程插入等待同步队列的队尾，直到成功为止。
+3. 接着，不断尝试为等待队列中的线程节点获取独占锁。
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/aqs_2.png)
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/aqs_3.png)
+
+详细流程可以用下图来表示，请结合源码来理解（一图胜千言）：
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/aqs_4.png)
+
+##### 释放独占锁
+
+AQS 中使用 `release(int arg)` 方法释放独占锁，其大致流程如下：
+
+1. 先尝试获取解锁线程的同步状态，如果获取同步状态不成功，则结束方法，直接返回。
+2. 如果获取同步状态成功，AQS 会尝试唤醒当前线程节点的后继节点。
+
+##### 获取可中断的独占锁
+
+AQS 中使用 `acquireInterruptibly(int arg)` 方法获取可中断的独占锁。
+
+`acquireInterruptibly(int arg)` 实现方式**相较于获取独占锁方法（ `acquire`）非常相似**，区别仅在于它会**通过 `Thread.interrupted` 检测当前线程是否被中断**，如果是，则立即抛出中断异常（`InterruptedException`）。
+
+##### 获取超时等待式的独占锁
+
+AQS 中使用 `tryAcquireNanos(int arg)` 方法获取超时等待的独占锁。
+
+doAcquireNanos 的实现方式 **相较于获取独占锁方法（ `acquire`）非常相似**，区别在于它会根据超时时间和当前时间计算出截止时间。在获取锁的流程中，会不断判断是否超时，如果超时，直接返回 false；如果没超时，则用 `LockSupport.parkNanos` 来阻塞当前线程。
+
+#### 共享锁的获取和释放
+
+##### 获取共享锁
+
+AQS 中使用 `acquireShared(int arg)` 方法获取共享锁。
+
+`acquireShared` 方法和 `acquire` 方法的逻辑很相似，区别仅在于自旋的条件以及节点出队的操作有所不同。
+
+成功获得共享锁的条件如下：
+
+- `tryAcquireShared(arg)` 返回值大于等于 0 （这意味着共享锁的 permit 还没有用完）。
+- 当前节点的前驱节点是头结点。
+
+##### 释放共享锁
+
+AQS 中使用 `releaseShared(int arg)` 方法释放共享锁。
+
+`releaseShared` 首先会尝试释放同步状态，如果成功，则解锁一个或多个后继线程节点。释放共享锁和释放独享锁流程大体相似，区别在于：
+
+对于独享模式，如果需要 SIGNAL，释放仅相当于调用头节点的 `unparkSuccessor`。
+
+##### 获取可中断的共享锁
+
+AQS 中使用 `acquireSharedInterruptibly(int arg)` 方法获取可中断的共享锁。
+
+`acquireSharedInterruptibly` 方法与 `acquireInterruptibly` 几乎一致，不再赘述。
+
+##### 获取超时等待式的共享锁
+
+AQS 中使用 `tryAcquireSharedNanos(int arg)` 方法获取超时等待式的共享锁。
+
+`tryAcquireSharedNanos` 方法与 `tryAcquireNanos` 几乎一致，不再赘述。
+
+
+
+### CountDownLatch
+
+先来看一个最简单的 CountDownLatch 使用方法，例子很简单，可以运行看一下效果。CountDownLatch 的作用是：当一个线程需要另外一个或多个线程完成后，再开始执行。比如主线程要等待一个子线程完成环境相关配置的加载工作，主线程才继续执行，就可以利用 CountDownLatch 来实现。
+
+#### 回顾举例
+
+首先实例化一个 CountDownLatch ，参数可以理解为一个计数器，这里为 1，然后主线程执行，调用 worker 子线程，接着调用 CountDownLatch 的 await() 方法，表示阻塞主线程。当子线程执行完成后，在 finnaly 块调用 countDown() 方法，表示一个等待已经完成，把计数器减一，直到减为 0，主线程又开始执行。
+
+```java
+private static CountDownLatch latch = new CountDownLatch(1);
+
+    public static void main(String[] args) throws InterruptedException{
+        System.out.println("主线程开始......");
+        Thread thread = new Thread(new Worker());
+        thread.start();
+        System.out.println("主线程等待......");
+        System.out.println(latch.toString());
+        latch.await();
+        System.out.println(latch.toString());
+        System.out.println("主线程继续.......");
+    }
+
+    public static class Worker implements Runnable {
+
+        @Override
+        public void run() {
+            System.out.println("子线程任务正在执行");
+            try {
+                Thread.sleep(2000);
+            }catch (InterruptedException e){
+
+            }finally {
+                latch.countDown();
+            }
+        }
+    }
+```
+
+执行结果如下：
+
+```erlang
+主线程开始......
+子线程任务正在执行
+主线程等待......
+java.util.concurrent.CountDownLatch@1d44bcfa[Count = 1]
+java.util.concurrent.CountDownLatch@1d44bcfa[Count = 0]
+主线程继续.......
+```
+
+
+
+![Untitled](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/Untitled.gif)
+
+
+
+首先在 CountDownLatch 类内部定义了一个 Sync 内部类，这个内部类就是继承自 AbstractQueuedSynchronizer 的。并且重写了方法 `tryAcquireShared`和`tryReleaseShared`。例如当调用 `awit()`方法时，CountDownLatch 会调用内部类Sync 的 `acquireSharedInterruptibly() ` 方法，然后在这个方法中会调用 `tryAcquireShared` 方法，这个方法就是 CountDownLatch 的内部类 Sync 里重写的 AbstractQueuedSynchronizer 的方法。调用 `countDown()` 方法同理。
+
+这种方式是使用 AbstractQueuedSynchronizer 的标准化方式，大致分为两步：
+
+1、内部持有继承自 AbstractQueuedSynchronizer 的对象 Sync；
+
+2、并在 Sync 内重写 AbstractQueuedSynchronizer protected 的部分或全部方法，这些方法包括如下几个：
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/273364-20180608074941782-565895757.png)
+
+之所以要求子类重写这些方法，是为了让使用者（这里的使用者指 CountDownLatch 等）可以在其中加入自己的判断逻辑，例如 CountDownLatch 在 `tryAcquireShared`中加入了判断，判断 state 是否不为0，如果不为0，才符合调用条件。
+
+`tryAcquire`和`tryRelease`是对应的，前者是独占模式获取，后者是独占模式释放。
+
+`tryAcquireShared`和`tryReleaseShared`是对应的，前者是共享模式获取，后者是共享模式释放。
+
+我们看到 CountDownLatch 重写的方法 tryAcquireShared 实现如下：
+
+```java
+protected int tryAcquireShared(int acquires) {
+            return (getState() == 0) ? 1 : -1;
+        }
+```
+
+判断 state 值是否为0，为0 返回1，否则返回 -1。state 值是 AbstractQueuedSynchronizer 类中的一个 volatile 变量。
+
+```java
+private volatile int state;
+```
+
+在 CountDownLatch 中这个 state 值就是计数器，在调用 await 方法的时候，将值赋给 state 。
+
+#### **等待线程入队**
+
+根据上面的逻辑，调用 await() 方法时，先去获取 state 的值，当计数器不为0的时候，说明还有需要等待的线程在运行，则调用 doAcquireSharedInterruptibly 方法，进来执行的第一个动作就是尝试加入等待队列 ，即调用 addWaiter（）方法， 源码如下：
+
+到这里就走到了 AQS 的核心部分，AQS 用内部的一个 Node 类维护一个 CHL Node FIFO 队列。将当前线程加入等待队列，并通过 parkAndCheckInterrupt（）方法实现当前线程的阻塞。下面一大部分都是在说明 CHL 队列的实现，里面用 CAS 实现队列出入不会发生阻塞。
+
+```java
+private void doAcquireSharedInterruptibly(int arg)
+        throws InterruptedException {
+    	//加入等待队列 				      
+        final Node node = addWaiter(Node.SHARED);
+        boolean failed = true;
+    	// 进入 CAS 循环
+        try {
+            for (;;) {
+                //当一个节点(关联一个线程)进入等待队列后， 获取此节点的 prev 节点 
+                final Node p = node.predecessor();
+                // 如果获取到的 prev 是 head，也就是队列中第一个等待线程
+                if (p == head) {
+                    // 再次尝试申请 反应到 CountDownLatch 就是查看是否还有线程需要等待(state是否为0)
+                    int r = tryAcquireShared(arg);
+                    // 如果 r >=0 说明 没有线程需要等待了 state==0
+                    if (r >= 0) {
+                        //尝试将第一个线程关联的节点设置为 head 
+                        setHeadAndPropagate(node, r);
+                        p.next = null; // help GC
+                        failed = false;
+                        return;
+                    }
+                }
+                //经过自旋tryAcquireShared后，state还不为0，就会到这里，第一次的时候，waitStatus是0，那么node的waitStatus就会被置为SIGNAL，第二次再走到这里，就会用LockSupport的park方法把当前线程阻塞住
+                if (shouldParkAfterFailedAcquire(p, node) &&
+                    parkAndCheckInterrupt())
+                    throw new InterruptedException();
+            }
+        } finally {
+            if (failed)
+                cancelAcquire(node);
+        }
+    }
+```
+
+我看看到上面先执行了 addWaiter() 方法，就是将当前线程加入等待队列，源码如下：
+
+```java
+/** Marker to indicate a node is waiting in shared mode */
+ static final Node SHARED = new Node();
+ /** Marker to indicate a node is waiting in exclusive mode */
+ static final Node EXCLUSIVE = null;
+
+private Node addWaiter(Node mode) {
+        Node node = new Node(Thread.currentThread(), mode);
+        // 尝试快速入队操作，因为大多数时候尾节点不为 null
+        Node pred = tail;
+        if (pred != null) {
+            node.prev = pred;
+            if (compareAndSetTail(pred, node)) {
+                pred.next = node;
+                return node;
+            }
+        }
+    	//如果尾节点为空(也就是队列为空) 或者尝试CAS入队失败(由于并发原因)，进入enq方法
+        enq(node);
+        return node;
+    }
+```
+
+上面是向等待队列中添加等待者（waiter）的方法。首先构造一个 Node 实体，参数为当前线程和一个mode，这个mode有两种形式，一个是 SHARED ，一个是 EXCLUSIVE，请看上面的代码。然后执行下面的入队操作 addWaiter，和 enq() 方法的 else 分支操作是一样的，这里的操作如果成功了，就不用再进到 enq() 方法的循环中去了，可以提高性能。如果没有成功，再调用 enq() 方法。
+
+```java
+private Node enq(final Node node) {
+    	// 死循环+CAS保证所有节点都入队
+        for (;;) {
+            Node t = tail;
+            // 如果队列为空 设置一个空节点作为 head
+            if (t == null) { // Must initialize
+                if (compareAndSetHead(new Node()))
+                    tail = head;
+            } else {
+                //加入队尾
+                node.prev = t;
+                if (compareAndSetTail(t, node)) {
+                    t.next = node;
+                    return t;
+                }
+            }
+        }
+    }
+```
+
+说明：循环加 CAS 操作是实现乐观锁的标准方式，CAS 是为了实现原子操作而出现的，所谓的原子操作指操作执行期间，不会受其他线程的干扰。Java 实现的 CAS 是调用 unsafe 类提供的方法，底层是调用 c++ 方法，直接操作内存，在 cpu 层面加锁，直接对内存进行操作。
+
+上面是 AQS 等待队列入队方法，操作在无限循环中进行，如果入队成功则返回新的队尾节点，否则一直自旋，直到入队成功。假设入队的节点为 node ，上来直接进入循环，在循环中，先拿到尾节点。
+
+1、if 分支，如果尾节点为 null，说明现在队列中还没有等待线程，则尝试 CAS 操作将头节点初始化，然后将尾节点也设置为头节点，因为初始化的时候头尾是同一个，这和 AQS 的设计实现有关， AQS 默认要有一个虚拟节点。此时，尾节点不在为空，循环继续，进入 else 分支；
+
+2、else 分支，如果尾节点不为 null， node.prev = t ，也就是将当前尾节点设置为待入队节点的前置节点。然后又是利用 CAS 操作，将待入队的节点设置为队列的尾节点，如果 CAS 返回 false，表示未设置成功，继续循环设置，直到设置成功，接着将之前的尾节点（也就是倒数第二个节点）的 next 属性设置为当前尾节点，对应 t.next = node 语句，然后返回当前尾节点，退出循环。
+
+setHeadAndPropagate 方法负责将自旋等待或被 LockSupport 阻塞的线程唤醒。
+
+```java
+private void setHeadAndPropagate(Node node, int propagate) {
+    	//备份现在的 head
+        Node h = head;  
+    	//抢到锁的线程被唤醒 将这个节点设置为head
+        setHead(node)
+    	// propagate 一般都会大于0 或者存在可被唤醒的线程
+        if (propagate > 0 || h == null || h.waitStatus < 0 ||
+            (h = head) == null || h.waitStatus < 0) {
+            Node s = node.next;
+            // 只有一个节点 或者是共享模式 释放所有等待线程 各自尝试抢占锁
+            if (s == null || s.isShared())
+                doReleaseShared();
+        }
+    }
+```
+
+Node 对象中有一个属性是 waitStatus ，它有四种状态，分别是：
+
+```java
+//线程已被 cancelled ，这种状态的节点将会被忽略，并移出队列
+static final int CANCELLED =  1;
+// 表示当前线程已被挂起，并且后继节点可以尝试抢占锁
+static final int SIGNAL    = -1;
+//线程正在等待某些条件
+static final int CONDITION = -2;
+//共享模式下 无条件所有等待线程尝试抢占锁
+static final int PROPAGATE = -3;
+```
+
+#### **等待线程被唤醒**
+
+当执行 CountDownLatch 的 countDown（）方法，将计数器减一，也就是state减一，当减到0的时候，等待队列中的线程被释放。是调用 AQS 的 releaseShared 方法来实现的，下面代码中的方法是按顺序调用的，摘到了一起，方便查看：
+
+```java
+// AQS类
+public final boolean releaseShared(int arg) {
+    	// arg 为固定值 1
+    	// 如果计数器state 为0 返回true，前提是调用 countDown() 之前不能已经为0
+        if (tryReleaseShared(arg)) {
+            // 唤醒等待队列的线程
+            doReleaseShared();
+            return true;
+        }
+        return false;
+    }
+
+// CountDownLatch 重写的方法
+protected boolean tryReleaseShared(int releases) {
+            // Decrement count; signal when transition to zero
+    		// 依然是循环+CAS配合 实现计数器减1
+            for (;;) {
+                int c = getState();
+                if (c == 0)
+                    return false;
+                int nextc = c-1;
+                if (compareAndSetState(c, nextc))
+                    return nextc == 0;
+            }
+        }
+
+/// AQS类
+ private void doReleaseShared() {
+        for (;;) {
+            Node h = head;
+            if (h != null && h != tail) {
+                int ws = h.waitStatus;
+                // 如果节点状态为SIGNAL，则他的next节点也可以尝试被唤醒
+                if (ws == Node.SIGNAL) {
+                    if (!compareAndSetWaitStatus(h, Node.SIGNAL, 0))
+                        continue;            // loop to recheck cases
+                    unparkSuccessor(h);
+                }
+                // 将节点状态设置为PROPAGATE，表示要向下传播，依次唤醒
+                else if (ws == 0 &&
+                         !compareAndSetWaitStatus(h, 0, Node.PROPAGATE))
+                    continue;                // loop on failed CAS
+            }
+            if (h == head)                   // loop if head changed
+                break;
+        }
+    }
+```
+
+因为这是共享型的，当计数器为 0 后，会唤醒等待队列里的所有线程，所有调用了 await() 方法的线程都被唤醒，并发执行。这种情况对应到的场景是，有多个线程需要等待一些动作完成，比如一个线程完成初始化动作，其他5个线程都需要用到初始化的结果，那么在初始化线程调用 countDown 之前，其他5个线程都处在等待状态。一旦初始化线程调用了 countDown ，其他5个线程都被唤醒，开始执行。
+
+#### **总结**
+
+1、AQS 分为独占模式和共享模式，CountDownLatch 使用了它的共享模式。
+
+2、AQS 当第一个等待线程（被包装为 Node）要入队的时候，要保证存在一个 head 节点，这个 head 节点不关联线程，也就是一个虚节点。
+
+3、当队列中的等待节点（关联线程的，非 head 节点）抢到锁，将这个节点设置为 head 节点。
+
+4、第一次自旋抢锁失败后，waitStatus 会被设置为 -1（SIGNAL），第二次再失败，就会被 LockSupport 阻塞挂起。
+
+5、如果一个节点的前置节点为 SIGNAL 状态，则这个节点可以尝试抢占锁。
+
+实现简单的一次性门闩
+
+```java
+public class OneShortLatch {
+//    实现一个一次性门闩
+
+    private final Sync sync = new Sync();
+
+    public void signal(){
+        sync.releaseShared(0);
+    }
+
+    public void await(){
+        sync.acquireShared(0);
+    }
+    private class Sync extends AbstractQueuedSynchronizer{
+        //没有要求实现方法
+        @Override
+        protected int tryAcquireShared(int arg) {
+            return (getState() == 1)?1:-1;//门闩是不是打开的
+        }
+
+        @Override
+        protected boolean tryReleaseShared(int arg) {
+            setState(1);
+            return true;//开闸了
+        }
+
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        OneShortLatch oneShortLatch = new OneShortLatch();
+        for (int i = 0; i < 10; i++) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("尝试获取Lathc");
+                    oneShortLatch.await();
+                    System.out.println("开始运行");
+
+                }
+            }).start();
+        }
+        Thread.sleep(5000);
+        oneShortLatch.signal();
+    }
+}
+```
 
 
 
@@ -4613,16 +5155,39 @@ void put(E e) throws InterruptedException;
 
 - 抛出异常；
 - 返回特殊值（`null` 或 `true`/`false`，取决于具体的操作）；
-- 阻塞等待此操作，直到这个操作成功；
-- 阻塞等待此操作，直到成功或者超时指定时间。
+- 阻塞等待此操作，一直阻塞；
+- 阻塞等待此操作，直到成功，超时退出。
 
 总结如下：
 
-|         | **Throws exception** | **Special value** | **Blocks**         | **Times out**        |
-| ------- | -------------------- | ----------------- | ------------------ | -------------------- |
-| Insert  | add(e)               | offer(e)          | put(e)             | offer(e, time, unit) |
-| Remove  | remove()             | poll()            | take()             | poll(time, unit)     |
-| Examine | element()            | peek()            | **not applicable** | **not applicable**   |
+| 编号 | 处理方式   | 插入方法                    | 移除方法                   | 检查方法  |
+| ---- | ---------- | --------------------------- | -------------------------- | --------- |
+| 1    | 抛出异常   | add(e)                      | remove(e)                  | element() |
+| 2    | 返回特殊值 | offer(e)                    | poll()                     | peek()    |
+| 3    | 一直阻塞   | put(e)                      | take(e)                    | 无        |
+| 4    | 超时退出   | offer(e, timeout, timeunit) | poll(e, timeout, timeunit) | 无        |
+
+  四种方式解释：
+
+- 抛出异常
+  - add方法：插入数据时，如果队列已满，则抛出IllegalStateException异常，否则返回true。
+  - remove方法：移除数据时，如果队列存在此元素，则删除成功，返回true，否则返回false。如果存在多个元素，则仅移除一个元素并返回true。需要注意：remove(e)是BlockingQueue接口的方法，remove()是Queue接口的方法。
+  - element方法：检查元素时，如果队列为空，则抛出NoSuchElementException异常，否则返回队列头部元素。element()是Queue接口的方法。
+- 返回特殊值
+  - offer方法：插入数据时，如果队列未满，则插入成功返回true，否则返回false。当使用有界队列时，建议使用offer方法。
+  - poll方法：移除数据时，如果队列不为空，则移除队列头部元素并返回，否则，返回null。poll()是Queue接口的方法。
+  - peek方法：检查元素时，如果队列为空，则返回null，否则返回队列头部元素。peek()是Queue接口的方法。
+- 一直阻塞
+  - put方法：插入数据时，如果队列为空，则插入成功，否则进行阻塞等待队列可用，若等待时被中断，则抛出InterruptedException异常。
+  - take方法：检查元素时，如果队列不为空，则返回队列头部元素，否则进行阻塞等待队列插入数据，若等待时被中断，则抛出InterruptedException异常。
+- 超时退出
+  - offer方法：插入数据时，如果队列为空，则插入成功返回true，否则进行阻塞等待队列可用，若等待时被中断，则抛出InterruptedException异常，若在指定时间内仍然不可用，则返回false。
+  - poll方法：检查元素时，如果队列不为空，则返回队列头部元素，否则进行阻塞等待队列插入数据，若等待时被中断，则抛出InterruptedException异常，若在指定时间内仍然不可用，则返回null。
+      注意：Queue队列不能插入null，否则会抛出NullPointerException异常。
+
+
+
+
 
 `BlockingQueue` 的各个实现类都遵循了这些规则。
 
@@ -4650,11 +5215,11 @@ public class PriorityBlockingQueue<E> extends AbstractQueue<E>
 
 #### PriorityBlockingQueue 要点
 
-- `PriorityBlockingQueue` 可以视为 `PriorityQueue` 的线程安全版本。
-- `PriorityBlockingQueue` 实现了 `BlockingQueue`，也是一个阻塞队列。
+- `PriorityBlockingQueue` 可以视为 `PriorityQueue` **的线程安全版本。**
+- `PriorityBlockingQueue` 实现了 `BlockingQueue`，**也是一个阻塞队列。**
 - `PriorityBlockingQueue` 实现了 `Serializable`，支持序列化。
 - `PriorityBlockingQueue` 不接受 `null` 值元素。
-- `PriorityBlockingQueue` 的插入操作 `put` 方法不会 block，因为它是无界队列（take 方法在队列为空的时候会阻塞）。
+- `PriorityBlockingQueue` 的**插入操作 `put` 方法不会 block**，**因为它是无界队列（take 方法在队列为空的时候会阻塞）。**
 
 #### PriorityBlockingQueue 原理
 
@@ -4668,7 +5233,7 @@ private final ReentrantLock lock;
 - `queue` 是一个 `Object` 数组，用于保存 `PriorityBlockingQueue` 的元素。
 - 而可重入锁 `lock` 则用于在执行插入、删除操作时，保证这个方法在当前线程释放锁之前，其他线程不能访问。
 
-`PriorityBlockingQueue` 的容量虽然有初始化大小，但是不限制大小，如果当前容量已满，插入新元素时会自动扩容。
+`PriorityBlockingQueue` 的容量**虽然有初始化大小，但是不限制大小，**如果当前容量已满，插入新元素时会自动扩容。
 
 ### ArrayBlockingQueue 类
 
@@ -4776,7 +5341,7 @@ private final Condition notFull = putLock.newCondition();
 
 ### SynchronousQueue 类
 
-SynchronousQueue 是**不存储元素的阻塞队列**。每个删除操作都要等待插入操作，反之每个插入操作也都要等待删除动作。那么这个队列的容量是多少呢？是 1 吗？其实不是的，其内部容量是 0。
+SynchronousQueue 是**不存储元素的阻塞队列**。每个删除操作都要等待插入操作，反之每个插入操作也都要等待删除动作。那么这个队列的容量是多少呢？是 1 吗？**其实不是的，其内部容量是 0。**
 
 `SynchronousQueue` 定义如下：
 
@@ -4815,3 +5380,537 @@ Queue 被广泛使用在生产者 - 消费者场景。而在并发场景，利�
 - 通用场景中，`LinkedBlockingQueue` 的吞吐量一般优于 `ArrayBlockingQueue`，因为它实现了更加细粒度的锁操作。
 - `ArrayBlockingQueue` 实现比较简单，性能更好预测，属于表现稳定的“选手”。
 - 可能令人意外的是，很多时候 `SynchronousQueue` 的性能表现，往往大大超过其他实现，尤其是在队列元素较小的场景。
+
+---
+title: Java并发工具类
+date: 2019-12-24 23:52:25
+categories:
+  - Java
+  - JavaSE
+  - 并发
+tags:
+  - Java
+  - JavaSE
+  - 并发
+permalink: /pages/02d274/
+---
+
+# Java 控制并发流程并发工具类
+
+> JDK 的 `java.util.concurrent` 包（即 J.U.C）中提供了几个非常有用的并发工具类。
+
+## CountDownLatch - 门闩 :key:
+
+> 字面意思为 **递减计数锁**。用于**控制一个线程等待多个线程**。
+>
+> `CountDownLatch` 维护一个计数器 count，表示需要等待的事件数量。`countDown` 方法递减计数器，表示有一个事件已经发生。调用 `await` 方法的线程会一直阻塞直到计数器为零，或者等待中的线程中断，或者等待超时。
+>
+> 比如： 拼多多人满了才发车
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/CountDownLatch.png)
+
+`CountDownLatch` 是基于 AQS(`AbstractQueuedSynchronizer`) 实现的。
+
+`CountDownLatch` 唯一的构造方法：
+
+```java
+// 初始化计数器
+public CountDownLatch(int count) {};
+```
+
+说明：
+
+- count 为统计值。
+
+`CountDownLatch` 的重要方法：
+
+```java
+public void await() throws InterruptedException { };
+public boolean await(long timeout, TimeUnit unit) throws InterruptedException { };
+public void countDown() { };
+```
+
+说明：
+
+- `await()` - 调用 `await()` 方法的线程会被挂起，它会等待直到 count 值为 0 才继续执行。
+- `await(long timeout, TimeUnit unit)` - 和 `await()` 类似，只不过等待一定的时间后 count 值还没变为 0 的话就会继续执行
+- `countDown()` - 将统计值 count 减 1
+
+示例：
+
+```java
+public class CountDownLatchDemo {
+
+    public static void main(String[] args) {
+        final CountDownLatch latch = new CountDownLatch(2);
+
+        new Thread(new MyThread(latch)).start();
+        new Thread(new MyThread(latch)).start();
+
+        try {
+            System.out.println("等待2个子线程执行完毕...");
+            latch.await();
+            System.out.println("2个子线程已经执行完毕");
+            System.out.println("继续执行主线程");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static class MyThread implements Runnable {
+
+        private CountDownLatch latch;
+
+        public MyThread(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void run() {
+            System.out.println("子线程" + Thread.currentThread().getName() + "正在执行");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("子线程" + Thread.currentThread().getName() + "执行完毕");
+            latch.countDown();
+        }
+
+    }
+
+}
+```
+
+## CyclicBarrier - 循环栅栏 :barber:
+
+> 字面意思是 **循环栅栏**。**`CyclicBarrier` 可以让一组线程等待至某个状态（遵循字面意思，不妨称这个状态为栅栏）之后再全部同时执行**。之所以叫循环栅栏是因为：**当所有等待线程都被释放以后，`CyclicBarrier` 可以被重用**。
+>
+> `CyclicBarrier` 维护一个计数器 count。每次执行 `await` 方法之后，count 加 1，直到计数器的值和设置的值相等，等待的所有线程才会继续执行。
+
+`CyclicBarrier` 是基于 `ReentrantLock` 和 `Condition` 实现的。Condition就是每一个线程才能起作用
+
+`CyclicBarrier` 应用场景：`CyclicBarrier` 在并行迭代算法中非常有用。
+
+![img](https://raw.githubusercontent.com/dunwu/images/dev/cs/java/javacore/concurrent/CyclicBarrier.png)
+
+`CyclicBarrier` 提供了 2 个构造方法
+
+```java
+public CyclicBarrier(int parties) {}
+public CyclicBarrier(int parties, Runnable barrierAction) {}
+```
+
+> 说明：
+>
+> - `parties` - `parties` 数相当于一个阈值，当有 `parties` 数量的线程在等待时， `CyclicBarrier` 处于栅栏状态。
+> - `barrierAction` - 当 `CyclicBarrier` 处于栅栏状态时执行的动作。
+
+`CyclicBarrier` 的重要方法：
+
+```java
+public int await() throws InterruptedException, BrokenBarrierException {}
+public int await(long timeout, TimeUnit unit)
+        throws InterruptedException,
+               BrokenBarrierException,
+               TimeoutException {}
+// 将屏障重置为初始状态
+public void reset() {}
+```
+
+> 说明：
+>
+> - `await()` - 等待调用 `await()` 的线程数达到屏障数。如果当前线程是最后一个到达的线程，并且在构造函数中提供了非空屏障操作，则当前线程在允许其他线程继续之前运行该操作。如果在屏障动作期间发生异常，那么该异常将在当前线程中传播并且屏障被置于断开状态。
+> - `await(long timeout, TimeUnit unit)` - 相比于 `await()` 方法，这个方法让这些线程等待至一定的时间，如果还有线程没有到达栅栏状态就直接让到达栅栏状态的线程执行后续任务。
+> - `reset()` - 将屏障重置为初始状态。
+
+示例：
+
+```java
+public class CyclicBarrierDemo {
+
+    final static int N = 4;
+
+    public static void main(String[] args) {
+        CyclicBarrier barrier = new CyclicBarrier(N,
+            new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("当前线程" + Thread.currentThread().getName());
+                }
+            });
+
+        for (int i = 0; i < N; i++) {
+            MyThread myThread = new MyThread(barrier);
+            new Thread(myThread).start();
+        }
+    }
+
+    static class MyThread implements Runnable {
+
+        private CyclicBarrier cyclicBarrier;
+
+        MyThread(CyclicBarrier cyclicBarrier) {
+            this.cyclicBarrier = cyclicBarrier;
+        }
+
+        @Override
+        public void run() {
+            System.out.println("线程" + Thread.currentThread().getName() + "正在写入数据...");
+            try {
+                Thread.sleep(3000); // 以睡眠来模拟写入数据操作
+                System.out.println("线程" + Thread.currentThread().getName() + "写入数据完毕，等待其他线程写入完毕");
+                cyclicBarrier.await();
+            } catch (InterruptedException | BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+}
+```
+
+
+
+```sh
+线程Thread-0正在写入数据...
+线程Thread-3正在写入数据...
+线程Thread-3写入数据完毕，等待其他线程写入完毕
+线程Thread-0写入数据完毕，等待其他线程写入完毕
+线程Thread-2写入数据完毕，等待其他线程写入完毕
+线程Thread-1写入数据完毕，等待其他线程写入完毕
+当前线程Thread-1
+```
+
+
+
+```java
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+
+public class TestCyclicBarrier {
+    //编写一个四个人集合了就出发的代码
+    public static void main(String[] args) {
+        CyclicBarrier barrier = new CyclicBarrier(4, new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("四个人到了，可以出发!!");
+            }
+        });
+        for (int i = 0; i < 8; i++) {
+           new Thread(new Tast(i,barrier)).start();
+        }
+        System.out.println("结束");
+    }
+    static class Tast implements Runnable{
+        public Tast(int i, CyclicBarrier barrier) {
+            this.i = i;
+            this.barrier = barrier;
+        }
+
+        private int i;
+        private CyclicBarrier barrier;
+        @Override
+        public void run() {
+            System.out.println("线程"+i+"现在出发");
+            try{
+                Thread.sleep((long) (Math.random()*5000));
+                System.out.println("线程"+i+"到达集合地点!!!");
+                barrier.await();
+            }catch (InterruptedException e){
+                e.printStackTrace();
+            }catch (BrokenBarrierException e){
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+```
+
+
+
+```sh
+线程1现在出发
+线程0现在出发
+线程2现在出发
+线程3现在出发
+线程6现在出发
+线程7现在出发
+线程5现在出发
+结束
+线程4现在出发
+线程0到达集合地点!!!
+线程4到达集合地点!!!
+线程5到达集合地点!!!
+线程1到达集合地点!!!
+四个人到了，可以出发!!
+线程7到达集合地点!!!
+线程2到达集合地点!!!
+线程6到达集合地点!!!
+线程3到达集合地点!!!
+四个人到了，可以出发!!
+```
+
+
+
+
+
+## Semaphore - 信号量 许可证 :passport_control:
+
+> 字面意思为 **信号量**。`Semaphore` 用来控制某段代码块的并发数。
+>
+> `Semaphore` 管理着一组虚拟的许可（permit），permit 的初始数量可通过构造方法来指定。每次执行 `acquire` 方法可以获取一个 permit，如果没有就等待；而 `release` 方法可以释放一个 permit。
+
+`Semaphore` 应用场景：
+
+- `Semaphore` 可以用于实现资源池，如数据库连接池。
+- `Semaphore` 可以用于将任何一种容器变成有界阻塞容器。
+
+![img](https://raw.githubusercontent.com/dunwu/images/dev/cs/java/javacore/concurrent/Semaphore.png)
+
+`Semaphore` 提供了 2 个构造方法：
+
+```java
+// 参数 permits 表示许可数目，即同时可以允许多少线程进行访问
+public Semaphore(int permits) {}
+// 参数 fair 表示是否是公平的，即等待时间越久的越先获取许可
+public Semaphore(int permits, boolean fair) {}
+```
+
+> 说明：
+>
+> - `permits` - 初始化固定数量的 permit，并且默认为非公平模式。
+> - `fair` - 设置是否为公平模式。所谓公平，是指等待久的优先获取 permit。
+
+`Semaphore`的重要方法：
+
+```java
+// 获取 1 个许可
+public void acquire() throws InterruptedException {}
+//获取 permits 个许可
+public void acquire(int permits) throws InterruptedException {}
+// 释放 1 个许可
+public void release() {}
+//释放 permits 个许可
+public void release(int permits) {}
+```
+
+说明：
+
+- `acquire()` - 获取 1 个 permit。
+- `acquire(int permits)` - 获取 permits 数量的 permit。
+- `release()` - 释放 1 个 permit。
+- `release(int permits)` - 释放 permits 数量的 permit。
+
+示例：
+
+```java
+public class SemaphoreDemo {
+
+    private static final int THREAD_COUNT = 30;
+
+    private static ExecutorService threadPool = Executors.newFixedThreadPool(THREAD_COUNT);
+
+    private static Semaphore semaphore = new Semaphore(10);
+
+    public static void main(String[] args) {
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            threadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        semaphore.acquire();
+                        System.out.println("save data");
+                        semaphore.release();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
+        threadPool.shutdown();
+    }
+
+}
+```
+
+## Condition
+
+对于任意一个java对象，它都拥有一组定义在java.lang.Object上监视器方法，包括wait()，wait(long timeout)，notify()，notifyAll()，这些方法配合synchronized关键字一起使用可以实现等待/通知模式。同样，Condition接口也提供了类似Object监视器的方法，通过与Lock配合来实现等待/通知模式。可以看一下Object类的监视器方法和Condition接口的对比：
+
+![在这里插入图片描述](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/da7f2e6e6158411a80c61a59ce60def5~tplv-k3u1fbpfcp-zoom-in-crop-mark:4536:0:0:0.awebp)
+
+### Condition解决生产者消费者问题
+
+假设生产者可以生产票，但是现存的票只能有一张，只有顾客买走了才能再生产一张票，因此可以用Condition来保证同步。havenum表示有票，需要生产者等待；nonum表示没票，需要消费者等待。代码如下：
+
+```java
+class tickets{
+    private int num = 0;
+    ReentrantLock lock = new ReentrantLock();
+
+    Condition nonum = lock.newCondition();
+    Condition havenum = lock.newCondition();
+
+
+    public void put() throws InterruptedException {
+        lock.lock();
+        try{
+            while(num==1)
+            {
+                nonum.await();
+            }
+            num++;
+            System.out.println(Thread.currentThread().getName()+" 生产了一份,现存数量是 "+num);
+            havenum.signalAll();
+        }
+        finally {
+            lock.unlock();
+        }
+    }
+
+    public void take() throws InterruptedException {
+        lock.lock();
+        try {
+            while(num==0)
+            {
+                havenum.await();
+            }
+            num--;
+            System.out.println(Thread.currentThread().getName()+" 消耗了一份,现存数量是 "+num);
+            nonum.signalAll();
+        }
+        finally {
+            lock.unlock();
+        }
+    }
+}
+```
+
+![在这里插入图片描述](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/84227caf892c447aa05a3833948f940e~tplv-k3u1fbpfcp-zoom-in-crop-mark:4536:0:0:0.awebp)
+
+### Condition  精准唤醒
+
+通过上面的例子我们也可以发现使用不同的Condition对象可以唤醒不同的线程，使用这一机制就可以做到精准唤醒。
+
+```java
+class Aweaken
+{
+    ReentrantLock lock = new ReentrantLock();
+    int num = 1;
+    Condition conditionA = lock.newCondition();
+    Condition conditionB = lock.newCondition();
+    Condition conditionC = lock.newCondition();
+
+    public void weakA()
+    {
+        lock.lock();
+        try {
+            while(num != 1)
+            {
+                conditionA.await();
+            }
+            num = 2;
+            System.out.println("现在是线程 "+Thread.currentThread().getName()+", 下一个应该是线程B");
+            conditionB.signal();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void weakB()
+    {
+        lock.lock();
+        try {
+            while(num != 2)
+            {
+                conditionB.await();
+            }
+            num = 3;
+            System.out.println("现在是线程 "+Thread.currentThread().getName()+", 下一个应该是线程C");
+            conditionC.signal();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void weakC()
+    {
+        lock.lock();
+        try {
+            while(num != 3)
+            {
+                conditionC.await();
+            }
+            num = 1;
+            System.out.println("现在是线程 "+Thread.currentThread().getName()+", 下一个应该是线程A");
+            conditionA.signal();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+
+public class PCold {
+
+    public static void main(String[] args) {
+        Aweaken b = new Aweaken();
+        new Thread(()->{
+            for (int i = 0; i < 10; i++) {
+                b.weakA();
+            }
+        },"A").start();
+
+        new Thread(()->{
+            for (int i = 0; i < 10; i++) {
+                b.weakB();
+            }
+        },"B").start();
+
+        new Thread(()->{
+            for (int i = 0; i < 10; i++) {
+                b.weakC();
+            }
+        },"C").start();
+
+    }
+}
+```
+
+### Condition 实现分析
+
+#### 等待队列
+
+ConditionObject的等待队列是一个FIFO队列，队列的每个节点都是等待在Condition对象上的线程的引用，该线程就是在Condition对象上等待的线程，如果一个线程调用了Condition.await()，那么该线程就会释放锁，构成节点加入等待队列并进入等待状态。
+
+从下图可以看出来Condition拥有首尾节点的引用，而新增节点只需要将原有的尾节点nextWaiter指向它，并更新尾节点即可。**上述节点引用更新过程没有使用CAS机制，因为在调用await()的线程必定是获取了锁的线程，该过程由锁保证线程的安全。**
+
+一个Lock（同步器）拥有一个同步队列和多喝等待队列（如下图所示） ![在这里插入图片描述](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/c0a627da483f48d4ac6e237513648181~tplv-k3u1fbpfcp-zoom-in-crop-mark:4536:0:0:0.awebp)
+
+#### 等待
+
+调用Condition的await()方法，会使得当前线程进入等待队列并释放锁，同时线程状态变为等待状态。当从await()返回时，当前线程一定是获取了Condition相关联的锁。
+
+线程触发await()这个过程可以看作是同步队列的首节点（当前线程肯定是成功获得了锁，因此一定是在同步队列的首节点）移动到了Condition的等待队列的尾节点，并释放同步状态进入等待状态，同时会唤醒同步队列的后继节点。
+
+![在这里插入图片描述](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/9b476a858a6746a1a57f439e8da7eeb0~tplv-k3u1fbpfcp-zoom-in-crop-mark:4536:0:0:0.awebp)
+
+#### 唤醒
+
+调用Condition的signal()方法将会唤醒再等待队列中的首节点，该节点也是到目前为止等待时间最长的节点。调用Condition的signalAll()方法，将等待队列中的所有节点全部唤醒，相当于将等待队列中的每一个节点都执行一次signal()。
+
+![在这里插入图片描述](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/78b7e8019109447b96d4f16c09d534b8~tplv-k3u1fbpfcp-zoom-in-crop-mark:4536:0:0:0.awebp)
+
+
+
+
+

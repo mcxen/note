@@ -651,3 +651,73 @@ public class MyMvcConfig implements WebMvcConfigurer {
 
 自动配置的原理是一样的，SpringBoot在自动配置的时候，先看容器中有没有用户自己配置的，如果有用户自己配置的bean，那么就用用户配置的，如果没有，就用自动配置的。如果组件可以存在多个，就将用户配置和自己的默认组合起来
 
+
+
+# Spring Cache
+
+Spring Cache 主要是作用在类上或者方法上，对类中的方法的返回结果进行缓存。那么如何对方法增强，来实现缓存的功能？
+
+学过 Spring 的同学，肯定能一下子就反应过来，就是用 `AOP`（面向切面编程）。
+
+面向切面编程可以简单地理解为在类上或者方法前加一些说明，就是我们常说的注解。
+
+Spring Cache 的注解会帮忙在方法上创建一个切面（aspect），并触发缓存注解的切点（poinitcut），听起来太绕了，简单点说就是：Spring Cache 的注解会帮忙在调用方法之后，去缓存**方法调用的最终结果**，或者在方法调用之前拿缓存中的结果，或者删除缓存中的结果，这些读、写、删缓存的**脏活**都交给 Spring Cache 来做了，是不是很爽，再也不用自己去写缓存操作的逻辑了。
+
+## 缓存注解
+
+Spring 提供了四个注解来声明缓存规则。@Cacheable，@CachePut，@CacheEvict，@Caching。
+
+
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/b62429adfd5a48290f8b3d44aee37a19.png)
+
+### 引入 Spring Cache 依赖
+
+在 pom 文件中引入 spring cache 依赖，如下所示：
+
+
+
+```
+<dependency>    <groupId>org.springframework.boot</groupId>    <artifactId>spring-boot-starter-cache</artifactId></dependency>
+```
+
+
+
+Spring Cache 支持很多缓存中间件作为框架中的缓存，总共有 9 种选择：
+
+
+
+- caffeine：Caffeine 是一种高性能的缓存库，基于 Google Guava。
+- couchbase：*CouchBase* 是一款非关系型 JSON 文档数据库。
+- generic：由泛型机制和 static 组合实现的泛型缓存机制。
+- hazelcast：一个高度可扩展的数据分发和集群平台，可用于实现分布式数据存储、数据缓存。
+- infinispan：分布式的集群缓存系统。
+- jcache：JCache 作为缓存。它是 JSR107 规范中提到的缓存规范。
+- none：没有缓存。
+- redis：用 Redis 作为缓存
+- simple：用内存作为缓存。
+
+
+
+我们还是用最熟悉的 Redis 作为缓存吧。配置 Redis 作为缓存也很简单，在配置文件 application.properties 中设置缓存的类型为 Redis 就可以了， 如下所示：
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/6b9de1e856fbd3e3e4a83caf1ae8cc69.png)
+
+
+
+pom 导入
+
+```java
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+
+```
+
+
+
+
+
+
+

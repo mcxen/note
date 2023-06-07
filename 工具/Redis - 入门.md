@@ -34,18 +34,6 @@ Redis与其他key-value缓存产品有以下三个特点
 - Redis不仅仅支持简单的 key-value 类型的数据，同时还提供list、set、zset、hash等数据结构的存储。
 - Redis支持数据的备份，即master-slave模式的数据备份。
 
-## 常用网站
-
-- 官网
-
-  https://redis.io/ 
-
-- 中文网
-
-   http://www.redis.cn 
-
-
-
 ## 安装Redis
 
 由于企业里面做Redis开发，99%都是Linux版的运用和安装，几乎不会涉及到Windows版，所以这里就以linux版为主，可以自己去测试玩玩，Windows安装及使用教程：https://www.cnblogs.com/xing-nb/p/12146449.html
@@ -111,6 +99,23 @@ linux直接去官网下载：https://redis.io/download
    ```
 
    redis-server在src里，redis.conf在外边
+
+   > 服了，这个shabi redis HomeBrew安装后的配置文件在这个卸载的时候出现了？？？
+   >
+   > ![截屏2023-05-28 21.48.38](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/截屏2023-05-28 21.48.38.png)
+   >
+   > ```sh
+   > brew install redis
+   > cd /opt/homebrew/etc
+   > vim /redis.conf
+   > 
+   > 
+   > mcxw@mcxAir etc % redis-server /opt/homebrew/etc/redis.conf 
+   > ```
+   >
+   > 使用/general查找到daemonize 就可以了
+   >
+   > **修改： 将 daemonize no 修改为 daemonize yes**
 
    
 
@@ -2707,7 +2712,7 @@ public class LettuceReactiveMain4 {
 }
 ```
 
-## SpringBoot整合
+## :star:SpringBoot整合
 
 ### 基础使用
 
@@ -2741,27 +2746,182 @@ public class LettuceReactiveMain4 {
 
 
 
-**yaml配置**
+#### **yaml配置**
 
 ```yml
 spring:
   redis:
     host: 127.0.0.1
     port: 6379
+   
 ```
 
-**测试类中测试**
+Properties
+
+
+
+```
+#redis配置
+#Redis服务器地址
+spring.redis.host=127.0.0.1
+#Redis服务器连接端口
+spring.redis.port=6379
+#Redis数据库索引（默认为0）
+spring.redis.database=0  
+#连接池最大连接数（使用负值表示没有限制）
+spring.redis.jedis.pool.max-active=50
+#连接池最大阻塞等待时间（使用负值表示没有限制）
+spring.redis.jedis.pool.max-wait=3000
+#连接池中的最大空闲连接
+spring.redis.jedis.pool.max-idle=20
+#连接池中的最小空闲连接
+spring.redis.jedis.pool.min-idle=2
+#连接超时时间（毫秒）
+spring.redis.timeout=5000
+```
+
+
+
+> 在 Spring Boot 中，测试类通常使用 JUnit 框架编写，测试类需要使用 `@RunWith(SpringRunner.class)` 和 `@SpringBootTest` 注解来启动 Spring 应用程序上下文。以下是一个简单的 Spring Boot 测试类的示例：
+>
+> ```java
+> @RunWith(SpringRunner.class)
+> @SpringBootTest
+> public class MyServiceTest {
+> 
+>     @Autowired
+>     private MyService myService;
+> 
+>     @Test
+>     public void testMyService() {
+>         String result = myService.sayHello("World");
+>         Assert.assertEquals("Hello, World", result);
+>     }
+> }
+> ```
+>
+> 在这个示例中，`@RunWith(SpringRunner.class)` 注解告诉 JUnit 使用 Spring 的测试运行器来运行测试。`@SpringBootTest` 注解告诉 Spring Boot 加载整个应用程序上下文。`@Autowired` 注解将 `MyService` 注入到测试类中。`@Test` 注解标识一个测试方法，这里我们测试了 `MyService` 的 `sayHello` 方法是否返回了正确的结果。
+>
+> 需要注意的是，测试类需要放在 `src/test/java` 目录下，而不是 `src/main/java` 目录下。另外，在测试类中可以使用 `@MockBean` 注解来模拟依赖项，以便更好地进行单元测试。
+>
+> ![截屏2023-05-29 16.44.11](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/%E6%88%AA%E5%B1%8F2023-05-29%2016.44.11.png)
+
+
+
+#### **测试类中测试**
 
 ```java
-@Autowired
-private RedisTemplate<String, String> redisTemplate;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Controller;
+import org.springframework.test.context.junit4.SpringRunner;
 
-@Test
-void contextLoads() {
-    redisTemplate.opsForValue().set("myKey", "myValue");
-    System.out.println(redisTemplate.opsForValue().get("myKey"));
+@SpringBootTest
+@RunWith(SpringRunner.class)
+public class RedisTemplateTest {
+    @Autowired
+    private RedisTemplate redisTemplate;
+    @Test
+    public void testRedis(){
+        redisTemplate.opsForValue().set("name","1");
+        System.out.println(redisTemplate.opsForValue().get("name"));
+    }
+}
+
+```
+
+
+
+**RedisTemplate对于Redis5种基础类型**
+
+```java
+redisTemplate.opsForValue(); // 操作字符串
+redisTemplate.opsForHash(); // 操作hash
+redisTemplate.opsForList(); // 操作list
+redisTemplate.opsForSet(); // 操作set
+redisTemplate.opsForZSet(); // 操作zset
+```
+
+
+
+**测试结果显示存储的是一个city，但是前面有很多字符，因为被序列化了**
+
+<img src="https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230529165420583.png" alt="image-20230529165420583" style="zoom:50%;" />
+
+**修改成String的RedisTemplate就可以了**（或者在配置类进行配置）
+
+
+
+<img src="https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230529165627050.png" alt="image-20230529165627050" style="zoom:50%;" />
+
+
+
+
+
+
+
+通过@Bean的方式配置RedisTemplate，主要是设置RedisConnectionFactory以及各种类型数据的Serializer。
+
+```java
+package tech.pdai.springboot.redis.jedis.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+/**
+ * Redis configuration.
+ *
+ * @author pdai
+ */
+@Configuration
+public class RedisConfig {
+
+    /**
+     * redis template.
+     *
+     * @param factory factory
+     * @return RedisTemplate
+     */
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(factory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.afterPropertiesSet();
+        return template;
+    }
 }
 ```
+
+
+
+
+
+#### Hash结构
+
+```java
+ //Hash结构
+        HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
+        hashOperations.put("china","hubei","wuhan");
+        hashOperations.put("china","hunan","xiangtan");
+        System.out.println(hashOperations.get("china", "hunan"));
+        Set<Object> keys = hashOperations.keys("china");//得到Hash的每一个属性
+        for (Object key : keys) {
+            System.out.println(key + " = "+hashOperations.get("china",key));
+        }
+```
+
+
 
 
 
