@@ -1,6 +1,6 @@
 ## 认识 Redis
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#什么是-redis)什么是 Redis？
+### 什么是 Redis？
 
 我们直接看 Redis 官方是怎么介绍自己的。
 
@@ -14,7 +14,7 @@ Redis 提供了多种数据类型来支持不同的业务场景，比如 String(
 
 除此之外，Redis 还支持**事务 、持久化、Lua 脚本、多种集群方案（主从复制模式、哨兵模式、切片机群模式）、发布/订阅模式，内存淘汰机制、过期删除机制**等等。
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-和-memcached-有什么区别)Redis 和 Memcached 有什么区别？
+### #redis-和-memcached-有什么区别)Redis 和 Memcached 有什么区别？
 
 很多人都说用 Redis 作为缓存，但是 Memcached 也是基于内存的数据库，为什么不选择它作为缓存呢？要解答这个问题，我们就要弄清楚 Redis 和 Memcached 的区别。 Redis 与 Memcached **共同点**：
 
@@ -29,7 +29,7 @@ Redis 与 Memcached **区别**：
 - Redis 原生支持集群模式，Memcached 没有原生的集群模式，需要依靠客户端来实现往集群中分片写入数据；
 - Redis 支持发布订阅模型、Lua 脚本、事务等功能，而 Memcached 不支持；
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#为什么用-redis-作为-mysql-的缓存)为什么用 Redis 作为 MySQL 的缓存？
+### #为什么用-redis-作为-mysql-的缓存)为什么用 Redis 作为 MySQL 的缓存？
 
 主要是因为 **Redis 具备「高性能」和「高并发」两种特性**。
 
@@ -47,9 +47,9 @@ Redis 与 Memcached **区别**：
 
 所以，直接访问 Redis 能够承受的请求是远远大于直接访问 MySQL 的，所以我们可以考虑把数据库中的部分数据转移到缓存中去，这样用户的一部分请求会直接到缓存这里而不用经过数据库。
 
-## [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-数据结构)Redis 数据结构
+## Redis 数据结构
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-数据类型以及使用场景分别是什么)Redis 数据类型以及使用场景分别是什么？
+### #redis-数据类型以及使用场景分别是什么)Redis 数据类型以及使用场景分别是什么？
 
 Redis 提供了丰富的数据类型，常见的有五种数据类型：**String（字符串），Hash（哈希），List（列表），Set（集合）、Zset（有序集合）**。
 
@@ -74,7 +74,7 @@ Redis 后续版本又支持四种数据类型，它们的应用场景如下：
 
 
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#五种常见的-redis-数据类型是怎么实现)五种常见的 Redis 数据类型是怎么实现？
+### #五种常见的-redis-数据类型是怎么实现)五种常见的 Redis 数据类型是怎么实现？
 
 我画了一张 Redis 数据类型和底层数据结构的对应关图，左边是 Redis 3.0版本的，也就是《Redis 设计与实现》这本书讲解的版本，现在看还是有点过时了，右边是现在 Redis 7.0 版本的。
 
@@ -124,9 +124,9 @@ Zset 类型的底层数据结构是由**压缩列表或跳表**实现的：
 
 
 
-## [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-线程模型)Redis 线程模型
+## #redis-线程模型)Redis 线程模型
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-是单线程吗)Redis 是单线程吗？
+### #redis-是单线程吗)Redis 是单线程吗？
 
 **Redis 单线程指的是「接收客户端请求->解析请求 ->进行数据读写等操作->发送数据给客户端」这个过程是由一个线程（主线程）来完成的**，这也是我们常说 Redis 是单线程的原因。
 
@@ -147,7 +147,7 @@ Zset 类型的底层数据结构是由**压缩列表或跳表**实现的：
 - BIO_AOF_FSYNC，AOF刷盘任务队列：当 AOF 日志配置成 everysec 选项后，主线程会把 AOF 写日志操作封装成一个任务，也放到队列中。当发现队列有任务后，后台线程会调用 fsync(fd)，将 AOF 文件刷盘，
 - BIO_LAZY_FREE，lazy free 任务队列：当队列有任务后，后台线程会 free(obj) 释放对象 / free(dict) 删除数据库所有对象 / free(skiplist) 释放跳表对象；
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-单线程模式是怎样的)Redis 单线程模式是怎样的？
+### #redis-单线程模式是怎样的)Redis 单线程模式是怎样的？
 
 Redis 6.0 版本之前的单线模式如下图：
 
@@ -169,7 +169,7 @@ Redis 6.0 版本之前的单线模式如下图：
 
 
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-采用单线程为什么还这么快)Redis 采用单线程为什么还这么快？
+### #redis-采用单线程为什么还这么快)Redis 采用单线程为什么还这么快？
 
 官方使用基准测试的结果是，**单线程的 Redis 吞吐量可以达到 10W/每秒**，如下图所示：
 
@@ -181,7 +181,7 @@ Redis 6.0 版本之前的单线模式如下图：
 - Redis 采用单线程模型可以**避免了多线程之间的竞争**，省去了多线程切换带来的时间和性能上的开销，而且也不会导致死锁问题。
 - Redis 采用了 **I/O 多路复用机制**处理大量的客户端 Socket 请求，IO 多路复用机制是指一个线程处理多个 IO 流，就是我们经常听到的 select/epoll 机制。简单来说，在 Redis 只运行单线程的情况下，该机制允许内核中，同时存在多个监听 Socket 和已连接 Socket。内核会一直监听这些 Socket 上的连接请求或数据请求。一旦有请求到达，就会交给 Redis 线程处理，这就实现了一个 Redis 线程处理多个 IO 流的效果。
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-6-0-之前为什么使用单线程)Redis 6.0 之前为什么使用单线程？
+### #redis-6-0-之前为什么使用单线程)Redis 6.0 之前为什么使用单线程？
 
 我们都知道单线程的程序是无法利用服务器的多核 CPU 的，那么早期 Redis 版本的主要工作（网络 I/O 和执行命令）为什么还要使用单线程呢？我们不妨先看一下Redis官方给出的[FAQ (opens new window)](https://link.juejin.cn/?target=https%3A%2F%2Fredis.io%2Ftopics%2Ffaq)。
 
@@ -193,7 +193,7 @@ Redis 6.0 版本之前的单线模式如下图：
 
 使用了单线程后，可维护性高，多线程模型虽然在某些方面表现优异，但是它却引入了程序执行顺序的不确定性，带来了并发读写的一系列问题，**增加了系统复杂度、同时可能存在线程切换、甚至加锁解锁、死锁造成的性能损耗**。
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-6-0-之后为什么引入了多线程)Redis 6.0 之后为什么引入了多线程？
+### #redis-6-0-之后为什么引入了多线程)Redis 6.0 之后为什么引入了多线程？
 
 虽然 Redis 的主要工作（网络 I/O 和执行命令）一直是单线程模型，但是**在 Redis 6.0 版本之后，也采用了多个 I/O 线程来处理网络请求**，**这是因为随着网络硬件的性能提升，Redis 的性能瓶颈有时会出现在网络 I/O 的处理上**。
 
@@ -223,9 +223,9 @@ io-threads 4
 - bio_close_file、bio_aof_fsync、bio_lazy_free：三个后台线程，分别异步处理关闭文件任务、AOF刷盘任务、释放内存任务；
 - io_thd_1、io_thd_2、io_thd_3：三个 I/O 线程，io-threads 默认是 4 ，所以会启动 3（4-1）个 I/O 多线程，用来分担 Redis 网络 I/O 的压力。
 
-## [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-持久化)Redis 持久化
+## #redis-持久化)Redis 持久化
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-如何实现数据不丢失)Redis 如何实现数据不丢失？
+### #redis-如何实现数据不丢失)Redis 如何实现数据不丢失？
 
 Redis 的读写操作都是在内存中，所以 Redis 性能才会高，但是当 Redis 重启后，内存中的数据就会丢失，那为了保证内存中的数据不会丢失，Redis 实现了数据持久化的机制，这个机制会把数据存储到磁盘，这样在 Redis 重启就能够从磁盘中恢复原有的数据。
 
@@ -235,7 +235,7 @@ Redis 共有三种数据持久化的方式：
 - **RDB 快照**：将某一时刻的内存数据，以二进制的方式写入磁盘；
 - **混合持久化方式**：Redis 4.0 新增的方式，集成了 AOF 和 RBD 的优点；
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#aof-日志是如何实现的)AOF 日志是如何实现的？
+### #aof-日志是如何实现的)AOF 日志是如何实现的？
 
 Redis 在执行完一条写操作命令后，就会把该命令以追加的方式写入到一个文件里，然后 Redis 重启时，会读取该文件记录的命令，然后逐一执行命令的方式来进行数据恢复。
 
@@ -335,7 +335,7 @@ TIP
 
 AOF 日志的内容就暂时提这些，想更详细了解 AOF 日志的工作原理，可以详细看这篇：[AOF 持久化是怎么实现的(opens new window)](https://xiaolincoding.com/redis/storage/aof.html)
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#rdb-快照是如何实现的呢)RDB 快照是如何实现的呢？
+### #rdb-快照是如何实现的呢)RDB 快照是如何实现的呢？
 
 因为 AOF 日志记录的是操作命令，不是实际的数据，所以用 AOF 方法做故障恢复时，需要全量把日志都执行一遍，一旦 AOF 日志非常多，势必会造成 Redis 的恢复操作缓慢。
 
@@ -384,7 +384,7 @@ TIP
 
 RDB 快照的内容就暂时提这些，想更详细了解 RDB 快照的工作原理，可以详细看这篇：[RDB 快照是怎么实现的？(opens new window)](https://xiaolincoding.com/redis/storage/rdb.html)
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#为什么会有混合持久化)为什么会有混合持久化？
+### #为什么会有混合持久化)为什么会有混合持久化？
 
 RDB 优点是数据恢复速度快，但是快照的频率不好把握。频率太低，丢失的数据就会比较多，频率太高，就会影响性能。
 
@@ -411,9 +411,9 @@ AOF 优点是丢失数据少，但是数据恢复不快。
 - AOF 文件中添加了 RDB 格式的内容，使得 AOF 文件的可读性变得很差；
 - 兼容性差，如果开启混合持久化，那么此混合持久化 AOF 文件，就不能用在 Redis 4.0 之前版本了。
 
-## [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-集群)Redis 集群
+## Redis 集群
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-如何实现服务高可用)Redis 如何实现服务高可用？
+### #redis-如何实现服务高可用)Redis 如何实现服务高可用？
 
 要想设计一个高可用的 Redis 服务，一定要从 Redis 的多服务节点来考虑，比如 Redis 的主从复制、哨兵模式、切片集群。
 
@@ -472,7 +472,7 @@ redis-cli -h 192.168.1.11 –p 6379 cluster addslots 2,3
 
 需要注意的是，在手动分配哈希槽时，需要把 16384 个槽都分配完，否则 Redis 集群无法正常工作。
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#集群脑裂导致数据丢失怎么办)集群脑裂导致数据丢失怎么办？
+### #集群脑裂导致数据丢失怎么办)集群脑裂导致数据丢失怎么办？
 
 > 什么是脑裂？
 
@@ -513,9 +513,9 @@ redis-cli -h 192.168.1.11 –p 6379 cluster addslots 2,3
 
 这样一来，主从切换完成后，也只有新主库能接收请求，不会发生脑裂，也就不会发生数据丢失的问题了。
 
-## [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-过期删除与内存淘汰)Redis 过期删除与内存淘汰
+## Redis 过期删除与内存淘汰
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-使用的过期删除策略是什么)Redis 使用的过期删除策略是什么？
+### Redis 使用的过期删除策略是什么？
 
 Redis 是可以对 key 设置过期时间的，因此需要有相应的机制将已过期的键值对删除，而做这个工作的就是过期键值删除策略。
 
@@ -572,7 +572,7 @@ Redis 的定期删除的流程：
 
 
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-持久化时-对过期键会如何处理的)Redis 持久化时，对过期键会如何处理的？
+### #redis-持久化时-对过期键会如何处理的)Redis 持久化时，对过期键会如何处理的？
 
 Redis 持久化文件有两种格式：RDB（Redis Database）和 AOF（Append Only File），下面我们分别来看过期键在这两种格式中的呈现状态。
 
@@ -592,17 +592,17 @@ AOF 文件分为两个阶段，AOF 文件写入阶段和 AOF 重写阶段。
 - **AOF 文件写入阶段**：当 Redis 以 AOF 模式持久化时，**如果数据库某个过期键还没被删除，那么 AOF 文件会保留此过期键，当此过期键被删除后，Redis 会向 AOF 文件追加一条 DEL 命令来显式地删除该键值**。
 - **AOF 重写阶段**：执行 AOF 重写时，会对 Redis 中的键值对进行检查，**已过期的键不会被保存到重写后的 AOF 文件中**，因此不会对 AOF 重写造成任何影响。
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-主从模式中-对过期键会如何处理)Redis 主从模式中，对过期键会如何处理？
+### #redis-主从模式中-对过期键会如何处理)Redis 主从模式中，对过期键会如何处理？
 
 当 Redis 运行在主从模式下时，**从库不会进行过期扫描，从库对过期的处理是被动的**。也就是即使从库中的 key 过期了，如果有客户端访问从库时，依然可以得到 key 对应的值，像未过期的键值对一样返回。
 
 从库的过期键处理依靠主服务器控制，**主库在 key 到期时，会在 AOF 文件里增加一条 del 指令，同步到所有的从库**，从库通过执行这条 del 指令来删除过期的 key。
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-内存满了-会发生什么)Redis 内存满了，会发生什么？
+### Redis 内存满了，会发生什么？
 
 在 Redis 的运行内存达到了某个阀值，就会触发**内存淘汰机制**，这个阀值就是我们设置的最大运行内存，此值在 Redis 的配置文件中可以找到，配置项为 maxmemory。
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-内存淘汰策略有哪些)Redis 内存淘汰策略有哪些？
+### Redis 内存淘汰策略有哪些？
 
 Redis 内存淘汰策略共有八种，这八种策略大体分为「不进行数据淘汰」和「进行数据淘汰」两类策略。
 
@@ -625,7 +625,7 @@ Redis 内存淘汰策略共有八种，这八种策略大体分为「不进行�
 - **allkeys-lru**：淘汰整个键值中最久未使用的键值；
 - **allkeys-lfu**（Redis 4.0 后新增的内存淘汰策略）：淘汰整个键值中最少使用的键值。
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#lru-算法和-lfu-算法有什么区别)LRU 算法和 LFU 算法有什么区别？
+### #lru-算法和-lfu-算法有什么区别)LRU 算法和 LFU 算法有什么区别？
 
 > 什么是 LRU 算法？
 
@@ -683,9 +683,9 @@ Redis 对象头中的 lru 字段，在 LRU 算法下和 LFU 算法下使用方�
 
 
 
-## [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-缓存设计)Redis 缓存设计
+## Redis 缓存设计
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#如何避免缓存雪崩、缓存击穿、缓存穿透)如何避免缓存雪崩、缓存击穿、缓存穿透？
+### 如何避免缓存雪崩、缓存击穿、缓存穿透？
 
 > 如何避免缓存雪崩？
 
@@ -736,7 +736,7 @@ TIP
 
 推荐阅读：[什么是缓存雪崩、击穿、穿透？(opens new window)](https://xiaolincoding.com/redis/cluster/cache_problem.html)
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#如何设计一个缓存策略-可以动态缓存热点数据呢)如何设计一个缓存策略，可以动态缓存热点数据呢？
+### 如何设计一个缓存策略，可以动态缓存热点数据呢？
 
 由于数据存储受限，系统并不是将所有数据都需要存放到缓存中的，而**只是将其中一部分热点数据缓存起来**，所以我们要设计一个热点数据动态缓存的策略。
 
@@ -750,7 +750,7 @@ TIP
 
 在 Redis 中可以用 zadd 方法和 zrange 方法来完成排序队列和获取 200 个商品的操作。
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#说说常见的缓存更新策略)说说常见的缓存更新策略？
+### 说说常见的缓存更新策略？
 
 常见的缓存更新策略共有3种：
 
@@ -839,15 +839,13 @@ Write Back 是计算机体系结构中的设计，比如 CPU 的缓存、操作�
 
 有没有觉得这个流程很熟悉？因为我在写 [CPU 缓存文章 (opens new window)](https://xiaolincoding.com/os/1_hardware/cpu_mesi.html#写回)的时候提到过。
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#如何保证缓存和数据库数据的一致性)如何保证缓存和数据库数据的一致性？
+### 如何保证缓存和数据库数据的一致性？
 
-TIP
 
-推荐阅读：[数据库和缓存如何保证一致性？(opens new window)](https://xiaolincoding.com/redis/architecture/mysql_redis_consistency.html)
 
-## [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-实战)Redis 实战
+## Redis 实战
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-如何实现延迟队列)Redis 如何实现延迟队列？
+### Redis 如何实现延迟队列？
 
 延迟队列是指把当前要做的事情，往后推迟一段时间再做。延迟队列的常见使用场景有以下几种：
 
@@ -861,7 +859,7 @@ TIP
 
 ![img](https://cdn.xiaolincoding.com/gh/xiaolincoder/redis/%E5%85%AB%E8%82%A1%E6%96%87/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97.png)
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-的大-key-如何处理)Redis 的大 key 如何处理？
+### Redis 的大 key 如何处理？
 
 > 什么是 Redis 大 key？
 
@@ -1023,7 +1021,7 @@ noslave-lazy-flush no
 
 建议开启其中的 lazyfree-lazy-eviction、lazyfree-lazy-expire、lazyfree-lazy-server-del 等配置，这样就可以有效的提高主线程的执行效率。
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-管道有什么用)Redis 管道有什么用？
+### #redis-管道有什么用)Redis 管道有什么用？
 
 管道技术（Pipeline）是客户端提供的一种批处理技术，用于一次处理多个 Redis 命令，从而提高整个交互的性能。
 
@@ -1041,7 +1039,7 @@ noslave-lazy-flush no
 
 要注意的是，管道技术本质上是客户端提供的功能，而非 Redis 服务器端的功能。
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#redis-事务支持回滚吗)Redis 事务支持回滚吗？
+### #redis-事务支持回滚吗)Redis 事务支持回滚吗？
 
 MySQL 在执行事务时，会提供回滚机制，当事务执行发生错误时，事务中的所有操作都会撤销，已经修改的数据也会被恢复到事务执行前的状态。
 
@@ -1108,7 +1106,7 @@ Redis [官方文档 (opens new window)](https://redis.io/topics/transactions)的
 
 这里不支持事务回滚，指的是不支持事务运行时错误的事务回滚。
 
-### [#](https://xiaolincoding.com/redis/base/redis_interview.html#如何用-redis-实现分布式锁的)如何用 Redis 实现分布式锁的？
+### #如何用-redis-实现分布式锁的)如何用 Redis 实现分布式锁的？
 
 分布式锁是用于分布式环境下并发控制的一种机制，用于控制某个资源在同一时刻只能被一个应用所使用。如下图所示：
 
