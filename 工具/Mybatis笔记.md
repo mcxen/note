@@ -96,6 +96,10 @@ select * from user where name = '${name}';
 
 
 
+
+
+
+
 #### **快速总结：**
 
 - ```#{}```解析传递进来的参数数据
@@ -348,6 +352,10 @@ Mysql8.0的时候的依赖：
   </configuration>
   ~~~
 
+  >
+  >
+  >`<dataSource type="POOLED"> `为`POOLED`，如果`sqlSession.close`就是放回连接池，如果是UNPOOLED就是Connection.close了.
+  >
   >mysql8.0的时候
   >
   >mybatis.config.xml
@@ -355,27 +363,27 @@ Mysql8.0的时候的依赖：
   >```xml
   ><?xml version="1.0" encoding="UTF-8" ?>
   ><!DOCTYPE configuration
-  >        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
-  >        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+  >   PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  >   "http://mybatis.org/dtd/mybatis-3-config.dtd">
   ><!--configuration核心配置文件-->
   ><configuration>
-  >    <!--环境-->
+  ><!--环境-->
   ><!--    deafult其实就是默认用这个dev开头的环境配置，还可以新建别的id，可以增加多个环境信息，-->
-  >    <environments default="development">
-  >        <environment id="development">
-  >            <!--事务管理-->
-  >            <transactionManager type="JDBC"/>
-  >            <dataSource type="POOLED">
-  >                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+  ><environments default="development">
+  >   <environment id="development">
+  >       <!--事务管理-->
+  >       <transactionManager type="JDBC"/>
+  >       <dataSource type="POOLED">
+  >           <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
   ><!--                下面的mybatis指的就是连接的哪一个database，这里是mybatis数据库-->
   ><!--                <property name="url" value="jdbc:mysql:///mybatis?useSSL=true&amp;userUnicode=true&amp;characterEncoding=UTF-8"/>-->
-  >                <property name="url" value="jdbc:mysql://localhost:3306/mybatis?characterEncoding=utf8&amp;useSSL=false&amp;serverTimezone=UTC&amp;rewriteBatchedStatements=true
+  >           <property name="url" value="jdbc:mysql://localhost:3306/mybatis?characterEncoding=utf8&amp;useSSL=false&amp;serverTimezone=UTC&amp;rewriteBatchedStatements=true
   >"/>
-  >                <property name="username" value="root"/>
-  >                <property name="password" value="Mysql2486"/>
-  >            </dataSource>
-  >        </environment>
-  >    </environments>
+  >           <property name="username" value="root"/>
+  >           <property name="password" value="Mysql2486"/>
+  >       </dataSource>
+  >   </environment>
+  ></environments>
   ></configuration>
   >```
 
