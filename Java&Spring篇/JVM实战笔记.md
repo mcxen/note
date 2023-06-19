@@ -1,3 +1,41 @@
+## 00 基础：
+
+### 工具：安装Visual VM & Visual GC
+
+**查看jdk安装目录**
+
+1、打开终端，输入：/usr/Libexec/java_home -V
+
+注意：输入命令参数区分大小写(-v是不对的，必须是-V）
+
+如图：3个红框内依次为：输入命令；当前Mac已安装idk目录；Mac默认使用的jdk版本；
+
+![截屏2023-06-19 20.23.16](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/%E6%88%AA%E5%B1%8F2023-06-19%2020.23.16.png)
+
+**下载visual VM**
+
+启动的时候提示找不到idk引用，于是到包内部的visualvm.conf中修改jdk引用地址。
+
+visualvm.conf的路径
+
+```sh
+vim /Applications/VisualVM.app/Contents/Resources/visualvm/etc/visualvm.conf
+```
+
+<img src="https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230619202936429.png" alt="image-20230619202936429" style="zoom:50%;" />
+
+将`#visualvm_jdkhome ="path/to/jdk" `修改为类似以下的路径就可以了 
+
+```sh
+visualvm_jdkhome="/Library/Java/JavaVirtualMachines/jdk1.8.0_311.jdk/Contents/Home"
+```
+
+
+
+
+
+
+
 ## 04 Java 字节码技术：不积细流，无以成江河
 
 Java 中的字节码，英文名为 `bytecode`, 是 Java 代码编译后的中间代码格式。JVM 需要读取并解析字节码才能执行相应的任务。
