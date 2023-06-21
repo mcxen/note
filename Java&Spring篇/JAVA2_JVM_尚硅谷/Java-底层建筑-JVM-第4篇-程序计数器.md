@@ -2,12 +2,16 @@
 
 #### PC Register 介绍
 
-![1597921927430](images/1597921927430.png)
+<img src="https://raw.githubusercontent.com/52chen/imagebed2023/main/image-20230620204755071.png" alt="image-20230620204755071" style="zoom:50%;" />
+
+
+
+![1597921927430](https://raw.githubusercontent.com/52chen/imagebed2023/main/1597921927430.png)
 
 - JVM中的程序计数寄存器（Program Counter Register）中，Register的命名源于CPU的寄存器，寄存器存储指令相关的线程信息。CPU只有把数据装载到寄存器才能够运行
-- 这里，并非广义上的所指的物理寄存器，或许将其翻译为PC计数器（或指令计数器）会更加的贴切（也称为程序钩子），并且也不容易引起一些不必要的误会。**JVM中的PC寄存器是对物理PC寄存器的一种抽象模拟**
+- 这里，并非广义上的所指的物理寄存器，或许将其翻译为PC计数器（或指令计数器）会更加的贴切（也称为程序钩子，钩一行一行的代码），并且也不容易引起一些不必要的误会。**JVM中的PC寄存器是对物理PC寄存器的一种抽象模拟**
 
-![1597929514163](images/1597929514163.png)
+![1597929514163](https://raw.githubusercontent.com/52chen/imagebed2023/main/1597929514163.png)
 
 **作用**
 
@@ -37,6 +41,10 @@ public class PCRegisterTest {
 }
 ```
 
+Idea中调用Javap，反编译得到：
+
+![image-20230620205003801](https://raw.githubusercontent.com/52chen/imagebed2023/main/image-20230620205003801.png)
+
 ```java
  public static void main(java.lang.String[]);
     descriptor: ([Ljava/lang/String;)V
@@ -62,7 +70,7 @@ public class PCRegisterTest {
         29: return
 ```
 
-![1597932972880](images/1597932972880.png)
+![1597932972880](https://raw.githubusercontent.com/52chen/imagebed2023/main/1597932972880.png)
 
 #### 两个常见问题
 
@@ -71,7 +79,7 @@ public class PCRegisterTest {
 
 > 因为CPU需要不停的切换各个线程，这时候切换回来以后，就得知道接着从哪开始继续执行
 >
-> JVM的字节码解释器就是需要通过改变PC寄存器的值来明确下一条具体应该执行那条字节码指令
+> JVM的字节码解释器就是需要通过改变PC寄存器的值<mark>来明确下一条具体应该执行那条字节码指令</mark>
 
 - PC寄存器为什么设定为线程私有的？
 
