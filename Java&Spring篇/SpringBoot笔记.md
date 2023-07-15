@@ -76,6 +76,37 @@ server.servlet.context-path=/first
 
 
 
+### 打包发布Spring Boot项目
+
+
+
+- 导入pom里面的plugin依赖
+
+```xml
+						<plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+```
+
+
+
+- 点击` Maven - LifeCycle - package`
+
+![image-20230705175444682](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230705175444682.png)
+
+
+
+- 在terminal就可以运行 `java -jar xxx.jar`
+
 ## SpringBoot 自动装配原理
 
 **pom.xml**
