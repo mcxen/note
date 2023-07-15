@@ -4,13 +4,19 @@
 
 ![1598102659732](images/1598102659732.png)
 
+方法区 | 堆区 | 栈 Stack | 本地方法栈 Native Method Stack
+
+![1598138073832](https://raw.githubusercontent.com/52chen/imagebed2023/main/1598138073832.png)
+
 #### 栈、堆、方法区之间的交互关系
 
-- 从线程是否共享来看
+- 
 
-![1598136169924](images/1598136169924.png)
+![img](https://raw.githubusercontent.com/52chen/imagebed2023/main/20210711085302939.png)
 
 - 从创建对象的角度来看
+
+  就是说是用来存储类CLass的信息，比如Person
 
 ![1598136466638](images/1598136466638.png)
 
@@ -18,8 +24,10 @@
 
 #### 方法区的基本理解
 
-- 《Java虚拟机规范》中明确说明：“尽管所有的方法区在逻辑上是属于堆的一部分，但是一些简单的实现可能不会选择区进行垃圾收集或者压缩”。但是对于HotSpot虚拟机而言，方法区还有个名字叫 Non-Heap（非堆），目的就是要和堆分开
-- 所以，**方法区看作是一块独立于Java堆的内存空间**
+
+
+- 《Java虚拟机规范》中明确说明：**“尽管所有的方法区在逻辑上是属于堆的一部分，但是一些简单的实现可能不会选择区进行垃圾收集或者压缩”**。但是对于HotSpot虚拟机而言，方法区还有个名字叫 Non-Heap（非堆），目的就是要和堆分开
+- 所以，**方法区看作是一块独立于Java堆的内存空间**，实际就是MetaSpace
 
 - 方法区（Method Area）和堆一样，是各个线程共享的内存区域
 - 方法区在JVM启动的时候被创建，并且它的实际物理内存空间中和Java堆区都一样可以是不连续的
@@ -30,11 +38,11 @@
 
 #### Hotspot中方法区的演进
 
-- 在JDK7以及之前，习惯上把方法区称为永久代。在JDK8以及以后，使用元空间取代了永久代
+- 在JDK7以及之前，习惯上把方法区称为**永久代**Permanent。在JDK8以及以后，使用**元空间**MetaSpace取代了永久代
 - 本质上。方法区和永久代并不等价。仅仅只堆Hotspot而言的。《Java虚拟机规范》对如何实现方法区。不做统一要求。
   - 现在看来，当年使用永久代，不是好的idea，导致Java程序更容易OOM（超过 -XX:MaxPermSize 上限）
 
-![1598138073832](images/1598138073832.png)
+![1598138073832](https://raw.githubusercontent.com/52chen/imagebed2023/main/1598138073832.png)
 
 - 到了JDK8，终于完全废弃了永久代的概念，改用和JRockit、J9一样在本地内存中实现的元空间（Metaspace）
 - 元空间的本质和永久代类似，都是JVM规范中方法区的体现，不过元空间与永久代最大区别就是：**元空间不在虚拟机设置的内容中，而是使用本地内存**
@@ -49,6 +57,36 @@
   - **通过-XX:MaxPermSize 来设定永久代的最大可分配空间，32位机器默认时64M，64位机器默认是82M**
   - 当JVM加载的类的信息容量超过了这个值，就会抛出异常 java.lang.OutOfMemoryError:PermGen space
 
+测试代码：
+
+```java
+public class Test {
+    public static void main(String[] args) {
+        System.out.println("start...");
+        try{
+            Thread.sleep(1000000);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+        System.out.println("end");
+    }
+}
+```
+
+```sh
+F:\项目\note>jps
+16356 Test
+21268 RemoteMavenServer36
+19512
+19324 Launcher
+3468 Jps
+
+F:\项目\note>jinfo -flag MetaspaceSize  16356
+-XX:MetaspaceSize=21807104 # 21807104/1024/1024 = 20 M
+```
+
+
+
 ![1598139146275](images/1598139146275.png)
 
 - JDK8以及以后
@@ -57,6 +95,10 @@
   - 与永久代不同，如果不指定大小，默认情况下，虚拟机会耗尽所有的可用系统内存，如果元数据区发生溢出，虚拟机一样会抛出异常 OutOfMemoryError:Metaspace
   - -XX:MetaspaceSize 设置初始值的大小。对于64位服务端的JVM来说，其默认的 -XX:MetaspaceSize 值为21 M，这就是最高水线。一旦触及这个水位线，Full GC 将会被触发并卸载没用的类。然后这个高水位线会被重置。新的水位线取决于GC之后释放了多少空间。如果释放过多，就适当降低该值，如果释放过低，就提升该值，前提是不超过 -XX:MaxMetaspaceSize
   - 如果初始化的高为太低，上述的调整就会发生很多次，可以发现执行了多次Full GC，建议将 -XX:MetaspaceSize设置一个较高的值
+
+---
+
+---
 
 - 演示OOM
 
@@ -97,7 +139,17 @@ public class OomTest extends ClassLoader {
 
 ```
 
+默认的可拓展的方式是可以执行10000的，但是加入了VM Option
+
+` -XX:MetaspaceSize=10m -XX:MaxMetaspaceSize=10m`
+
+之后就是报OOM
+
 ![1598140517083](images/1598140517083.png)
+
+---
+
+---
 
 #### 如何解决OOM
 
