@@ -2,7 +2,7 @@
 
 #### 对象的的实例化
 
-![1598163495014](F:\元桌面\ic\Java-Review\Java进阶篇\images\1598163495014.png)
+![1598163495014](https://raw.githubusercontent.com/52chen/imagebed2023/main/1598163495014.png)
 
 - 实例代码
 
@@ -134,7 +134,7 @@ Process finished with exit code 0
 
 #### 对象的内存布局
 
-![1598168361302](images/1598168361302.png)
+![1598168361302](https://raw.githubusercontent.com/52chen/imagebed2023/main/1598168361302.png)
 
 ##### 对象头（Header）
 

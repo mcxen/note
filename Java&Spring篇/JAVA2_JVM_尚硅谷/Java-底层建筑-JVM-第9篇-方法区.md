@@ -18,7 +18,7 @@
 
   就是说是用来存储类CLass的信息，比如Person
 
-![1598136466638](images/1598136466638.png)
+![1598136466638](https://raw.githubusercontent.com/52chen/imagebed2023/main/1598136466638.png)
 
 ![1598136328885](images/1598136328885.png)
 

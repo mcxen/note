@@ -1,8 +1,14 @@
-### Java - 底层建筑 - JVM - 第15篇 - 垃圾回收相关算法
+### 第15篇 - 垃圾回收相关算法
+
+> 不用一行一行的去看实现原理，概述性，面试喜欢问。
+
+垃圾回收主要针对就是方法区metaspace和堆的Eden, Old区。
+
+![](https://raw.githubusercontent.com/52chen/imagebed2023/main/1597799674320.png)
 
 ![1598249719270](images/1598249719270.png)
 
-#### 垃圾标记阶段的算法之引用计数算法
+#### 垃圾标记
 
 ##### 垃圾标记阶段：对象是否存活的判断
 
@@ -10,7 +16,7 @@
 - 那么在JVM中究竟是怎样标记一个死亡对象呢？简答来说，当一个对象已经不再被任何存活对象引用的时候，就可以宣判为已经死亡
 - 判断对象存活一般有两种方式：**引用计数法和可达性分析算法**
 
-##### 方式一：引用计数算法
+##### 《方式一：引用计数算法》
 
 - 引用计数算法（Reference Counting）比较简单，堆每个对象保存一个完整的整型的 **引用计算属性，用于记录对象被引用的情况**
 - 对于一个对象A，只要有一个对象引用类A，则A的引用计数器+1，当引用失效的时候，引用计数器就减去1，只要对象A的引用计数器为0；即表示A不可能再被使用，可进行回收
@@ -64,7 +70,7 @@ public class GCTest {
   - 手动解除：很好理解，就是在合适的时机，解除引用关系
   - 使用弱引用weakref，weakref是Python的标准库，为了解决循环引用
 
-##### 方式二：可达性分析（或者根搜索算法、追踪性垃圾收集）
+##### 《方式二：可达性分析（或者根搜索算法、追踪性垃圾收集）》
 
 - 相当于引用计数算法而言，可达性分析算法不仅仅具有简单和执行高效等特点，更重要的是该算法可以有效的解决 **引用计数算法中循环引用的问题，防止内存泄漏的发生**
 - 相对于引用计数算法，这里的可达性分析就是 **Java、C#选择的**，这种类型的垃圾收集通常也叫做 **追踪性垃圾收集（Tracing Garbage Collection）**
@@ -100,7 +106,7 @@ public class GCTest {
 
 #### 对象的finalization机制
 
-- Java语言提供了对象终止（finalization）机制来允许开发人员提供 **对象被销毁之前的自定义处理逻辑**
+- Java语言提供了对象终止（finalization）机制来允许开发人员提供 **对象被销毁之前的自定义处理逻辑**，在对象销毁前，加一些逻辑代码，比如加一些输出信息之类的。
 - 当垃圾回收器发现没有引用指向一个对象，即：垃圾回收此对象之前，总会先调用这个对象的finalize() 方法
 - finalize()方法允许在子类中被重新，**用于在对象被回收时进行资源释放**，通常在这个方法中进行一些资源释放和清理的工作，比如关闭文件、套接字和数据库连接等
 
@@ -118,23 +124,26 @@ public class GCTest {
   - **可触及的：**从根节点开始，可以达到这个对象
   - **可复活的：**对象所有的引用都被释放，但是可能再finalize()中复活，但是只有一次复活的机会
   - **不可触及的：**对象的finalize()被调用，并且没有复活，那么就会进入不可触及状态。不可触及的状态不可能被复活，因为 finalize()只调用一次
+  
 - 以上三种状态，只有在对象不可触及的时候才可以被回收
 
 - **具体过程：判断一个对象objA是否可被回收，至少要经历2次标记过程**
   - 如果对象objA到GC Roots没有引用连接，则进行第一次标记
+  
   - 进行筛选，判断此对象是否有执行finalize()方法，
     - 如果没有重写finalize()方法，或者finalize()方法已经被虚拟机调用过，则虚拟机视为”没有必要执行“，objA被判断是不可触及的
-    - 如果对象objA重写了finalize()方法，且还未执行过，那么objA会被插入到F-Queue队列中，由一个虚拟机自动创建的、低优先级的  Finalizer 线程触发其 finalize()方法执行
+    
+    - 如果对象objA重写了finalize()方法，且还未执行过，那么objA会被插入到F-Queue队列中，由一个虚拟机自动创建的、低优先级的  Finalizer（下图所示） 线程触发其 finalize()方法执行。[VisualVM 下载页面](https://visualvm.github.io/download.html)
+    
+      ![image-20230722151704831](https://raw.githubusercontent.com/52chen/imagebed2023/main/image-20230722151704831.png)
+    
     - **finalize()方法是对象逃亡的最后机会**，稍后GC会对 F-Queue队列中的对象进行第二次标记     
-
+  
 - **代码演示可复活的对象**
 
-```jaba
-package cn.icanci.jvm.string;
+```java
+package JVM.GC;
 
-/**
- * @Author: icanci
- */
 public class CanReliveObj {
     // 类变量，属于 GC Roots
     public static CanReliveObj obj;
@@ -152,9 +161,14 @@ public class CanReliveObj {
             obj = new CanReliveObj();
             // 对象第一次调用自己
             obj = null;
+            if (obj == null) {
+                System.out.println("obj is dead");
+            } else {
+                System.out.println("obj is alive");
+            }
             System.gc();
             System.out.println("第一次GC");
-            Thread.sleep(2000);
+            Thread.sleep(2000);//Finalize优先级低，所以暂停两秒
             if (obj == null) {
                 System.out.println("obj is dead");
             } else {
@@ -174,12 +188,15 @@ public class CanReliveObj {
     }
 }
 
-/**
- * 第一次GC
- * 调用当前类重写的finalize()方法
- * obj is alive
- * 第二次GC
+/*
+obj is dead
+第一次GC
+调用当前类重写的finalize()方法
+obj is alive
+第二次GC
+obj is dead
  */
+
 ```
 
 #### 使用MAT查看GC  Roots溯源
@@ -227,11 +244,11 @@ public class GcRootsTest {
 
 - 使用VisualVM即可生成
 
-![1598264176745](images/1598264176745.png)
+![1598264176745](https://raw.githubusercontent.com/52chen/imagebed2023/main/1598264176745.png)
 
 - 然后使用MAT打开查看
 
-![1598264235747](images/1598264235747.png)
+![1598264235747](https://raw.githubusercontent.com/52chen/imagebed2023/main/1598264235747.png)
 
 #### 使用Jprofiler进行GC Roots溯源
 
@@ -239,7 +256,9 @@ public class GcRootsTest {
 
 ![1598264543432](images/1598264543432.png)
 
-#### 垃圾清除阶段算法之标记-清除算法
+#### 垃圾清除 Sweep
+
+##### 方式一标记-清除算法 Mark Sweep
 
 - 当成功区分处内存中存活对象和死亡对象之后，GC接下来的任务就是执行垃圾回收，释放掉无用对象所占用的内存空间，以便有足够的可用内存空间为新对象分配内存
 - 目前在JVM中比较常见的三种垃圾收集算法是 **标记-清除算法（Mark-Sweep）、复制算法（Copying）、标记-压缩算法（Mark-Compact）**
@@ -260,7 +279,7 @@ public class GcRootsTest {
 - **注意：何为清除**
   - 这里所说的清除不是真的置空，而是把需要清除的对象地址保存在空闲的列表里，下次有新的对象需要加载的时候，判断垃圾位置的空间是否足够，够就存放
 
-#### 垃圾清除阶段算法之复制算法
+##### 方式二 复制算法
 
 - **背景**
   - 为了解决标记-清除算法在垃圾回收效率方面的缺陷，复制算法出现
@@ -283,7 +302,7 @@ public class GcRootsTest {
 
 ![1598266981231](images/1598266981231.png)
 
-#### 垃圾清除阶段算法之标记 - 压缩（整理）算法
+##### 方式三 标记 - 压缩（整理）算法
 
 - **背景**
   - 复制算法的高效性是建立在存活对象少、垃圾对象多的前提下的，这种情况在新生代经常发生，但是在老年代，更常见的是大部分对象都是存活对象。如果依然使用复制算法，因为存活的对象很多，复制的成本也很高。因此 **老年代的特征需要其他的算法**
@@ -307,7 +326,7 @@ public class GcRootsTest {
   - 移动对象的同时，如果对象被引用，还需要调整引用的地址
   - 移动过程种，需要全程暂停用户应用程序 即 STW
 
-#### 小结
+##### 小结
 
 ![1598268042432](images/1598268042432.png)
 

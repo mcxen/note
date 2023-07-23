@@ -1,6 +1,16 @@
 ### Java - 底层建筑 - JVM - 第3篇 - 运行时数据区概述和线程
 
-![](images/1597799674320.png)
+
+
+JVM 可以分为 5 个部分，分别是：
+
+- 1.类加载器（Class Loader）：加载字节码文件到内存。
+- 2.运行时数据区（Runtime Data Area）：JVM 核心内存空间结构模型。
+- 3.执行引擎（Execution Engine）：对 JVM 指令进行解析，翻译成机器码，解析完成后提交到操作系统中。
+- 4.本地库接口（Native Interface）：供 Java 调用的融合了不同开发语言的原生库。
+- 5.本地方法库（Native Libraies）：Java 本地方法的具体实现。
+
+![](https://raw.githubusercontent.com/52chen/imagebed2023/main/1597799674320.png)
 
 #### 内存
 

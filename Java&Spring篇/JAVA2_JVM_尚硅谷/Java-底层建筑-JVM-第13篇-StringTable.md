@@ -1,26 +1,50 @@
 ### Java - 底层建筑 - JVM - 第13篇 - StringTable
 
+`StringTable`是JVM内部维护的一个数据结构，用于存储字符串常量池中的字符串对象，常量池属于方法区，方法区的实现是元空间MetaSpace,就是用来保存类的。
+
+![1598136466638](https://raw.githubusercontent.com/52chen/imagebed2023/main/1598136466638.png)
+
 #### String的基本特性
 
 - String：字符串，使用一对 "" 引起来表示
-  - String s1 = "hello";
-  - String s2 = new String("hello");
-- String：声明为final的，不可被继承
-- String 实现了Serializable接口：表示字符串是支持序列化的，实现了Comparable接口：表示String可以比较大小
-- 在JDK8以及之前，String内部定义了**final char[] value** 用来存储字符串数据，JDK9之后使用 **byte[]**
+  - String s1 = "hello";//常量池中的对象“hello”；
+  - String s2 = new String("hello");//堆空间的对象new String("hello"); s1!=s2
+  
+- String：声明为final的，不可被继承，太监类
+
+  - String 实现了Serializable接口：表示字符串是支持序列化的，实现了Comparable接口：表示String可以比较大小，可以排序，联系人添加之后，按照abc排序。
+
+- <mark>在JDK8以及之前，String内部定义了**final char[] value** 用来存储字符串数据，JDK9之后使用 **byte[]**</mark>
+
+  - 使用 `char[]` 来表示 String 就导致了即使 String 中的字符只用一个字节就能表示，也得占用两个字节。
+
+  - 从 `char[]` 到 `byte[]`，最主要的目的是**为了节省字符串占用的内存** 。内存占用减少带来的另外一个好处，就是 GC 次数也会减少。
+
+  - Java JDK9 Coder会根据字符串的内容自动设置为相应的编码，要么 Latin-1 要么 UTF16。也就是说，从 `char[]` 到 `byte[]`，**中文是两个字节，纯英文是一个字节，在此之前呢，中文是两个字节，英文也是两个字节** 。
+
+  - JDK9用Latin1 / UTF-16，原因：UTF-8 是变长的，那对于 String 这种有随机访问方法的类来说，就很不方便。所谓的随机访问，就是charAt、subString这种方法，随便指定一个数字，String要能给出结果。如果字符串中的每个字符占用的内存是不定长的，那么进行随机访问的时候，就需要从头开始数每个字符的长度，才能找到你想要的字符。
+
+    UTF-16也是变长的呢？一个字符还可能占用 4 个字节呢？UTF-16在Java的世界里，就可以视为一个定长的编码。
 
 - String：代表不可变的字符序列。简称：不可变性
   - 当对字符串重新赋值的时候，需要重写指定内存区域赋值，而不是修改原有的value进行赋值
   - 不能对现有的字符串进行连接操作，也需要重新指定内存区域，不是修改原有的value进行赋值
   - 当调用String的replace()方法修改指定字符或者字符串的时候，也需要重新指定内存区域赋值，不能使用原有的value赋值
+
 - 通过字面量的方式（区别于new）给一个字符串赋值，此时的字符串声明在常量池中
 
 - **字符串常量池中是不会存储相同内容的字符串的**
+
 - String的String Pool 是一个固定大小的HashTable 默认长度为1009，如果放进去String Pool 的String非常多，就会造成Hash冲突严重，从而导致链表很长，而链表长了之后，会直接影响调用 String.intern()的性能
+
 - 使用 **-XX:StringTableSize** 可设置StringTable的长度
+
 - 在JDK6中的StringTable是固定的，就是1009的长度，如果字符串常量池中的字符串过多就会导致效率下降很快，StirngTableSize设置没有要求
+
 - 在JDK7中，StringTable的默认长度为 60013，JDK7没有要求
+
 - JDK8开始1009 是可设置的最小值 
+
 - Stirng#intern()方法：如果字符串常量池中没有对应的字符串的话，就添加在常量池
 
 #### String的内存分配
@@ -34,7 +58,9 @@
 - JDK7种Oracle对字符串池的逻辑做了很大的改变，将 **字符串常量池的位置调整到Java堆内**
   - 所有的字符串都保存在堆中，和其他普通对象一样，这样可以让你在进行调优的时候仅仅需要调整堆大小就可以了
   - 字符串常量池的概念原本使用的比较多，但是这个改动使得我们有足够的理由考虑使用String.intern();
-- Java8元空间，字符串常量在堆
+- 在Java 8及以后的版本中，字符串常量池和其他元数据信息都被放置在堆的元数据区域中。
+
+  在新生代和老年代这两个主要的堆区域中，一般不直接存储StringTable。这是因为StringTable是一个特殊的数据结构，用于存储字符串的哈希值和引用，而不是存储原始的字符串对象本身。字符串常量在堆，实际的字符串对象通常存储在堆的新生代或老年代中，而StringTable则存储了对这些字符串对象的引用。
 
 - **StringTable为什么需要调整**
   - 之前的永久代比较小，放大量的字符串，会占用很大的空间
@@ -169,17 +195,21 @@ public class StringInternDemo {
 ```
 
 - **题目**
-- new String("ab") 会创建几个对象？
+
+
+
+##### **new String("ab") 会创建几个对象？**
+
+
 
 ```java
 package cn.icanci.jvm.string;
 
-/**
- * @Author: icanci
- */
 public class StringNewDemo {
     public static void main(String[] args) {
-        String ab = new String("ab");
+        String ab = new String("ab");//new在对空间
+        //常量池里面也有一个对象，这个对象与字符串常量池中的对象内容相同，但属于不同的对象。
+        //String s = "ab";中，创建了一个字符串对象。
     }
 }
 
@@ -195,10 +225,27 @@ public class StringNewDemo {
 
 ```
 
-- 从上面反编译看出，创建了两个对象，一个放在堆中，一个放在了字符串常量池  ldc指令	
+- 从上面反编译看出，创建了两个对象，一个放在堆中，一个放在了字符串常量池 .
+
+  - `new #2 <java/lang/String>`指令在JVM中表示创建一个新的String对象，并将其压入操作数栈。它是在堆上为对象分配内存，并调用相应的构造方法进行初始化的指令。
+
+  - 在字节码中，`dup`指令会复制栈顶的数值，并将复制值推入栈顶的下一个位置。
+
+    举例说明，假设操作数栈的栈顶位置有一个整数数值10，执行dup指令后，栈中会新增一个数值10，操作数栈的内容会变成[10, 10]。这样，在后续的指令中可以对这两个数值进行不同的操作。
+
+  - `ldc <index>`在字节码中，ldc指令会将常量池中索引为`<index>`的常量加载到操作数栈中。
+
+    举例说明，假设常量池中有一个位于索引#5的字符串常量"Hello, World!"，使用ldc指令ldc #5将该字符串常量加载到操作数栈中，在这之后，可以对该字符串进行其他的操作和引用。
+
+  - `invokespecial`：这是一条指令，用于调用非虚方法（private、constructor、super）。对于静态方法、私有方法、final方法和构造方法，它们都是非虚方法，因为它们无法被继承和重写。`<java/lang/String.<init>>`：这表示要调用的方法是String类的构造方法，它用于创建String对象。
+
+  - `astore_1` 是一条指令，用于将栈顶的引用类型值存储到局部变量表中的索引为 1 的位置。
+
 - 如果之前常量池是有的，就字符串的值就直接引用到此常量
 
-- new String("a") + new String("b") 创建了几个对象
+
+
+##### new String("a") + new String("b") 创建了几个对象
 
 ```java
 package cn.icanci.jvm.string;
@@ -246,6 +293,8 @@ public class StringNewDemo {
 
 - 实例代码 
 
+我草，明白了，new String("1");，在堆里面有一个1，在常量池有一个新的1，所以不一样，但是new String("1") + new String("1"); 在常量池里面没有，然后再intern，JDK7以后是**直接在常量池里储存这个堆的地址了，**不是重新搞一个对象然后把地址给堆的对象。因此你再从常量池里取变量，就和这个堆的变量的地址一样了。
+
 ```java
 package cn.icanci.jvm.string;
 
@@ -255,27 +304,26 @@ package cn.icanci.jvm.string;
 public class StringInternDemo {
     public static void main(String[] args) {
         String s = new String("1");
-        // 调用此方法之前，字符串常量池已经有了 "1"
-        s.intern();
+        // 调用此s.intern()方法之前，字符串常量池已经有了 "1"
+        s.intern();//s = s.intern();这样的话就可以得到true了
         // 此时 s 指的是堆空间的地址
-        // 此时 s2 指向的是常量池中的地址
+        // 此时 s2 指向的是常量池中的地址，因此是不相同的
         String s2 = "1";
         // JDK6：false
         // JDK7/8：false
         System.out.println(s == s2);
         // 因为 new String("1") + new String("1"); 这个过程没有把"11"放在常量池
-        // 此时 s3 的地址就是相当于 new String("11"); 字符串常量池没有"11"
-        String s3 = new String("1") + new String("1");
-        // 在字符串常量池生成"11"
-        // 这个"11"如何理解
+        
+        String s3 = new String("1") + new String("1");// 此时 s3 的地址就是相当于 new String("11"); 但是字符串常量池没有"11"
+        
         // 在JDK6中就是创建了一个新的对象
         // 在JDK7中，调用 s3.intern(),字符串常量池中 "11"的值就是创建对象的地址
-        s3.intern();
+        s3.intern();// 在字符串常量池生成"11"
         // 使用的是上一行代码执行时，在常量池中生成的"11" 的地址
         String s4 = "11";
+        System.out.println(s3 == s4);
         // JDK6：false
         // JDK7/8：true
-        System.out.println(s3 == s4);
     }
 }
 
