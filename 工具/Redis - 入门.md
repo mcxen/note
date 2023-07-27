@@ -1319,6 +1319,30 @@ Redis hash是一个string类型的field和value的映射表，hash特别适合�
 
 ### 有序集合Zset
 
+> ```sh
+> zadd(key, score, member)：向名称为key的zset中添加元素member，score用于排序。如果该元素已经存在，则根据score更新该元素的顺序。
+> 
+> zrem(key, member) ：删除名称为key的zset中的元素member
+> 
+> zincrby(key, increment, member) ：如果在名称为key的zset中已经存在元素member，则该元素的score增加increment；否则向集合中添加该元素，其score的值为increment
+> 
+> zrank(key, member) ：返回名称为key的zset（元素已按score从小到大排序）中member元素的rank（即index，从0开始），若没有member元素，返回“nil”
+> 
+> zrevrank(key, member) ：返回名称为key的zset（元素已按score从大到小排序）中member元素的rank（即index，从0开始），若没有member元素，返回“nil”
+> 
+> zrange(key, start, end)：返回名称为key的zset（元素已按score从小到大排序）中的index从start到end的所有元素
+> 
+> zrevrange(key, start, end)：返回名称为key的zset（元素已按score从大到小排序）中的index从start到end的所有元素
+> 
+> zrangebyscore(key, min, max)：返回名称为key的zset中score >= min且score <= max的所有元素 zcard(key)：返回名称为key的zset的基数
+> 
+> zscore(key, element)：返回名称为key的zset中元素element的score 
+> 
+> zremrangebyrank(key, min, max)：删除名称为key的zset中rank >= min且rank <= max的所有元素 zremrangebyscore(key, min, max) ：删除名称为key的zset中score >= min且score <= max的所有元素
+> ```
+>
+> 
+
 在set基础上，加一个score值。之前set是k1 v1 v2 v3，现在zset是 k1 score1 v1 score2 v2
 
 
@@ -1444,6 +1468,137 @@ zrevrank 返回有序集中成员的排名。其中有序集成员按分数值�
 ```
 
 和set相比，sorted set增加了一个权重参数score，使得集合中的元素能够按score进行有序排列，比如 一个存储全班同学成绩的sorted set，其集合value可以是同学的学号，而score就可以是其考试得分， 这样在数据插入集合的时候，就已经进行了天然的排序。可以用sorted set来做带权重的队列，比如普通消息的score为1，重要消息的score为2，然后工作线程可以选择按score的倒序来获取工作任务。让 重要的任务优先执行。
+
+#### Zset底层实现原理
+
+
+
+##### zset的两种实现方式
+
+有序集合是由 ziplist (压缩列表) 或 skiplist (跳跃表) 组成的。
+
+当数据比较少时，有序集合使用的是 ziplist 存储的，如下代码所示：
+
+```shell
+127.0.0.1:6379> zadd myzset 1 db 2 redis 3 mysql
+(integer) 3
+127.0.0.1:6379> object encoding myzset
+"ziplist"
+```
+
+从结果可以看出，有序集合把 myset 键值对存储在 ziplist 结构中了。 有序集合使用 ziplist 格式存储必须满足以下两个条件：
+
+- 有序集合保存的元素个数要小于 128 个；
+- 有序集合保存的所有元素成员的长度都必须小于 64 字节。
+
+如果不能满足以上两个条件中的任意一个，有序集合将会使用 skiplist 结构进行存储。 接下来我们来测试以下，当有序集合中某个元素长度大于 64 字节时会发生什么情况？ 代码如下：
+
+```shell
+127.0.0.1:6379> zadd zmaxleng 1.0 redis
+(integer) 1
+127.0.0.1:6379> object encoding zmaxleng
+"ziplist"
+127.0.0.1:6379> zadd zmaxleng 2.0 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+(integer) 1
+127.0.0.1:6379> object encoding zmaxleng
+"skiplist"
+```
+
+通过以上代码可以看出，当有序集合保存的所有元素成员的长度大于 64 字节时，有序集合就会从 ziplist 转换成为 skiplist。
+
+因为有了skiplist，才1能在O(logN)的时间内插入一个元素，并且实现快速的按分数范围查找元素
+
+`dict`保存着**member**到**score**的映射，这样就可以使用`O(1)`的复杂度来查找**member**对应的**score**值。虽然同时使用两种结构，但它们会通过指针来共享相同元素的 **member** 和 **score**，因此不会浪费额外的内存。
+
+##### skiplist优势
+
+skiplist本质上是并行的有序链表，但它克服了有序链表插入和查找性能不高的问题。它的插入和查询的时间复杂度都是O(logN)
+
+##### skiplist原理
+
+普通有序链表的插入需要一个一个向前查找是否可以插入，所以时间复杂度为O(N)，比如下面这个链表插入23，就需要一直查找到22和26之间。
+
+![img](https://raw.githubusercontent.com/52chen/imagebed2023/main/16f4cdf8de59fcc7%7Etplv-t2oaga2asx-zoom-in-crop-mark%3A4536%3A0%3A0%3A0.awebp)
+
+如果节点能够跳过一些节点，连接到更靠后的节点就可以优化插入速度：
+
+![img](https://raw.githubusercontent.com/52chen/imagebed2023/main/16f4ce042d683d4e%7Etplv-t2oaga2asx-zoom-in-crop-mark%3A4536%3A0%3A0%3A0.awebp)
+
+在上面这个结构中，插入23的过程是
+
+- 先使用第2层链接head->7->19->26，发现26比23大，就回到19
+- 再用第1层连接19->22->26，发现比23大，那么就插入到26之前，22之后
+
+上面这张图就是跳表的初步原理，但一个元素插入链表后，应该拥有几层连接呢？跳表在这块的实现方式是随机的，也就是23这个元素插入后，随机出一个数，比如这个数是3，那么23就会有如下连接：
+
+- 第3层head->23->end
+- 第2层19->23->26
+- 第1层22->23->26
+
+下面这张图展示了如何形成一个跳表，随机层数就是表示当前节点凸显出来的层数
+
+![img](https://raw.githubusercontent.com/52chen/imagebed2023/main/16f4ce73b1bf06e4%7Etplv-t2oaga2asx-zoom-in-crop-mark%3A4536%3A0%3A0%3A0.awebp)
+
+在上述跳表中查找/插入23的过程为：
+
+![img](https://raw.githubusercontent.com/52chen/imagebed2023/main/16f4ce8baf95f2aa%7Etplv-t2oaga2asx-zoom-in-crop-mark%3A4536%3A0%3A0%3A0.awebp)
+
+总结一下跳表原理：
+
+- 每个跳表都必须设定一个最大的连接层数MaxLevel
+- 第一层连接会连接到表中的每个元素
+- 插入一个元素会随机生成一个连接层数值[1, MaxLevel]之间，根据这个值跳表会给这元素建立N个连接
+- 插入某个元素的时候先从最高层开始，当跳到比目标值大的元素后，回退到上一个元素，用该元素的下一层连接进行遍历，周而复始直到第一层连接，最终在第一层连接中找到合适的位置
+
+##### skiplist在redis zset的使用
+
+redis中skiplist的MaxLevel设定为32层
+
+skiplist原理中提到skiplist一个元素插入后，会随机分配一个层数，而redis的实现，这个随机的规则是：
+
+- 一个元素拥有第1层连接的概率为100%
+- 一个元素拥有第2层连接的概率为50%
+- 一个元素拥有第3层连接的概率为25%
+- 以此类推...
+
+为了提高搜索效率，redis会缓存MaxLevel的值，在每次插入/删除节点后都会去更新这个值，<u>这样每次搜索的时候不需要从32层开始搜索，而是从MaxLevel指定的层数开始搜索</u>
+
+实际应用中的skiplist每个节点应该包含member和score两部分。前面的描述中我们没有具体区分member和score，但实际上列表中是按照score进行排序的，查找过程也是根据score在比较。
+
+##### 查找过程
+
+对于zrangebyscore命令：score作为查找的对象，在跳表中跳跃查询，就和上面skiplist的查询一样
+
+
+
+##### 插入过程
+
+zadd [zset name] [score] [value]：
+
+- 在map中查找value是否已存在，如果存在现需要在skiplist中找到对应的元素删除，再在skiplist做插入
+- 插入过程也是用score来作为查询位置的依据，和skiplist插入元素方法一样。并需要更新value->score的map
+
+如果score一样怎么办？根据value再排序，按照顺序插入
+
+##### 删除过程
+
+zrem [zset name] [value]：从map中找到value所对应的score，然后再在跳表中搜索这个score,value对应的节点，并删除
+
+##### 排名是怎么算出来的
+
+zrank [zset name] [value]的实现依赖与一些附加在跳表上的属性：
+
+- 跳表的每个元素的Next指针都记录了这个指针能够跨越多少元素，redis在插入和删除元素的时候，都会更新这个值
+- 然后在搜索的过程中按经过的路径将路径中的span值相加得到rank
+
+
+
+Redis使用SkipList而不是用平衡树的主要原因有：
+
+1. 平衡树不适合范围查找。需要中序遍历继续寻找其它节点。而Skiplist就非常简单了，使用`lv1`的指针进行向右遍历即可。
+2. 平衡树的插入和删除引发子树调整，逻辑复杂，SkipList相对简单很多
+3. 平衡树每个节点包含两个指针，SkipList平均不到2个指针，内存上更有优势。
+4. 从算法实现难度上来比较，Skiplist 比平衡树要简单得多。
 
 
 
