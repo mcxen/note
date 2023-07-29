@@ -124,31 +124,47 @@ GCT：垃圾回收消耗总时间
 
 **组合关系**
 
-![1598318529744](images/1598318529744.png)
+![image-20230728212103341](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230728212103341.png)
 
-- 两个收集器间有连线，表明它们可以搭配使用:
+- 两个收集器间有连线，表明它们可以**搭配使用**:
 
   - Serial/Serial old、Seria1/CMS、ParNew/Serial old、ParNew/CMS、Parallel Scavenge/Serial old、Parallel Scavenge/Parallel old、G1;
   - 其中serial old作为CMS出现"concurrent Mode Failure"失败的后备预案。
 
-  - (红色虚线)由于维护和兼容性测试的成本，在JDK 8时将serial+CMS、ParNew+Serial old这两个组合声明为废弃（JEP 173），并在JDK 9中完全取消了，这些组合的支持（EP214），即:移除。
-  - (绿色虚线)JDK14中:弃用Parallel Scavenge和Serial0ld Gc组合(JEP336)
-  - （青色虚线)DK 14中:]删除CMS垃圾回收器(EP 363)
+  - （红色虚线，JDK8取消这两种组合)由于维护和兼容性测试的成本，在JDK 8时将serial+CMS、ParNew+Serial old这两个组合声明为废弃（JEP 173），并在JDK 9中完全取消了，这些组合的支持（EP214），即：移除。
+  - （绿色虚线）JDK14中:弃用Parallel Scavenge和Serial0ld Gc组合(JEP336)
+  - （青色虚线）JDK 14中:]删除CMS垃圾回收器(EP 363)
 
 - 为什么要有很多收集器，一个不够吗?闳为Java的使用场景很多，移动端，服务器等。所以就需要针对不同的场景，提供不同的垃圾收集器，提高垃圾收集的性能。
 - 虽然我们会对各个收集器进行比较，但并非为了挑选一个最好的收集器出来。没有一种放之四海皆准、任何场景下都适用的完美收集器存在，更加没有万能的收集器。所以**我们选择的只是对具体应用最合适的收集器。**
 
 #### 查看默认的垃圾收集器
 
-- -XX:+PrintCommandLineFlags 查看命令行参数，包括使用的垃圾收集器 JDK8没有使用G1收集器，JDK9才开始
+- 1、 -XX:+PrintCommandLineFlags 查看命令行参数，包括使用的垃圾收集器 JDK8没有使用G1收集器，JDK9才开始
+
+<img src="https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230728213036818.png" alt="image-20230728213036818" style="zoom:50%;" />
 
 ```java
--XX:InitialHeapSize=266668608 -XX:MaxHeapSize=4266697728 -XX:+PrintCommandLineFlags -XX:+UseCompressedClassPointers -XX:+UseCompressedOops -XX:-UseLargePagesIndividualAllocation -XX:+UseParallelGC 
+-XX:InitialHeapSize=134217728 -XX:MaxHeapSize=2147483648 -XX:+PrintCommandLineFlags -XX:+UseCompressedClassPointers -XX:+UseCompressedOops -XX:+UseParallelGC 
 ```
 
-- 执行命令行指令：jinfo -flag 相关垃圾回收器参数 进程id
+后面写着：` -XX:+UseParallelGC`表明JDK8中默认的垃圾回收器就是`Parallel GC`。老年代就是触发Parallel Old的GC。 
+
+<img src="https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230728212103341.png" alt="image-20230728212103341" style="zoom: 33%;" />
+
+- 2、 也可以执行命令行指令：jinfo -flag 相关垃圾回收器参数 进程id，如果结果是+，加号，表明是启用的，
 
 ![1598321384961](images/1598321384961.png)
+
+> JDK9中：G1
+>
+> JDK17: 可以看到是G1
+>
+> ` -XX:+PrintCommandLineFlags` 查看命令行参数，查看垃圾回收器版本。
+>
+> <img src="https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230728213534047.png" alt="image-20230728213534047" style="zoom:50%;" />
+
+
 
 #### Serial回收器 - 串行回收
 
@@ -197,6 +213,10 @@ GCT：垃圾回收消耗总时间
 
 - 参数配置：-XX:UseParNewGC 手动设置是否开启 -XX:ParallelGCThreads 限制线程数量，默认开启个CPU数据相同的线程数
 
+> <img src="https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230728212103341.png" alt="image-20230728212103341" style="zoom: 33%;" />
+>
+> 根据上图，这个parnew GC在JDK9之后就无法和SerisalOld组合。JDK 14中:删除CMS垃圾回收器(EP 363)，也没办法和CMS GC组合，也就是说成了孤家寡人。
+
 #### Parallel回收器 - 吞吐量优先
 
 - HotSpot的年轻代中除了拥有ParNew收集器是基于并行回收的以外，Parallel scavenge收集器同样也采用了**复制算法、并行回收和"stop the World"机制。**
@@ -211,12 +231,13 @@ GCT：垃圾回收消耗总时间
 ![1598324708952](images/1598324708952.png)
 
 - 在程序吞吐量优先的应用场景中，Parallel 收集器和Parallel Old的结合在Server模式下的内存回收性能很不错
-- Java8中默认是此收集器
+- <mark>**Java8中默认是此收集器**</mark>
 
-- **参数设置**
+- **Parallel GC 参数设置**
   - -XX:+UseParallelGC 手动设置年轻代使用Parallel并行收集器执行回收任务
   - -XX:+UseParallelOldGC 手动指定老年代都是使用并行回收收集器
-    - 分别适用于新生代和老年代，JDK8默认开启
+    - 分别适用于新生代和老年代，JDK8默认开启，JDK9是手动开启Paralle GC，因为9是默认的是G1回收器了。
+    - ![image-20230729095250682](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230729095250682.png)
     - 上面的两个参数，开启一个，另外一个也会激活
   - -XX:ParallelGCThreads 设置年轻代并行收集器的线程数，一般与CPU相等，以避免过多对的线程数影响垃圾收集行呢个
     - 默认情况下，当CPU的数量小于8个，ParallelGCThreads 的值等于CPU数量
@@ -224,9 +245,9 @@ GCT：垃圾回收消耗总时间
   - -XX:MaxGCPauseMillis 设置垃圾收集器最大停顿时间（也就是STW的时间）单位是毫秒
     - 为了尽可能把停顿的时间控制在 MaxGCPauseMillis 内，收集器工作的时候会设置堆的大小或者其他的参数
     - **使用此参数需要谨慎**
-  - -XX:GCTimeRatio 垃圾回收时间占总时间的比例（= 1/（N+1）） 用于衡量吞吐量的大小
+  - -**XX:GCTimeRatio 垃圾回收时间占总时间的比例**（= 1/（N+1）） 用于衡量吞吐量的大小
     - 取值范围（1~100 ） 默认99
-  - -XX:+UseAdaptiveSizePolicy 设置具有自适应调节
+  - -XX:+UseAdaptiveSizePolicy 设置具有自适应调节，这里就是新生代和幸存者比值不完全是1:8的原因。
 
 #### CMS垃圾回收器 - 低延迟
 
@@ -237,7 +258,10 @@ GCT：垃圾回收消耗总时间
 - CMS的垃圾收集算法采用**标记-清除**算法，并且也会"Stop-the-world"
 
 - CMS 不能作为老年代的收集器，却无法与JDK1.4 中已经存在新生代收集器Parallel Scavenge 配合工作，所以采用CMS来收集老年代，新生代只能选择ParNew或者Serial收集器中选择一个
-- 在G1出现之前，CMS使用还是非常广泛的，一直到今天仍然有很多系统使用CMS GC
+- 在G1出现之前，**CMS使用还是非常广泛的，一直到今天仍然有很多系统使用CMS GC**
+- > <img src="https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230728212103341.png" alt="image-20230728212103341" style="zoom: 33%;" />
+  >
+  > 根据上图，这个Parnew GC在JDK9之后就无法和SerisalOld组合。JDK1.5推出CMS，JDK 14中删除CMS垃圾回收器(EP 363)，也没办法和CMS GC组合，也就是说成了孤家寡人。JDK8使用的是`ParallelGC`，
 
 ![1598333581106](images/1598333581106.png)
 
