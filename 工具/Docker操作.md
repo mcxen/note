@@ -1,8 +1,449 @@
 # Docker操作
 
+## Docker指令
+
+### 帮助命令
 
 
-## Docker传输文件
+
+```sh
+docker version # 显示 Docker 版本信息。
+docker info # 显示 Docker 系统信息，包括镜像和容器数。
+docker --help # 帮助
+```
+
+
+
+### 镜像命令
+
+#### docker images
+
+列出本地主机上的镜像
+
+![image-20210603161520609](https://gcore.jsdelivr.net/gh/oddfar/static/img/Docker.assets/06.Docker-常用命令.assets/image-20210603161520609.png)
+
+**解释：**
+
+- REPOSITORY 镜像的仓库源 
+
+- TAG 镜像的标签 
+
+- IMAGE ID 镜像的ID 
+
+- CREATED 镜像创建时间 
+
+- SIZE 镜像大小
+
+
+
+同一个仓库源可以有多个 TAG，代表这个仓库源的不同版本，我们使用 `REPOSITORY:TAG` 定义不同的镜像，如果你不定义镜像的标签版本，docker将默认使用 lastest 镜像！
+
+#### docker search
+
+搜索镜像：
+
+docker search 某个镜像的名称 对应DockerHub仓库中的镜像
+
+```sh
+docker search mysql
+```
+
+可选项：
+
+列出收藏数不小于指定值的镜像，例如
+
+```sh
+docker search mysql --filter=stars=1000
+```
+
+![image-20210603161853652](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20210603161853652.png)
+
+- NAME: 镜像仓库源的名称
+- DESCRIPTION: 镜像的描述
+- OFFICIAL: 是否 docker 官方发布
+- STARS: 类似 Github 里面的 star，表示点赞、喜欢的意思。
+- AUTOMATED: 自动构建。
+
+
+
+也通过Docker Hub 进行查找
+
+比如https://hub.docker.com/search?q=mysql&type=image
+
+
+
+#### docker pull
+
+下载镜像
+
+不写tag，默认是latest
+
+```sh
+docker pull mysql
+```
+
+指定版本下载
+
+```sh
+docker pull mysql:5.7
+```
+
+#### docker rmi
+
+删除镜像
+
+```sh
+docker rmi -f 镜像id # 删除单个
+docker rmi -f 镜像名:tag 镜像名:tag # 删除多个
+```
+
+删除全部
+
+```sh
+docker rmi -f $(docker images -qa)
+```
+
+
+
+### 容器命令
+
+有镜像才能创建容器，我们这里使用 centos 的镜像来测试，就是虚拟一个 centos ！
+
+```sh
+docker pull centos
+```
+
+
+
+**容器启动**
+
+```sh
+docker run [OPTIONS] IMAGE [COMMAND][ARG...]
+```
+
+常用参数说明
+
+| 参数          | 说明                                                         |
+| ------------- | ------------------------------------------------------------ |
+| --name="Name" | 给容器指定一个名字<br/><mark>之后再对容器操作，可以用这个name，相当于“别名”</mark> |
+| -d            | 后台方式运行容器，并返回容器的id！                           |
+| -i            | 以交互模式运行容器，通过和 -t 一起使用                       |
+| -t            | 给容器重新分配一个终端，通常和 -i 一起使用                   |
+| -P            | 随机端口映射（大写）                                         |
+| -p            | 指定端口映射（小写），一般可以有四种写法                     |
+
+查看镜像：
+
+![image-20210603162841857](https://gcore.jsdelivr.net/gh/oddfar/static/img/Docker.assets/06.Docker-常用命令.assets/image-20210603162841857.png)
+
+启动一个容器，使用centos进行用交互模式启动容器，在容器内执行/bin/bash命令！
+
+```sh
+docker run -it centos /bin/bash
+```
+
+![image-20210603163129380](https://gcore.jsdelivr.net/gh/oddfar/static/img/Docker.assets/06.Docker-常用命令.assets/image-20210603163129380.png)
+
+退出容器：****
+
+![image-20210603163202927](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20210603163202927.png)
+
+
+
+**容器查看**
+
+```sh
+docker ps [OPTIONS]
+```
+
+常用参数说明
+
+| 参数 | 说明                                          |
+| ---- | --------------------------------------------- |
+| -a   | 列出当前所有正在运行的容器 + 历史运行过的容器 |
+| -l   | 显示最近创建的容器                            |
+| -n=? | 显示最近n个创建的容器                         |
+| -q   | 静默模式，只显示容器编号。                    |
+
+**退出容器**
+
+| 指令     | 说明           |
+| -------- | -------------- |
+| exit     | 容器停止退出   |
+| ctrl+P+Q | 容器不停止退出 |
+
+
+
+**启动停止容器**
+
+| 指令                              | 说明         |
+| --------------------------------- | ------------ |
+| docker start (容器id or 容器名)   | 启动容器     |
+| docker restart (容器id or 容器名) | 重启容器     |
+| docker stop (容器id or 容器名)    | 停止容器     |
+| docker kill (容器id or 容器名)    | 强制停止容器 |
+
+**删除容器**
+
+| 指令                             | 说明         |
+| -------------------------------- | ------------ |
+| docker rm 容器id                 | 删除指定容器 |
+| docker rm -f $(docker ps -a -q)  | 删除所有容器 |
+| docker ps -a -q\|xargs docker rm | 删除所有容器 |
+
+
+
+**容器再启动**
+
+- 命令
+
+  ``` bash
+  docker start id/name
+  ```
+
+启动之前停止关闭的容器
+
+
+
+**后台启动容器**
+
+```sh
+docker run -d 容器名
+```
+
+启动centos，使用后台方式启动，例如：
+
+```sh
+docker run -d centos
+```
+
+问题： 使用docker ps 查看，发现容器已经退出了！
+
+ 解释：Docker容器后台运行，就必须有一个前台进程，容器运行的命令如果不是那些一直挂起的命 令，就会自动退出。
+
+比如，你运行了nginx服务，但是docker前台没有运行应用，这种情况下，容器启动后，会立即自杀，因为他觉得没有程序了，所以最好的情况是，将你的应用使用前台进程的方式运行启动。
+
+
+
+**清理停止的容器**
+
+清理停止的容器: 
+
+```sh
+docker container prune
+```
+
+![image-20210604202728156](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20210604202728156.png)
+
+
+
+**查看日志**
+
+```sh
+docker logs -f -t --tail 容器id
+```
+
+例子：我们启动 centos，并编写一段脚本来测试玩玩！最后查看日志
+
+```sh
+docker run -d centos /bin/sh -c "while true;do echo hello;sleep 1;done"
+```
+
+![image-20210603174412524](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20210603174412524.png)
+
+
+
+查看日志：
+
+```sh
+docker logs 容器id
+```
+
+
+
+| 参数   | 说明             |
+| ------ | ---------------- |
+| -t     | 显示时间戳       |
+| -f     | 打印最新的日志   |
+| --tail | 数字显示多少条！ |
+
+```sh
+docker logs -tf --tail 10 87f5e5a2954e
+```
+
+
+
+![image-20210603174510568](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20210603174510568-20230729104540958.png)
+
+
+
+- 停止运行
+
+```sh
+docker stop 87f5e5a2954e
+```
+
+![image-20210603175026851](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20210603175026851.png)
+
+- **查看正在运行容器的进程信息**
+
+```sh
+docker top 容器id
+```
+
+- **查看容器/镜像的元数据**
+
+```sh
+docker inspect 容器id
+```
+
+![image-20210603175638262](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20210603175638262-20230729104535012.png)
+
+**进入正在运行的容器**
+
+命令一：
+
+```sh
+docker exec -it 容器id bashShell
+```
+
+例如：
+
+```sh
+[root@VM-0-6-centos ~]# docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+[root@VM-0-6-centos ~]# docker run -d centos /bin/sh -c "while true;do echo hello;sleep 1;done"
+a9b967bdbc870bb039b69c76ddc3d3ce6aa87d57c51a8040e32224fb45576b28
+[root@VM-0-6-centos ~]# docker ps
+CONTAINER ID   IMAGE     COMMAND                  CREATED         STATUS         PORTS     NAMES
+a9b967bdbc87   centos    "/bin/sh -c 'while t…"   8 seconds ago   Up 7 seconds             upbeat_haibt
+[root@VM-0-6-centos ~]# docker exec -it a9b967bdbc87 /bin/bash
+[root@a9b967bdbc87 /]# ps -ef
+UID        PID  PPID  C STIME TTY          TIME CMD
+root         1     0  0 10:01 ?        00:00:00 /bin/sh -c while true;do echo hello;sleep 1;done
+root        37     0  0 10:02 pts/0    00:00:00 /bin/bash
+root        59     1  0 10:02 ?        00:00:00 /usr/bin/coreutils --coreutils-prog-shebang=sleep /usr/bin/sleep 1
+root        60    37  0 10:02 pts/0    00:00:00 ps -ef
+```
+
+退出容器终端，不会导致容器的停止
+
+```sh
+[root@a9b967bdbc87 /]# exit
+exit
+[root@VM-0-6-centos ~]# docker ps
+CONTAINER ID   IMAGE     COMMAND                  CREATED         STATUS         PORTS     NAMES
+a9b967bdbc87   centos    "/bin/sh -c 'while t…"   7 minutes ago   Up 7 minutes             upbeat_haibt
+```
+
+命令二：
+
+```sh
+docker attach 容器id
+```
+
+测试：
+
+```sh
+[root@VM-0-6-centos ~]# docker images
+REPOSITORY    TAG       IMAGE ID       CREATED        SIZE
+hello-world   latest    d1165f221234   2 months ago   13.3kB
+centos        latest    300e315adb2f   5 months ago   209MB
+[root@VM-0-6-centos ~]# docker  run -it -d  centos /bin/bash
+7f9ead6f906b3c691d29866236414e1808d194462ed0839c8ee5c947d731ed57
+[root@VM-0-6-centos ~]# docker ps
+CONTAINER ID   IMAGE     COMMAND       CREATED          STATUS         PORTS     NAMES
+7f9ead6f906b   centos    "/bin/bash"   10 seconds ago   Up 9 seconds             nervous_mcclintock
+[root@VM-0-6-centos ~]# docker attach 7f9ead6f906b
+[root@7f9ead6f906b /]# echo "hello"
+hello
+[root@7f9ead6f906b /]# exit
+exit
+[root@VM-0-6-centos ~]# docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+[root@VM-0-6-centos ~]# 
+```
+
+
+
+
+
+**区别 ：**
+
+- exec 是在容器中打开新的终端，并且可以启动新的进程 
+
+- attach 直接进入容器启动命令的终端，不会启动新的进程
+
+推荐大家使用 `docker exec` 命令，
+
+
+
+**容器内拷贝文件到主机上**
+
+```sh
+docker cp 容器id:容器内路径 目的主机路径
+```
+
+例如：
+
+```sh
+docker cp 7f9ead6f906b:/home/f1 /home
+```
+
+
+
+### 常用命令总结
+
+![img_29](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/img_29.png)
+
+
+
+| 命令    | 官方说明                                                     | 解释                                                         |
+| ------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| attach  | Attach local standard input, output, and error streams to a running container | 当前 shell 下 attach 连接指定运行镜像                        |
+| build   | Build an image from a Dockerfile                             | 通过 Dockerfile 定制镜像                                     |
+| commit  | Create a new image from a container's changes                | 提交当前容器为新的镜像                                       |
+| cp      | Copy files/folders between a container and the local filesystem | 从容器中拷贝指定文件或者目录到宿主机中                       |
+| create  | Create a new container                                       | 创建一个新的容器，同 run，但不启动容器                       |
+| diff    | Inspect changes to files or directories on a container's filesystem | 查看 docker 容器变化                                         |
+| events  | Get real time events from the server                         | 从 docker 服务获取容 器实时事件                              |
+| exec    | Run a command in a running container                         | 在已存在的容器上运行命令                                     |
+| export  | Export a container's filesystem as a tar archive             | 导出容器的内 容流作为一个 tar 归档文件[对应 import ]         |
+| history | Show the history of an image                                 | 展示一个镜像形成历史                                         |
+| images  | List images                                                  | 列出系统当前镜像                                             |
+| import  | Import the contents from a tarball to create a filesystem image | 从 tar包中的内容创建一个新的文件系统映像[对应export]         |
+| info    | Display system-wide information                              | 显示系统相关信息                                             |
+| inspect | Return low-level information on Docker objects               | 查看容器详细信息                                             |
+| kill    | Kill one or more running containers                          | 杀掉 指定 docker 容器                                        |
+| load    | Load an image from a tar archive or STDIN                    | 从一个 tar 包中加载一 个镜像[对应 save]                      |
+| login   | Log in to a Docker registry                                  | 登陆一个 docker 源服务器                                     |
+| logout  | Log out from a Docker registry                               | 从当前 Docker registry 退出                                  |
+| logs    | Fetch the logs of a container                                | 输出当前容器日志信息                                         |
+| pause   | Pause all processes within one or more containers            | 暂停容器                                                     |
+| port    | List port mappings or a specific mapping for the container   | 查看映射端口对应的容器内部源端口                             |
+| ps      | List containers                                              | 列出容器列表                                                 |
+| pull    | Pull an image or a repository from a registry                | 从docker镜像源服务器拉取指定镜像或者库镜像                   |
+| push    | Push an image or a repository to a registry                  | 推送指定镜像或者库镜像至docker源服务器                       |
+| rename  | Rename a container                                           | 给一个容器改名                                               |
+| restart | Restart one or more containers                               | 重启运行的容器                                               |
+| rm      | Remove one or more containers                                | 移除一个或者多个容器                                         |
+| rmi     | Remove one or more images                                    | 移除一个或多个镜像[无容器使用该镜像才可删除，否则需删除相关容器才可继续或 -f 强制删除] |
+| run     | Run a command in a new container                             | 创建一个新的容器并运行 一个命令                              |
+| save    | Save one or more images to a tar archive (streamed to STDOUT by default) | 保存一个镜像为一个 tar 包[对应 load]                         |
+| search  | Search the Docker Hub for images                             | 在 docker hub 中搜 索镜像                                    |
+| start   | Start one or more stopped containers                         | 启动容器                                                     |
+| stats   | Display a live stream of container(s) resource usage statistics | 显示容器资源使用统计信息的实时信息                           |
+| stop    | Stop one or more running containers                          | 停止容器                                                     |
+| tag     | Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE        | 给源中镜像打标签                                             |
+| top     | Display the running processes of a container                 | 查看容器中运行的进程信 息                                    |
+| unpause | Unpause all processes within one or more containers          | 取消暂停容器                                                 |
+| update  | Update configuration of one or more containers               | 更新容器配置                                                 |
+| version | Show the Docker version information                          | 查看 docker 版本号                                           |
+| wait    | Block until one or more containers stop, then print their exit codes | 截取容器停止时的退出状态值                                   |
+
+
+
+### Docker传输文件
 
 获取ID
 
@@ -17,7 +458,7 @@ d171ddbbbfd92676deb5c5d2ed55cd307c4b97b13b65c0f0e3a3d424ad8282f6
 
 下面这个就是Id了。
 
-### Docker容器向宿主机传送文件
+#### Docker容器向宿主机传送文件
 
 格式:
 
@@ -31,7 +472,7 @@ docker cp container_id:<docker容器内的路径> <本地保存文件的路径>
 docker cp 10704c9eb7bb:/root/test.text /home/vagrant/test.txt
 ```
 
-### 宿主机向Docker容器传送文件
+#### 宿主机向Docker容器传送文件
 
 格式:
 
@@ -45,7 +486,7 @@ docker cp 本地文件的路径 container_id:<docker容器内的路径>
 docker cp  /home/vagrant/test.txt 10704c9eb7bb:/root/test.text
 ```
 
-### 其它
+#### 其它
 
 在宿主机(本机)中通过`docker cp --help` 查看 `docker cp`的用法
 
@@ -346,3 +787,8 @@ master_log_pos=157;
 > mysql>use 数据库
 > 然后使用source命令，后面参数为脚本文件(如这里用到的.sql)
 > mysql>source d:/dbname.sql
+
+
+
+
+
