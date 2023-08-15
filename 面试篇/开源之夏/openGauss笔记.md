@@ -28,7 +28,7 @@ openGauss镜像这里我们用的[云和恩墨](https://hub.docker.com/r/enmotec
 因为5.0.0是最新版本，所以latest就是5.0.0。这里，直接用的指定版本。
 
 ```
-docker pull enmotech/opengauss:3.0.0
+docker pull enmotech/opengauss:latest
 ```
 
 ![img](https://raw.githubusercontent.com/52chen/imagebed2023/main/1680050717617732.png)
@@ -49,38 +49,39 @@ docker pull enmotech/opengauss:3.0.0
 >
 > 这个主要的问题就是docker没有启动起来导致的...
 >
-> 启动docker并查看运行状态是否成功
+> > 启动docker并查看运行状态是否成功
+> >
+> > > ```sh
+> > > [root@iZbp12f9404um3f6avsm29Z ~]# systemctl start docker
+> > > [root@iZbp12f9404um3f6avsm29Z ~]# systemctl status docker
+> > > ● docker.service - Docker Application Container Engine
+> > > Loaded: loaded (/usr/lib/systemd/system/docker.service; disabled; vendor preset: disabled)
+> > > Active: active (running) since Tue 2021-06-15 17:49:40 CST; 7min ago
+> > >   Docs: http://docs.docker.com
+> > > Main PID: 1320 (dockerd-current)
+> > >  Tasks: 40
+> > > Memory: 11.5M
+> > > CGroup: /system.slice/docker.service
+> > >         ├─1320 /usr/bin/dockerd-current --add-runtime docker-
+> > > ```
+> > >
+> > > 看到running的标志，就是运行成功了...
+> > >
+> > > 为了避免日重启再次出现类似情况，增加一个开机自动启动docker...
+> > >
+> > > ```sh
+> > > [root@iZbp12f9404um3f6avsm29Z ~]# systemctl enable docker
+> > > Created symlink from /etc/systemd/system/multi-user.target.wants/docker.service to /usr/lib/systemd/system/docker.service.
+> > > ```
 >
-> ```sh
-> [root@iZbp12f9404um3f6avsm29Z ~]# systemctl start docker
-> [root@iZbp12f9404um3f6avsm29Z ~]# systemctl status docker
-> ● docker.service - Docker Application Container Engine
->    Loaded: loaded (/usr/lib/systemd/system/docker.service; disabled; vendor preset: disabled)
->    Active: active (running) since Tue 2021-06-15 17:49:40 CST; 7min ago
->      Docs: http://docs.docker.com
->  Main PID: 1320 (dockerd-current)
->     Tasks: 40
->    Memory: 11.5M
->    CGroup: /system.slice/docker.service
->            ├─1320 /usr/bin/dockerd-current --add-runtime docker-
-> ```
+> 
 >
-> 看到running的标志，就是运行成功了...
->
-> 为了避免日重启再次出现类似情况，增加一个开机自动启动docker...
->
-> ```sh
-> [root@iZbp12f9404um3f6avsm29Z ~]# systemctl enable docker
-> Created symlink from /etc/systemd/system/multi-user.target.wants/docker.service to /usr/lib/systemd/system/docker.service.
-> ```
+> 
 
-1. 镜像拉取后就可以一条命令启动实例。GS_PASSWORD=Enmo@123 可以修改成自己熟悉的密码。
-
-   ```sh
+1. ```sh
+   --镜像拉取后就可以一条命令启动实例。GS_PASSWORD=Enmo@123 可以修改成自己熟悉的密码。
    docker run --name opengauss --privileged=true -d -e GS_PASSWORD=Enmo@123 enmotech/opengauss:latest
    ```
-
-   
 
    GS_PASSWORD：设置openGauss数据库的超级用户omm以及测试用户gaussdb的密码。如果要从容器外部（其它主机或者其它容器）连接则必须要输入密码。
    GS_NODENAME：数据库节点名称，默认为gaussdb。
@@ -91,7 +92,21 @@ docker pull enmotech/opengauss:3.0.0
 
    因此访问opengauss数据库时，可以直接填写这个转发的端口地址
 
-   
+   > ## Error
+   >
+   > 服了。
+   >
+   > 又出现错误了，打开了一会儿自动就退出了
+   >
+   > ![image-20230802194923376](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230802194923376.png)
+   >
+   > > 解决办法：使用老版本的3.0.0
+   > >
+   > > ```sh
+   > > docker run --name opengauss --privileged=true -d -e GS_PASSWORD=Enmo@123 enmotech/opengauss:3.0.0
+   > > ```
+   > >
+   > > ![截屏2023-08-02 19.57.04](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/%E6%88%AA%E5%B1%8F2023-08-02%2019.57.04.png)
 
    除了GS_PASSWORD外都可以使用默认值。若要设定非默认值，和GS_PASSWORD一样使用 -e 设定。 
 
@@ -101,7 +116,7 @@ docker pull enmotech/opengauss:3.0.0
    [root@pekphisprb70593 ~]# docker ps -a --获取CONTAINER ID
    [root@pekphisprb70593 ~]# docker start ab4f29ac64c8 
    -- 如果已经停止了，那么就使用 docker start 启动一个已停止的容器
-   [root@pekphisprb70593 ~]# docker exec -it ab4f29ac64c8 /bin/bash 
+   [root@pekphisprb70593 ~]# docker exec -it a66f26157cf7 /bin/bash 
    --把这个命令里的 ab4f29ac64c8 修改为实际的ID
    ```
 
@@ -116,6 +131,8 @@ docker pull enmotech/opengauss:3.0.0
 
    
 
+   
+
 3. 然后就和在普通服务器一样操作了。openGauss镜像配置了本地信任机制，因此在容器内连接数据库无需密码。
 
    ```sh
@@ -125,7 +142,8 @@ docker pull enmotech/opengauss:3.0.0
    Non-SSL connection (SSL connection is recommended when requiring high-security)
    Type "help" for help.
    
-   omm=# 
+   omm=# \du
+   
    ```
 
    
@@ -140,7 +158,8 @@ A：如果不需要了，就可以不需要卸载啊后处理，直接通过删�
 −删除容器
 
 ```
-docker ps -a ``docker rm 实际的CONTAINER ID
+docker ps -a 
+docker rm 实际的CONTAINER ID
 ```
 
 −删除镜像
@@ -275,7 +294,7 @@ gsql -d postgres -U omm -p 15400
 >
 > 
 
-#### 配置客户端接入认证
+#### [官方] 配置客户端接入认证
 
 **精简版：**
 
@@ -287,7 +306,10 @@ Non-SSL connection (SSL connection is recommended when requiring high-security)
 Type "help" for help.
 
 openGauss=# CREATE USER jack PASSWORD 'Test@123';  --创建jack用户
-openGauss=# gs_guc set -N all -I all -h "host all jack 192.168.198.1/32 sha256"; --分配访问ip地址
+openGauss=# 
+gs_guc set -N all -I all -h "host all jack 192.168.198.1/32 sha256"; --分配访问ip地址
+gs_guc set -N all -I all -h "host all jack 10.10.0.30/32 sha256"
+
 ```
 
 
@@ -299,7 +321,7 @@ openGauss=# gs_guc set -N all -I all -h "host all jack 192.168.198.1/32 sha256";
    例如，下面示例中配置允许IP地址为192.168.198.1的客户端访问本机。
 
    ```sql
-   gs_guc set -N all -I all -h "host all jack 192.168.198.1/32 sha256" --分配访问ip地址
+   gs_guc set -N all -I all -h "host all jack 192.168.1.220/32 sha256" --分配访问ip地址
    ```
 
    > ![img](https://docs.opengauss.org/zh/docs/1.0.0/docs/Developerguide/public_sys-resources/icon-note.gif) **说明：**
