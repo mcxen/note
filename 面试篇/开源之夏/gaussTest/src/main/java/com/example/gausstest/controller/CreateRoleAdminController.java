@@ -18,11 +18,9 @@ public class CreateRoleAdminController {
         this.createRoleAdminService = createRoleAdminService;
     }
     /*
-    SELECT rolname,rolsuper,rolcreaterole,rolsystemadmin,rolauditadmin FROM pg_roles WHERE rolcreaterole = 'true';，
-    执行结果为：[{"rolname":"omm","rolsuper":"t","rolcreaterole":"t","rolsystemadmin":"t","rolauditadmin":"t"},
-    {"rolname":"safeadmin","rolsuper":"f","rolcreaterole":"t","rolsystemadmin":"f","rolauditadmin":"f"}]
-    。设计SpringBoot的restful接口，使用mybtais负责dao，编写entity层，entity层的名字叫createRoleAdmin，
-    编写service层给出controller，编写对应的网页的layui风格的使用这个接口的表格
+
+
+
      */
     @GetMapping("/creroladmin")
     public List<RoleAdmin> getCreateRoleAdminList(HttpSession httpSession) {

@@ -782,14 +782,6 @@ opengauss=# select table_name,table_schema,grantee,string_agg(privilege_type,','
 
 
 
-
-
-三权分立管理员扫描结果
-
-表格权限扫描
-
-
-
 1、管理员可以有多个，但是安全管理员只能有一个：
 
 ```sql
@@ -804,7 +796,7 @@ SELECT table_catalog,table_schema,table_name
 FROM information_schema.tables
 WHERE table_type = 'BASE TABLE'
     AND table_schema NOT IN ('pg_catalog', 'information_schema','dbe_pldeveloper','db4ai');
--- 查询所有公开的表格，包括：所在数据库，所在schema，名字
+-- 查询所有公开的表格，包括：所在数据库，所在schema，名字 Table
    
 GRANT SELECT ON SCHEMA public TO testuser;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO testuser;
@@ -824,8 +816,28 @@ FROM(SELECT
             datname NOT LIKE 'template%'
     ) a,
     pg_roles b
-WHERE (a.grantee = b.oid OR a.grantee = 0) AND b.rolname = 'admin_department' GROUP BY a.datname, b.rolname;   
--- 查询当前用户所有数据库的权限
+WHERE (a.grantee = b.oid OR a.grantee = 0) AND  b.rolname NOT LIKE 'gs%' GROUP BY a.datname, b.rolname;   
+-- 查询所有用户的所有数据库的权限 Rol_Dat_Privilege
+ /*
+根据 SELECT b.rolname, a.datname, string_agg(a.pri_t, ',') AS privileges
+FROM (
+    SELECT datname, grantee, privilege_type AS pri_t
+    FROM (
+        SELECT
+            datname,
+            (aclexplode(COALESCE(datacl, acldefault('d'::"char", datdba)))).grantee AS grantee,
+            (aclexplode(COALESCE(datacl, acldefault('d'::"char", datdba)))).privilege_type AS privilege_type
+        FROM pg_database
+        WHERE datname NOT LIKE 'template%'
+    ) subquery
+) a
+JOIN pg_roles b ON a.grantee = b.oid OR a.grantee = 0
+WHERE b.rolname NOT LIKE 'gs%'
+GROUP BY a.datname, b.rolname;
+设计SpringBoot的restful接口，使用mybtais负责dao，编写entity层，entity层的名字叫Rol_Dat_Privilege，
+    编写service层给出controller，编写对应的网页的layui风格的使用这个接口的表格，表格使用ajax展示数据，表格标题改为中文。
+ */
+ 
  
  select table_name,table_schema,grantee,string_agg(privilege_type,',') from information_schema.table_privileges where grantee='admin_department' group by table_name,table_schema,grantee;
 -- 查询当前数据库下当前用户对表的权限
@@ -839,15 +851,27 @@ FROM
     information_schema.role_table_grants
  GROUP BY
     grantee,table_name;
--- 查询当前数据库下所有的表的根据用户和表名分类的权限
-    
+
+SELECT grantee AS rol_name, table_name, string_agg(privilege_type, ', ') AS privileges FROM information_schema.role_table_grants GROUP BY grantee,table_name;
+
+-- 查询当前数据库下所有的表的根据用户和表名分类的权限，Rol_Table_Privilege
+-- PROMPT:
+/*  根据
+    SELECT grantee AS rol_name, table_name, string_agg(privilege_type, ', ') AS privileges FROM information_schema.role_table_grants GROUP BY grantee,table_name;执行结果为：
+    。设计SpringBoot的restful接口，使用mybtais负责dao，编写entity层，entity层的名字叫Rol_Table_Privilege，
+    编写service层给出controller，编写对应的网页的layui风格的使用这个接口的表格
+    */
     
  
 ```
 
 ![image-20230915142438524](https://raw.githubusercontent.com/52chen/imagebed2023/main/image-20230915142438524.png)
 
-3、查询三权分立机制：安全管理员、系统管理员和审计管理员分别是谁
+3、查询三权分立机制：安全管理员、系统管理员和审计管理员
+
+三权分立开启之后，权限管理更加严格，如图无法给审计管理员赋予系统管理员的权限
+
+![image-20230916204255549](https://cdn.jsdelivr.net/gh/mcxen/image@main/image-20230916204255549.png)
 
 
 
@@ -900,6 +924,24 @@ WHERE rolsystemadmin = 'true' AND rolname != 'omm';
 
 
 
+
+
+查询所有用户：
+
+```sql
+SELECT usesysid,usename,usesuper
+FROM pg_user;
+-- PROMPT:
+/*  根据
+    SELECT usesysid,usename,usesuper
+FROM pg_user;
+    。设计SpringBoot的restful接口，使用mybtais负责dao，编写entity层，entity层的名字叫PgUser，
+    编写service层给出controller，编写对应的网页的layui风格的使用这个接口的表格
+*/
+```
+
+
+
 5、禁止新建以“gs_role_”开头的用户/角色，也禁止将已有的用户/角色重命名为以“gs_role_”开头；
 
 ```sql
@@ -940,4 +982,3 @@ WHERE usename LIKE 'gs_role%';
 
 6、 [postgresql查询权限](https://www.modb.pro/db/398722)
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  

@@ -26,7 +26,7 @@ public class SysAdminController {
         return sysAdminService.getSysAdminList();
     }
     @GetMapping("/sysadminerr")
-    public String getCreateRoleAdminErr(){
+    public String getSysAdminErr(){
         List<RoleAdmin> roleAdminList = sysAdminService.getSysAdminList();
         String msg = "";
         msg ="该数据库的系统管理员权限正常";

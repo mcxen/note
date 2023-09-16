@@ -22,13 +22,13 @@ public class AuditAdminController {
     编写service层给出controller，编写对应的网页的layui风格的使用这个接口的表格
      */
     @GetMapping("/auditadmin")
-    public List<RoleAdmin> getCreateRoleAdminList(HttpSession httpSession) {
+    public List<RoleAdmin> getAuditAdminList(HttpSession httpSession) {
         List<RoleAdmin> roleAdminList = auditAdminService.getAuditAdminList();
 
         return roleAdminList;
     }
     @GetMapping("/auditadminerr")
-    public String getCreateRoleAdminErr(){
+    public String getAuditAdminErr(){
         List<RoleAdmin> roleAdminList = auditAdminService.getAuditAdminList();
         String msg = "";
         msg ="该数据库的审计管理员权限正常";
