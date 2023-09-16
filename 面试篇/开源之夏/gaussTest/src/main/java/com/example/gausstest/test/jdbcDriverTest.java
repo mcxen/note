@@ -4,7 +4,7 @@ import java.sql.*;
 public class jdbcDriverTest {
     public static void main(String[] args) {
         // JDBC连接信息
-        String url = "jdbc:postgresql://192.168.161.18:5432/opengauss";
+        String url = "jdbc:postgresql://192.168.1.49:123/opengauss";//远程ip连接没有用。
         String username = "opengauss";
         String password = "gauss@123";
 
