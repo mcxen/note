@@ -2,6 +2,19 @@
 
 # openGauss安装
 
+## 需求
+
+openGauss是一种高性能、高可靠、高安全性的开源数据库系统，由华为公司发起和维护。在实际应用中，由于复杂的配置和管理需求，openGauss数据库可能存在各种违规操作和安全隐患。因此，需要根据openGauss的数据库配置和用户权限，检查数据库中是否存在违规操作的可能和安全隐患。
+
+技术要求：
+
+1. 了解openGauss的基础功能 2. 了解访问控制
+
+项目产出：
+
+1. 探索openGauss中的访问控制模型，完成技术洞察博客一篇。
+2. 设计用户权限检查项，开发扫描程序，实现数据库权限扫描功能，扫描数据库中是否有违规操作的可能和安全隐患，完成设计文档。
+
 ## Docker安装openGauss
 
 ### 拉取openGauss镜像
@@ -622,11 +635,6 @@ pom.xml文件如下
 			<version>3.5.3</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>42.5.1</version>
-		</dependency>
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -849,3 +857,7 @@ openGauss 使用的 SHA256 不兼容 PostgreSQL 的驱动
 ![在 DataGrip 中导入 openGauss 驱动程序文件](https://raw.githubusercontent.com/52chen/imagebed2023/main/%25E5%259B%25BE%25E7%2589%2587-7-1024x659.png)在 DataGrip 中导入 openGauss 驱动程序文件
 
 ![成功在 DataGrip 上连接到 openGauss](https://raw.githubusercontent.com/52chen/imagebed2023/main/%25E5%259B%25BE%25E7%2589%2587-6-1024x708.png)成功在 DataGrip 上连接到 openGauss
+
+
+
+成功

@@ -16,8 +16,11 @@ import java.util.List;
 public class TestController {
     @Autowired
     TbClassService tbClassService;
+
     @GetMapping("/query")
     public List<TbClass> queryData(){
         return tbClassService.query();
     }
+
+
 }

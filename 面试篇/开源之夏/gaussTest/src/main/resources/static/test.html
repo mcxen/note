@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--GPT Prompt：-->
+<!--GPT Prompt：
+Layui设计网页包含3部分，设置3个内容，改为侧边导航，点击了侧边导航栏之后页面内容要切换成对应的内容，而且页面内容要居中，不能遮挡导航栏，点击了侧边导航栏之后页面内容切换成对应的内容，其他部分的内容不要显示了，具体结果都用Thymeleaf 来渲染。
+
+1、第一部分是三权分立管理员扫描结果，包含三个子模块，第一个模块是安全管理员列表和权限安全隐患情况，第二个模块是系统管理员列表和权限安全隐患情况，第三个模块是审计管理员列表和权限安全隐患情况，
+
+2、第二部分是表格权限扫描，包含三个子模块，第一个模块是当前数据库下所有的表的根据用户和表名分类的权限列表和权限安全隐患情况，第二个模块是当前数据库下当前用户对表的权限列表和权限安全隐患情况，第三个模块是所有公开的表格，包括：所在数据库，所在schema，名字列表和权限安全隐患情况，
+
+3、第三部分是用户角色权限扫描，包含以“gs_role_”开头的用户/角色列表，
+
+最下面中间增加一个刷新当前页面的按钮。
+
+-->
+<head>
+  <meta charset="utf-8">
+  <title>权限扫描仪表盘</title>
+  <link rel="stylesheet" href="https://cdn.staticfile.org/layui/2.6.8/css/layui.min.css">
+  <style>
+
+    .layui-container {
+      margin-top: 30px;
+    }
+
+    .layui-side {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 200px;
+      background-color: #fff;
+      border-right: 1px solid #e6e6e6;
+      z-index: 999;
+    }
+
+    .layui-body {
+      margin-left: 30px;
+      /*左侧边界的宽度定义*/
+      padding: 15px;
+    }
+
+    .layui-nav-tree .layui-nav-item>a {
+      font-size: 16px !important;
+    }
+
+    .layui-nav-tree .layui-nav-child {
+      background-color: #f9fafc;
+    }
+
+    .layui-nav-tree .layui-nav-child dd a {
+      font-size: 14px !important;
+    }
+
+    .layui-nav-tree .layui-this {
+      background-color: #f3f8ff !important;
+    }
+
+    .layui-nav-tree .layui-this a {
+      color: #000 !important;
+      font-weight: bold;
+    }
+
+    /* 新增样式 */
+    .content-section {
+      margin: auto;
+      max-width: 800px;
+    }
+
+    .content-item {
+      display: none;
+    }
+
+    .show {
+      display: block;
+    }
+
+  </style>
+  <script src="https://cdn.staticfile.org/layui/2.6.8/layui.min.js"></script>
+</head>
+
+<body>
+<div class="layui-layout layui-layout-admin">
+  <div class="layui-header">
+    <div class="layui-logo">权限扫描仪表盘</div>
+  </div>
+
+  <div class="layui-side layui-bg-white">
+    <div class="layui-nav-tree">
+      <ul class="layui-nav layui-nav-tree" lay-filter="test">
+        <li class="layui-nav-item">
+          <a href="javascript:;">三权分立管理员</a>
+          <dl class="layui-nav-child">
+            <dd><a href="javascript:;" onclick="showContent('security-admin-1')">安全管理员列表和权限安全隐患情况</a></dd>
+            <dd><a href="javascript:;" onclick="showContent('security-admin-2')">系统管理员列表和权限安全隐患情况</a></dd>
+            <dd><a href="javascript:;" onclick="showContent('security-admin-3')">审计管理员列表和权限安全隐患情况</a></dd>
+          </dl>
+        </li>
+
+        <li class="layui-nav-item">
+          <a href="javascript:;">表格权限</a>
+          <dl class="layui-nav-child">
+            <dd><a href="javascript:;" onclick="showContent('table-permissions-1')">当前数据库下所有表的根据用户和表名分类的权限列表和权限安全隐患情况</a></dd>
+            <dd><a href="javascript:;" onclick="showContent('table-permissions-2')">当前数据库下当前用户对表的权限列表和权限安全隐患情况</a></dd>
+            <dd><a href="javascript:;" onclick="showContent('table-permissions-3')">所有公开的表格</a></dd>
+          </dl>
+        </li>
+
+        <li class="layui-nav-item">
+          <a href="javascript:;" onclick="showContent('user-roles')">用户角色权限</a>
+        </li>
+
+        <li class="layui-nav-item">
+          <a href="javascript:;" onclick="refreshPage()">展示所有数据</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layui-body">
+
+    <div id="content-section" class="content-section">
+      <!--    安全管理员列表和权限安全隐患情况-->
+      <div id="security-admin-1" class="content-item">
+        <h1>安全管理员列表和权限安全隐患情况</h1><br>
+        <h2>安全管理员列表</h2>
+        <table id="createRoleAdminTable" class="layui-table">
+          <thead>
+          <tr>
+            <th>用户名</th>
+            <th>是否超级用户</th>
+            <th>是否具备创建角色权限</th>
+            <th>是否系统管理员</th>
+            <th>是否审计管理员</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <!--      <h3>安全信息: </h3>-->
+        <h2 id="creRolAdminErr"></h2>
+        <br><br><br>
+      </div>
+
+<!--      系统管理员列表和权限安全隐患情况-->
+      <div id="security-admin-2" class="content-item">
+        <h1>系统管理员列表和权限安全隐患情况</h1><br>
+        <h2>系统管理员列表</h2>
+        <table id="sysAdminTable" class="layui-table">
+          <thead>
+          <tr>
+            <th>用户名</th>
+            <th>是否超级用户</th>
+            <th>是否具备创建角色权限</th>
+            <th>是否系统管理员</th>
+            <th>是否审计管理员</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <h2 id="sysAdminErr"></h2>
+        <br><br><br>
+      </div>
+
+<!--      审计管理员列表和权限安全隐患情况-->
+      <div id="security-admin-3" class="content-item">
+        <h1>审计管理员列表和权限安全隐患情况</h1><br>
+        <h2>审计管理员列表</h2>
+        <table id="auditAdminTable" class="layui-table">
+          <thead>
+          <tr>
+            <th>用户名</th>
+            <th>是否超级用户</th>
+            <th>是否具备创建角色权限</th>
+            <th>是否系统管理员</th>
+            <th>是否审计管理员</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <!--      <h3>安全信息: </h3>-->
+        <h2 id="auditAdminErr"></h2>
+        <br><br><br>
+      </div>
+
+      <div id="table-permissions-1" class="content-item">
+        <h1>当前数据库下所有表的根据用户和表名分类的权限列表和权限安全隐患情况</h1>
+        <table class="layui-table">
+          <!-- 当前数据库下所有表的根据用户和表名分类的权限列表和权限安全隐患情况的内容 -->
+        </table>
+      </div>
+
+      <div id="table-permissions-2" class="content-item">
+        <h1>当前数据库下当前用户对表的权限列表和权限安全隐患情况</h1>
+        <table class="layui-table">
+          <!-- 当前数据库下当前用户对表的权限列表和权限安全隐患情况的内容 -->
+        </table>
+      </div>
+
+      <div id="table-permissions-3" class="content-item">
+        <h1>所有公开的表格</h1>
+        <table class="layui-table">
+          <!-- 所有公开的表格的内容 -->
+        </table>
+      </div>
+
+      <div id="user-roles" class="content-item">
+        <h1>用户角色权限</h1>
+        <table class="layui-table">
+          <!-- 用户角色权限的内容 -->
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.staticfile.org/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+  //安全管理员信息
+  $(document).ready(function() {
+    $.ajax({
+      url: "/creroladminerr",
+      dataType: "text",
+      success: function(creRolAdminErr) {
+        $("#creRolAdminErr").text(creRolAdminErr);
+      }
+    });
+  });
+<!--  创建安全管理员脚本-->
+  $(function () {
+    $.ajax({
+      url: '/creroladmin',
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) {
+        var createRoleAdminHtml = '';
+        for (var i in data) {
+          createRoleAdminHtml += '<tr>' +
+                  '<td>' + data[i].rolname + '</td>' +
+                  '<td>' + (data[i].rolsuper ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolcreaterole ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolsystemadmin ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolauditadmin ? '是' : '否') + '</td>' +
+                  '</tr>';
+        }
+        $('#createRoleAdminTable tbody').html(createRoleAdminHtml);
+        layui.use('table', function () {
+          layui.table.render({
+            elem: '#createRoleAdminTable',
+            page: true,
+            limit: 10
+          });
+        });
+      }
+    });
+  });
+</script>
+
+
+<script>
+  //系统管理员信息
+  $(document).ready(function() {
+    $.ajax({
+      url: "/sysadminerr",
+      dataType: "text",
+      success: function(sysAdminErr) {
+        $("#sysAdminErr").text(sysAdminErr);
+      }
+    });
+  });
+  <!--  创建系统管理员脚本-->
+  $(function () {
+    $.ajax({
+      url: '/sysadmin',
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) {
+        var sysAdminHtml = '';
+        for (var i in data) {
+          sysAdminHtml += '<tr>' +
+                  '<td>' + data[i].rolname + '</td>' +
+                  '<td>' + (data[i].rolsuper ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolcreaterole ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolsystemadmin ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolauditadmin ? '是' : '否') + '</td>' +
+                  '</tr>';
+        }
+        $('#sysAdminTable tbody').html(sysAdminHtml);
+        layui.use('table', function () {
+          layui.table.render({
+            elem: '#sysAdminTable',
+            page: true,
+            limit: 10
+          });
+        });
+      }
+    });
+  });
+</script>
+
+<script>
+  //审计管理员信息
+  $(document).ready(function() {
+    $.ajax({
+      url: "/auditadminerr",
+      dataType: "text",
+      success: function(auditAdminErr) {
+        $("#auditAdminErr").text(auditAdminErr);
+      }
+    });
+  });
+  <!--  创建审计管理员脚本-->
+  $(function () {
+    $.ajax({
+      url: '/auditadmin',
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) {
+        var auditAdminHtml = '';
+        for (var i in data) {
+          auditAdminHtml += '<tr>' +
+                  '<td>' + data[i].rolname + '</td>' +
+                  '<td>' + (data[i].rolsuper ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolcreaterole ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolsystemadmin ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolauditadmin ? '是' : '否') + '</td>' +
+                  '</tr>';
+        }
+        $('#auditAdminTable tbody').html(auditAdminHtml);
+        layui.use('table', function () {
+          layui.table.render({
+            elem: '#auditAdminTable',
+            page: true,
+            limit: 10
+          });
+        });
+      }
+    });
+  });
+</script>
+
+
+
+<script>
+  // 获取要显示的内容区域元素
+  var contentItems = document.getElementsByClassName("content-item");
+
+  function showContent(contentId) {
+    // 遍历所有内容区域元素
+    for (var i = 0; i < contentItems.length; i++) {
+      var contentItem = contentItems[i];
+
+      // 如果内容区域的 id 和传入的 contentId 匹配，则显示该内容区域，否则隐藏
+      if (contentItem.id === contentId) {
+        contentItem.classList.add("show");
+      } else {
+        contentItem.classList.remove("show");
+      }
+    }
+  }
+
+  function refreshPage() {
+    // 显示所有内容区域
+    for (var i = 0; i < contentItems.length; i++) {
+      contentItems[i].classList.add("show");
+    }
+  }
+</script>
+</body>
+
+</html>
