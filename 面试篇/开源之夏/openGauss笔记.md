@@ -861,3 +861,91 @@ openGauss 使用的 SHA256 不兼容 PostgreSQL 的驱动
 
 
 成功
+
+
+
+
+
+# JDBC连接数据库
+
+导入驱动：
+
+<img src="https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230917111942267.png" alt="image-20230917111942267" style="zoom:50%;" />
+
+在JDBC中实现该操作：使用java的JDBC来操作数据库：
+
+```java
+public class jdbcDriverTest {
+    public static void main(String[] args) {
+        // JDBC连接信息
+        String url = "jdbc:postgresql://192.168.161.18:5432/opengauss";
+        String username = "opengauss";
+        String password = "gauss@123";
+
+        // 注册OpenGauss JDBC驱动程序
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            // 连接成功，创建PreparedStatement对象以执行SQL语句
+            String sql = "select a.datname,b.rolname,string_agg(a.pri_t,',') from (select datname,(aclexplode(COALESCE(datacl, acldefault('d'::\"char\",datdba)))).grantee as grantee,(aclexplode(COALESCE(datacl, acldefault('d'::\"char\", datdba)))).privilege_type as pri_t from pg_database where datname not like 'template%') a,pg_roles b where (a.grantee=b.oid or a.grantee=0) and b.rolname='opengauss' group by a.datname,b.rolname;";
+            PreparedStatement statement = connection.prepareStatement(sql);
+
+//            // 设置参数值
+//            int idValue = 1;
+//            statement.setInt(1, idValue);
+
+            // 执行查询
+            ResultSet resultSet = statement.executeQuery();
+
+            // 处理查询结果
+            while (resultSet.next()) {
+                // 从结果集中获取数据
+                String datname = resultSet.getString("datname");
+                String rolname = resultSet.getString("rolname");
+                String stringAgg = resultSet.getString("string_agg");
+
+                // 处理数据...
+                System.out.println("datname = " + datname);
+                System.out.println("rolname = " + rolname);
+                System.out.println("stringAgg = " + stringAgg);
+            }
+
+            // 关闭结果集和PreparedStatement
+            resultSet.close();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+运行结果为：
+
+```sh
+datname = testdb
+rolname = opengauss
+stringAgg = TEMPORARY,CONNECT
+
+datname = db_department
+rolname = opengauss
+stringAgg = TEMPORARY,CONNECT
+
+datname = postgres
+rolname = opengauss
+stringAgg = TEMPORARY,CONNECT
+
+datname = opengauss
+rolname = opengauss
+stringAgg = TEMPORARY,CONNECT,CREATE,TEMPORARY,CONNECT
+
+Process finished with exit code 0
+```
+
+
+
