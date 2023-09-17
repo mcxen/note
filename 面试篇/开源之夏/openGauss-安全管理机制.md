@@ -437,10 +437,10 @@ GRANT
 
    ```pgsql
    --- oaauth_owner 是项目管理账号,此处密码仅为示例，请注意修改。
-   CREATE USER oaauth_owner WITH LOGIN PASSWORD 'asdfy181BASDfadasdbfas';
+   CREATE USER oaauth_owner WITH LOGIN PASSWORD 'gauss@123';
    
-   CREATE ROLE oaauth_role_readwrite;
-   CREATE ROLE oaauth_role_readonly;
+   CREATE ROLE oaauth_role_readwrite WITH PASSWORD 'gauss@123';
+   CREATE ROLE oaauth_role_readonly WITH PASSWORD 'gauss@123';
    
    --- 设置: 对于oaauth_owner 创建的表，oaauth_role_readwrite 有 DQL（SELECT）、DML（UPDATE、INSERT、DELETE）权限。
    ALTER DEFAULT PRIVILEGES FOR ROLE oaauth_owner GRANT ALL ON TABLES TO oaauth_role_readwrite;
@@ -458,11 +458,11 @@ GRANT
 
    ```pgsql
    --- oaauth_readwrite只有 DQL（SELECT）、DML（UPDATE、INSERT、DELETE）权限。
-   CREATE USER oaauth_readwrite WITH LOGIN PASSWORD 'dfandfnapSDhf23hbEfabf';
+   CREATE USER oaauth_readwrite WITH LOGIN PASSWORD 'gauss@123';
    GRANT oaauth_role_readwrite TO oaauth_readwrite;
    
    --- oaauth_readonly只有 DQL（SELECT）权限。
-   CREATE USER oaauth_readonly WITH LOGIN PASSWORD 'F89h912badSHfadsd01zlk';
+   CREATE USER oaauth_readonly WITH LOGIN PASSWORD 'gauss@123';
    GRANT oaauth_role_readonly TO oaauth_readonly;
    ```
 
@@ -482,6 +482,10 @@ GRANT
    **说明**
 
    oaauth_readwrite和oaauth_readonly自动继承了相关Role的权限变更，不需要再额外操作。
+
+![image-20230917145135120](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/image-20230917145135120.png)
+
+
 
 ### 应用场景示例
 
@@ -573,9 +577,7 @@ GRANT USAGE ON SCHEMA oaauth_1 TO oaauth_role_readonly;
   \du
   ```
 
-  命令查看：
-
-  
+  ![](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/image-20230917145135120.png)
 
   从上述查询结果示例中可以看出：employee_readwrite账号的**Member of**列中，内容为`oaauth_role_readonly,employee_role_readwrite`，因此，此账号对employee项目表具有DQL和DML权限，对oaauth项目表具有DQL权限。
 
@@ -598,7 +600,7 @@ GRANT USAGE ON SCHEMA oaauth_1 TO oaauth_role_readonly;
   
   ```
 
-## 用户权限查询命令示例
+## openGauss用户权限查询命令示例
 
 
 
@@ -682,9 +684,7 @@ opengauss=# select table_name,table_schema,grantee,string_agg(privilege_type,','
 
 
 
-## 数据库安全策略：
-
-参考：[gauss5.0手册](https://docs.opengauss.org/zh/docs/5.0.0/docs/DatabaseAdministrationGuide/%E7%AE%A1%E7%90%86%E7%94%A8%E6%88%B7%E5%8F%8A%E6%9D%83%E9%99%90.html)
+## openGauss数据库安全策略：
 
 需求：
 
@@ -692,13 +692,11 @@ opengauss=# select table_name,table_schema,grantee,string_agg(privilege_type,','
 
 ### 1、三权分立权限安全策略
 
-安全管理员、系统管理员和审计管理员
+扫描当前数据库中安全管理员、系统管理员和审计管理员，三权分立开启之后，权限管理更加严格，如图无法给审计管理员赋予系统管理员的权限。
 
-三权分立开启之后，权限管理更加严格，如图无法给审计管理员赋予系统管理员的权限
+![三权分立-审计.drawio](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/%E4%B8%89%E6%9D%83%E5%88%86%E7%AB%8B-%E5%AE%A1%E8%AE%A1.drawio.svg)
 
-
-
-1）安全管理员rolcreaterole：
+**1）安全管理员rolcreaterole：**
 
 ```sql
 CREATE USER poladmin WITH CREATEROLE password "gauss@123";
@@ -720,21 +718,24 @@ WHERE rolcreaterole = 'true' AND rolname != 'omm';
   select table_name,table_schema,grantee,string_agg(privilege_type,',') from information_schema.table_privileges where grantee='audadmin' group by table_name,table_schema,grantee;
   ```
 
-  
+  ![三权分立-安全.drawio](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/%E4%B8%89%E6%9D%83%E5%88%86%E7%AB%8B-%E5%AE%89%E5%85%A8.drawio.svg)
 
-2） 审计管理员rolauditadmin
+**2） 审计管理员rolauditadmin**
 
 ```sql
 CREATE USER poladmin WITH AUDITADMIN password "gauss@123";
 
 # AUDITADMIN | NOAUDITADMIN  定义角色是否有审计管理属性。
-
 SELECT *
 FROM pg_roles
 WHERE rolauditadmin = 'true' AND rolname != 'omm';
 ```
 
-3）系统管理员rolsystemadmin
+![三权分立-审计.drawio](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/三权分立-审计.drawio.svg)
+
+
+
+**3）系统管理员rolsystemadmin**
 
 ```sql
 CREATE USER poladmin WITH SYSADMIN password "gauss@123";
@@ -745,45 +746,51 @@ FROM pg_roles
 WHERE rolsystemadmin = 'true' AND rolname != 'omm';
 ```
 
-
+![三权分立-系统.drawio](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/%E4%B8%89%E6%9D%83%E5%88%86%E7%AB%8B-%E7%B3%BB%E7%BB%9F.drawio.svg)
 
 
 
 ### 2、表格、数据库权限安全策略
 
+#### 1）查询用户对各个表的权限
+
+实现思路：
+
+根据SQL语句：
+
+```sql
+SELECT grantee AS rol_name, table_name, string_agg(privilege_type, ', ') AS privileges FROM information_schema.role_table_grants GROUP BY grantee,table_name;
+```
+
+ 设计SpringBoot的restful接口，使用mybtais负责dao，编写entity层，entity层的名字叫`Rol_Table_Privilege`，编写service层给出controller，编写对应的网页的layui风格的使用这个接口的表格的ajax代码.
+
+展示结果为：
+
+<img src="https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/image-20230917134347380.png" alt="image-20230917134347380" style="zoom: 50%;" />
+
+
+
+还可以根据指定用户查询所有数据表或者指定数据表的权限：
+
+SQL代码为：
+
+```sql
+ select table_name,table_schema,grantee,string_agg(privilege_type,',') from information_schema.table_privileges where grantee='admin_department' group by table_name,table_schema,grantee;
+-- 查询当前数据库下当前用户对表的权限
+```
 
 
 
 
-```SQL
-SELECT table_catalog,table_schema,table_name
-FROM information_schema.tables
-WHERE table_type = 'BASE TABLE'
-    AND table_schema NOT IN ('pg_catalog', 'information_schema','dbe_pldeveloper','db4ai');
--- 查询所有公开的表格，包括：所在数据库，所在schema，名字 Table
-   
-GRANT SELECT ON SCHEMA public TO testuser;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO testuser;
--- 授予 testuser 用户在 public 模式下所有表的查询权限，包括 tb_class 表
- 
- GRANT SELECT ON tb_class TO testuser;
--- 授予 testuser 用户 tb_class 表的查询权限。
- 
-SELECT     a.datname,b.rolname,string_agg(a.pri_t, ',') AS privileges
-FROM(SELECT 
-            datname,
-            (aclexplode(COALESCE(datacl, acldefault('d'::"char", datdba)))).grantee AS grantee,
-            (aclexplode(COALESCE(datacl, acldefault('d'::"char", datdba)))).privilege_type AS pri_t
-        FROM 
-            pg_database
-        WHERE 
-            datname NOT LIKE 'template%'
-    ) a,
-    pg_roles b
-WHERE (a.grantee = b.oid OR a.grantee = 0) AND  b.rolname NOT LIKE 'gs%' GROUP BY a.datname, b.rolname;   
--- 查询所有用户的所有数据库的权限 Rol_Dat_Privilege
- /*
-根据 SELECT b.rolname, a.datname, string_agg(a.pri_t, ',') AS privileges
+
+#### 2）查询用户对各个数据库的权限
+
+实现思路：
+
+根据SQL语句：
+
+```sql
+SELECT b.rolname, a.datname, string_agg(a.pri_t, ',') AS privileges
 FROM (
     SELECT datname, grantee, privilege_type AS pri_t
     FROM (
@@ -798,69 +805,77 @@ FROM (
 JOIN pg_roles b ON a.grantee = b.oid OR a.grantee = 0
 WHERE b.rolname NOT LIKE 'gs%'
 GROUP BY a.datname, b.rolname;
-设计SpringBoot的restful接口，使用mybtais负责dao，编写entity层，entity层的名字叫Rol_Dat_Privilege，
-    编写service层给出controller，编写对应的网页的layui风格的使用这个接口的表格，表格使用ajax展示数据，表格标题改为中文。
- */
- 
- 
- select table_name,table_schema,grantee,string_agg(privilege_type,',') from information_schema.table_privileges where grantee='admin_department' group by table_name,table_schema,grantee;
--- 查询当前数据库下当前用户对表的权限
- 
- 
- SELECT
-    grantee AS user,
-    table_name,
-    string_agg(privilege_type, ', ') AS privileges
-FROM
-    information_schema.role_table_grants
- GROUP BY
-    grantee,table_name;
 
-SELECT grantee AS rol_name, table_name, string_agg(privilege_type, ', ') AS privileges FROM information_schema.role_table_grants GROUP BY grantee,table_name;
-
--- 查询当前数据库下所有的表的根据用户和表名分类的权限，Rol_Table_Privilege
--- PROMPT:
-/*  根据
-    SELECT grantee AS rol_name, table_name, string_agg(privilege_type, ', ') AS privileges FROM information_schema.role_table_grants GROUP BY grantee,table_name;执行结果为：
-    。设计SpringBoot的restful接口，使用mybtais负责dao，编写entity层，entity层的名字叫Rol_Table_Privilege，
-    编写service层给出controller，编写对应的网页的layui风格的使用这个接口的表格
-    */
-    
- 
+-- 优化为一行的版本为：
+SELECT b.rolname, a.datname, string_agg(a.pri_t, ',') AS privileges FROM (SELECT datname, grantee, privilege_type AS pri_t FROM (SELECT datname, (aclexplode(COALESCE(datacl, acldefault('d'::"char", datdba)))).grantee AS grantee, (aclexplode(COALESCE(datacl, acldefault('d'::"char", datdba)))).privilege_type AS privilege_type FROM pg_database WHERE datname NOT LIKE 'template%') subquery) a JOIN pg_roles b ON a.grantee = b.oid OR a.grantee = 0 WHERE b.rolname NOT LIKE 'gs%' GROUP BY a.datname, b.rolname;
 ```
 
-![image-20230915142438524](https://raw.githubusercontent.com/52chen/imagebed2023/main/image-20230915142438524.png)
+ 设计SpringBoot的restful接口，使用mybtais负责dao，编写entity层，entity层的名字叫`Rol_Table_Privilege`，编写service层给出controller，编写对应的网页的layui风格的使用这个接口的表格的ajax代码.
+
+展示结果为：
+
+![image-20230917134608083](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/image-20230917134608083.png)
+
+
+
+同理还可以根据指定用户查询所有数据库或者指定数据库的权限。
+
+
+
+#### 3）当前数据库的表格
+
+
+
+```SQL
+SELECT table_catalog,table_schema,table_name
+FROM information_schema.tables
+WHERE table_type = 'BASE TABLE'
+    AND table_schema NOT IN ('pg_catalog', 'information_schema','dbe_pldeveloper','db4ai');
+-- 查询当前所有公开的表格，包括：所在数据库，所在schema，名字 Table
+   
+GRANT SELECT ON SCHEMA public TO testuser;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO testuser;
+-- 授予 testuser 用户在 public 模式下所有表的查询权限，包括 tb_class 表
+ 
+ GRANT SELECT ON tb_class TO testuser;
+-- 授予 testuser 用户 tb_class 表的查询权限。
+```
 
 
 
 ### 3、角色、用户权限安全策略
 
-1）管理员可以有多个，但是安全管理员只能有一个：
+**1）管理员可以有多个，但是安全管理员只能有一个**
 
 ```sql
 SELECT rolname FROM pg_roles WHERE rolsuper = true;
 -- 查询初始用户也就是超级管理员
 ```
 
+实现思路：
 
+根据所有用户的列表中，我们可以查找超级管理员的数据，如果超过一个，就存在安全隐患，展示出隐患信息。
 
-1）查询所有用户：
+**2）查询所有用户、角色信息：**
+
+实现思路：
+
+根据SQL语句：
 
 ```sql
 SELECT usesysid,usename,usesuper
 FROM pg_user;
--- PROMPT:
-/*  根据
-    SELECT usesysid,usename,usesuper
-FROM pg_user;
-    。设计SpringBoot的restful接口，使用mybtais负责dao，编写entity层，entity层的名字叫PgUser，
-    编写service层给出controller，编写对应的网页的layui风格的使用这个接口的表格
-*/
 ```
 
+ 设计SpringBoot的restful接口，使用mybtais负责dao，编写entity层，entity层的名字叫`PgUser`，编写service层给出controller，编写对应的网页的layui风格的使用这个接口的表格的ajax代码.
+
+展示结果为：
+
+<img src="https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/image-20230917135238547.png" alt="image-20230917135238547" style="zoom:50%;" />
 
 
-2）禁止新建以“gs_role_”开头的用户/角色，也禁止将已有的用户/角色重命名为以“gs_role_”开头；
+
+**3）禁止新建以“gs_role_”开头的用户/角色，也禁止将已有的用户/角色重命名为以“gs_role_”开头；**
 
 ```sql
 SELECT * FROM pg_user;
@@ -874,19 +889,11 @@ WHERE usename LIKE 'gs_role%';
 
 
 
-3）非[三权分立](https://docs.opengauss.org/zh/docs/3.1.0/docs/Developerguide/三权分立.html)下，openGauss用户帐户只能由系统管理员rolsystemadmin或拥有CREATEROLE属性的安全管理员创建和删除。三权分立时，用户帐户只能由初始用户omm和安全管理员rolcreaterole创建。
+**4）非[三权分立](https://docs.opengauss.org/zh/docs/3.1.0/docs/Developerguide/三权分立.html)下，openGauss用户帐户只能由系统管理员rolsystemadmin或拥有CREATEROLE属性的安全管理员创建和删除。三权分立时，用户帐户只能由初始用户omm和安全管理员rolcreaterole创建。**
 
+![image-20230915171817953](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/image-20230915171817953.png)
 
-
-![image-20230915171817953](https://cdn.jsdelivr.net/gh/mcxen/image@main/image-20230915171817953.png)
-
-如上图，Data的连接账号的是admin_department，是一个系统管理员，不是安全管理员，因此无法创建账户，如果没有开启三权分立，那么就可以创建账号。
-
-
-
-
-
-
+如上图，Data的连接账号的是admin_department，是一个系统管理员(sysadmin)，不是安全管理员，因此无法创建账户，如果没有开启三权分立，那么就可以创建账号。
 
 
 
@@ -905,4 +912,6 @@ WHERE usename LIKE 'gs_role%';
 5、[sks-admin](https://github.com/DengSinkiang/sk-admin/tree/master)
 
 6、 [postgresql查询权限](https://www.modb.pro/db/398722)
+
+7、[gauss5.0手册](https://docs.opengauss.org/zh/docs/5.0.0/docs/DatabaseAdministrationGuide/%E7%AE%A1%E7%90%86%E7%94%A8%E6%88%B7%E5%8F%8A%E6%9D%83%E9%99%90.html)
 
