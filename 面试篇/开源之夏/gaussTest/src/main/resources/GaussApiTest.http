@@ -1,0 +1,5 @@
+#测试获取所有表格参数
+GET http://localhost:8080/tables
+Accept: application/json
+
+###

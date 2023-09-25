@@ -123,9 +123,9 @@ pom.xml文件如下
         </dependency>
 
         <dependency>
-        <groupId>org.bouncycastle</groupId>
-        <artifactId>bcprov-jdk15on</artifactId>
-        <version>1.70</version>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.70</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -165,7 +165,7 @@ pom.xml文件如下
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
-                    <mainClass>com.example.gausstest.GaussTestApplication</mainClass>
+                    <mainClass>com.mcx.gaussprivilege.GaussTestApplicationcom.mcx.gaussprivilege.GaussTestApplication</mainClass>
                     <skip>true</skip>
                 </configuration>
                 <executions>
@@ -234,7 +234,7 @@ public class RolTablePrivilege {
 ```java
 package com.example.gausstest.dao;
 
-import com.example.gausstest.entity.RolTablePrivilege;
+import entity.com.mcx.gaussprivilege.RolTablePrivilege;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -257,8 +257,8 @@ public interface RolTablePrivilegeMapper {
 ```java
 package com.example.gausstest.service;
 
-import com.example.gausstest.dao.RolTablePrivilegeMapper;
-import com.example.gausstest.entity.RolTablePrivilege;
+import dao.com.mcx.gaussprivilege.RolTablePrivilegeMapper;
+import entity.com.mcx.gaussprivilege.RolTablePrivilege;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -286,8 +286,8 @@ public class RolTablePrivilegeService {
 ```java
 package com.example.gausstest.controller;
 
-import com.example.gausstest.entity.RolTablePrivilege;
-import com.example.gausstest.service.RolTablePrivilegeService;
+import entity.com.mcx.gaussprivilege.RolTablePrivilege;
+import service.com.mcx.gaussprivilege.RolTablePrivilegeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -298,6 +298,7 @@ import java.util.List;
 public class RolTablePrivilegeController {
     @Autowired
     RolTablePrivilegeService rolTablePrivilegeService;
+
     @GetMapping("/rolTablePrivileges")
     public List<RolTablePrivilege> getAllRolTablePrivileges() {
         return rolTablePrivilegeService.getAllRolTablePrivileges();

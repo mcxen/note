@@ -3235,8 +3235,8 @@ netstat –tunlp | grep mysql
 ps –ef | grep mysql			查看mysql进程
 
 grep 'temp' /var/log/mysqld.log
-
-mysql -uroot –p				登录mysql（使用临时密码登录）
+s?r&po_8+pRw
+mysql -u root –p		登录mysql（使用临时密码登录）
 
 \#修改密码
 

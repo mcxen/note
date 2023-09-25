@@ -231,7 +231,7 @@ Layui设计网页包含3部分，设置3个内容，改为侧边导航，点击�
 
       <div id="table-permissions-3" class="content-item">
         <h1>2.3 所有公开的表格</h1>
-        <table class="layui-table">
+        <table id="table_list" class="layui-table">
           <!-- 所有公开的表格的内容 -->
         </table>
       </div>
@@ -457,6 +457,33 @@ Layui设计网页包含3部分，设置3个内容，改为侧边导航，点击�
     // 权限列的模板
     layui.laytpl('{{#  layui.each(d.privileges, function(index, item){ }}{{ item }}&nbsp;&nbsp;{{#  }); }}').render(data, function(html){
       $('#privilegesTpl').html(html);
+    });
+  });
+</script>
+
+<!--获取Table_list,展示所有表格-->
+<script>
+  layui.use('table', function () {
+    var table = layui.table;
+
+    // 渲染表格
+    table.render({
+      elem: '#table_list',
+      url: '/tables',
+      method: 'get',
+      parseData: function(res) {
+        return {
+          "code": 0,
+          "msg": "",
+          "count": res.length,
+          "data": res
+        };
+      },
+      cols: [[
+        {field: 'database', title: '所属数据库'},
+        {field: 'tableSchema', title: '表格Schema'},
+        {field: 'tableName', title: '表名'}
+      ]]
     });
   });
 </script>
