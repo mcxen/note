@@ -81,7 +81,183 @@ Apache RocketMQ作为阿里开源的一款高性能、高吞吐的分布式消�
 
 - 走读官网地址，学会如何学习新技术 http://rocketmq.apache.org/
 
-  
+
+
+
+### :bulb:RocketMQ 基本使用
+
+
+
+配置Java本地的环境变量：
+
+```sh
+mcxw@mcxAir ~ % cat ~/.zprofile  #查看环境变量
+
+# Setting PATH for Python 3.11
+# The original version is saved in .zprofile.pysave
+PATH="/Library/Frameworks/Python.framework/Versions/3.11/bin:${PATH}"
+export PATH
+
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+mcxw@mcxAir ~ % /usr/libexec/java_home -V  #查看Java路径
+Matching Java Virtual Machines (3):
+    17.0.6 (arm64) "Oracle Corporation" - "Java SE 17.0.6" /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
+    1.8.0_392 (arm64) "Amazon" - "Amazon Corretto 8" /Library/Java/JavaVirtualMachines/amazon-corretto-8.jdk/Contents/Home
+    1.8.0_311 (x86_64) "Oracle Corporation" - "Java SE 8" /Library/Java/JavaVirtualMachines/jdk1.8.0_311.jdk/Contents/Home
+/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
+mcxw@mcxAir ~ % 
+```
+
+配置RocketMQ的环境变量
+
+```sh
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
+export NAMESRV_ADDR=localhost:9876
+```
+
+```sh
+mcxw@mcxAir ~ % vim ~/.zprofile 
+mcxw@mcxAir ~ % cat ~/.zprofile          
+
+# Setting PATH for Python 3.11
+# The original version is saved in .zprofile.pysave
+PATH="/Library/Frameworks/Python.framework/Versions/3.11/bin:${PATH}"
+export PATH
+
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
+export NAMESRV_ADDR=localhost:9876
+mcxw@mcxAir ~ % 
+```
+
+
+
+
+
+- 下载 RocketMQ
+
+下载 [RocketMQ最新的二进制文件](https://www.apache.org/dyn/closer.cgi?path=rocketmq/4.3.2/rocketmq-all-4.3.2-bin-release.zip)，并解压
+
+解压后的目录结构如下：
+
+```
+apache-rocketmq
+├── LICENSE
+├── NOTICE
+├── README.md
+├── benchmark
+├── bin
+├── conf
+└── lib
+```
+
+
+
+- 后台启动 NameServer
+
+```
+nohup sh bin/mqnamesrv &
+tail -f ~/logs/rocketmqlogs/namesrv.log
+```
+
+> 这里前台启动：
+>
+> ```sh
+> sh bin/mqnamesrv
+> sh bin/mqbroker -n localhost:9876
+> ```
+>
+> 运行结果：
+>
+> ```sh
+> cxw@mcxAir Downloads % cd rocketmq-all-4.9.5-bin-release 
+> mcxw@mcxAir rocketmq-all-4.9.5-bin-release % sh bin/mqnamesrv
+> Create RAMDisk /Volumes/RAMDisk for gc logging on Darwin OS.
+> The Name Server boot success. serializeType=JSON
+> 
+> ```
+>
+> ```sh
+> mcxw@mcxAir ~ % cd Downloads/rocketmq-all-4.9.5-bin-release 
+> mcxw@mcxAir rocketmq-all-4.9.5-bin-release % sh bin/mqbroker -n localhost:9876
+> Java HotSpot(TM) 64-Bit Server VM warning: Option UseBiasedLocking was deprecated in version 15.0 and will likely be removed in a future release.
+> The broker[mcxAir.local, 198.18.0.1:10911] boot success. serializeType=JSON and name server is localhost:9876
+> ```
+>
+> 
+
+
+
+
+
+
+
+- 启动 Broker
+
+```
+nohup sh bin/mqbroker -n localhost:9876 &
+tail -f ~/logs/rocketmqlogs/broker.log
+```
+
+
+
+- 发送、接收消息
+
+发送消息：
+
+```
+sh bin/tools.sh org.apache.rocketmq.example.quickstart.Producer
+```
+
+
+
+发送成功后显示：`SendResult [sendStatus=SEND_OK, msgId= …`
+
+接收消息：
+
+```
+sh bin/tools.sh org.apache.rocketmq.example.quickstart.Consumer
+```
+
+
+
+接收成功后显示：`ConsumeMessageThread_%d Receive New Messages: [MessageExt…`
+
+- 关闭 Server
+
+```
+sh bin/mqshutdown broker
+sh bin/mqshutdown namesrv
+```
+
+
+
+- 设置dashboard
+
+下载：https://downloads.apache.org/rocketmq/rocketmq-dashboard/
+
+解压缩之后，用Idea打开，然后获取maven，然后启动app
+
+注意：将JVM的配置加上，才可以和本地的运行的MQ绑定。
+
+`-Drocketmq.namesrv.addr=127.0.0.1:9876`
+
+![截屏2023-11-24 11.16.22](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/%E6%88%AA%E5%B1%8F2023-11-24%2011.16.22.png)
+
+启动界面：
+
+![截屏2023-11-24 11.19.19](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/%E6%88%AA%E5%B1%8F2023-11-24%2011.19.19.png)
+
+
+
+
+
+
+
+
 
 ### RocketMQ4.x的本地源码部署
 
@@ -329,6 +505,8 @@ public class PayConsumer {
 	https://blog.csdn.net/mayifan0/article/details/67633729
 	https://blog.csdn.net/a906423355/article/details/78192828
 ```
+
+
 
 ### RocketMQ4.X集群架构讲解
 

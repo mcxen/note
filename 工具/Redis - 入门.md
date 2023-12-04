@@ -100,25 +100,6 @@ linux直接去官网下载：https://redis.io/download
 
    redis-server在src里，redis.conf在外边
 
-   > 服了，这个shabi redis HomeBrew安装后的配置文件在这个卸载的时候出现了？？？
-   >
-   > ![截屏2023-05-28 21.48.38](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/截屏2023-05-28 21.48.38.png)
-   >
-   > ```sh
-   > brew install redis
-   > cd /opt/homebrew/etc
-   > vim /redis.conf
-   > 
-   > 
-   > mcxw@mcxAir etc % redis-server /opt/homebrew/etc/redis.conf 
-   > ```
-   >
-   > 使用/general查找到daemonize 就可以了
-   >
-   > **修改： 将 daemonize no 修改为 daemonize yes**
-
-   
-
 8. redis默认不是后台启动，修改文件
 
    一般我们在 /usr/local/bin 目录下，创建myconfig目录，存放我们的配置文件
@@ -153,15 +134,18 @@ linux直接去官网下载：https://redis.io/download
      
      
      
-     ### Redis启动测试一下！
+   
+​	
+### Redis启动测试一下！
 
-   - 启动redis服务
+- 启动redis服务
 
-     ```bash
-     cd /usr/local/bin
-     redis-server myconfig/redis.conf
-     ```
-     
+  ```bash
+  cd /usr/local/bin
+  redis-server myconfig/redis.conf
+  ```
+
+
 - redis客户端连接
   
   ```bash
@@ -178,6 +162,25 @@ linux直接去官网下载：https://redis.io/download
   ```
   
   我的安装在/usr/local/redis-5.0*
+  
+  
+  
+  > 服了，这个shabi redis HomeBrew安装后的配置文件在这个卸载的时候出现了？？？
+  >
+  > ![截屏2023-05-28 21.48.38](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/截屏2023-05-28 21.48.38.png)
+  >
+  > ```sh
+  > brew install redis
+  > cd /opt/homebrew/etc
+  > vim /redis.conf
+  > 
+  > 
+  > mcxw@mcxAir etc % redis-server /opt/homebrew/etc/redis.conf 
+  > ```
+  >
+  > 使用/general查找到daemonize 就可以了
+  >
+  > **修改： 将 daemonize no 修改为 daemonize yes**
   
   
   
@@ -236,10 +239,47 @@ daemonize no  --> daemonize yes
 
 #### 3. 设置密码
 
-编辑配置文件 `/usr/local/redis-5.0.14/redis.conf`，找到如下内容，做如下修改：
+MAC，HomeBrew安装的是`/opt/homebrew/etc/redis.conf`
+
+编辑配置文件 `/usr/local/redis-5.0.14/redis.conf`，找到如下内容，去掉前面的注释，并修改为所需要的密码：（在vim中，「/」为查找，「n」为查看下一个的位置的选项）
 
 ```shell
-requirepass 123456
+#requirepass foobared
+```
+
+**登录验证**
+
+设置Redis认证密码后，客户端登录时需要使用`-a`参数输入认证密码，不添加该参数虽然也可以登录成功，但是没有任何操作权限。如下：
+
+```sh
+$ ./redis-cli -h 127.0.0.1 -p 6379
+127.0.0.1:6379> keys *
+(error) NOAUTH Authentication required.
+```
+
+使用密码认证登录，并验证操作权限：
+
+```sh
+$ ./redis-cli -h 127.0.0.1 -p 6379 -a 123456
+127.0.0.1:6379> config get requirepass
+1) "requirepass"
+2) "myPassword"
+```
+
+看到类似上面的输出，说明Reids密码认证配置成功。
+
+除了按上面的方式在登录时，使用`-a`参数输入登录密码外。也可以不指定，在连接后进行验证：
+
+```sh
+$ ./redis-cli -h 127.0.0.1 -p 6379
+127.0.0.1:6379> ping
+(error) NOAUTH Authentication required.
+127.0.0.1:6379> auth 123456
+OK
+127.0.0.1:6379> config get requirepass
+1) "requirepass"
+2) "123456"
+127.0.0.1:6379> 
 ```
 
 #### 4. 修改 Redis 默认端口
@@ -2886,7 +2926,7 @@ public class LettuceReactiveMain4 {
 
 3、 RedisTemplate 基本操作
 
-
+> 补充说明：注意要将你需要保存的转成序列化。
 
 **导入依赖**
 
@@ -3193,6 +3233,47 @@ public class RedisTest {
 
     }
 }
+```
+
+### 搭配SpringBoot自带的缓存使用
+
+> 1、需要缓存的Dispatcher**转发**
+
+![image-20231116212531425](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20231116212531425.png)
+
+
+
+> 2、**序列化返回值**
+
+![image-20231116212651288](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20231116212651288.png)
+
+> 3、添加SpringBoot缓存和redis的依赖
+
+```xml
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+```
+
+
+
+> 4、配置application.properties
+>
+
+```properties
+
+spring.data.redis.host=127.0.0.1
+spring.data.redis.port=6379
+spring.data.redis.password=123456
+
+## 设置缓存改为redis
+spring.cache.type=redis
+#设置缓存前缀
+spring.cache.redis.use-key-prefix=true
+spring.cache.redis.key-prefix=train_cache_
+spring.cache.redis.cache-null-values=false
+spring.cache.redis.time-to-live=60s
 ```
 
 
@@ -3934,7 +4015,7 @@ sentinel client-reconfig-script mymaster /var/redis/reconfig.sh
 
  相较于缓存穿透，缓存击穿的目的性更强，一个存在的key，在缓存过期的一刻，同时有大量的请求，这些请求都会击穿到DB，造成瞬时DB请求量大、压力骤增。这就是缓存被击穿，只是针对其中某个key的缓存不可用而导致击穿，但是其他的key依然可以使用缓存响应。
 
- 比如热搜排行上，一个热点新闻被同时大量访问就可能导致缓存击穿。
+ 比如热搜排行上，一个热点新闻失效的同时被同时大量访问就可能导致缓存击穿。
 
 > 解决方案
 
