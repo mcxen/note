@@ -46,7 +46,7 @@
 
 #### 存储过程和函数的区别
 
-![](images/640.webp)
+![](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/640.webp)
 
 #### 什么是视图？游标是什么？
 
