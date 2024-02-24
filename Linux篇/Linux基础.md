@@ -1392,6 +1392,66 @@ old-origin	http://xxx.git (push)
 git remote remove old-origin
 ```
 
+### git clone、git pull和git fetch的区别
+
+#### git clone 
+
+git clone 是将其他仓库克隆到本地，包括被 clone 仓库的版本变化，因此本地无需是一个仓库，且克隆将设置额外的远程跟踪分支。因为是克隆来的，所以 .git 文件夹里存放着与远程仓库一模一样的版本库记录，clone 操作是一个从无到有的克隆操作。
+
+基本用法：
+
+```
+$ git clone <版本库的URL> [本地目录名]
+```
+
+如果不指定本地目录，则会在本地生成一个远程仓库同名的目录。
+
+#### git pull
+
+git pull 是拉取远程分支更新到本地仓库再与本地分支进行合并，即：git pull = git fetch + git merge
+
+基本用法：
+
+```
+$ git pull <远程主机名> [远程分支名]:[本地分支名]
+```
+
+如果不指定远程分支名和本地分支名，则会将远程 master 分支拉取下来和本地的当前分支合并。
+
+#### git fetch
+
+理解 fetch 的关键, 是理解 FETCH_HEAD，FETCH_HEAD 指的是：某个 branch 在服务器上的最新状态。这个列表保存在 .git/FETCH_HEAD 文件中，其中每一行对应于远程服务器的一个分支。
+当前分支指向的 FETCH_HEAD，就是这个文件第一行对应的那个分支。一般来说，存在两种情况：
+
+- 如果没有显式的指定远程分支，则远程分支的 master 将作为默认的 FETCH_HEAD
+- 如果指定了远程分支，就将这个远程分支作为 FETCH_HEAD
+
+git fetch 更新本地仓库的两种用法：
+
+```bash
+# 方法一
+$ git fetch origin master                #从远程的origin仓库的master分支下载代码到本地的origin master
+$ git log -p master.. origin/master      #比较本地的仓库和远程参考的区别
+$ git merge origin/master                #把远程下载下来的代码合并到本地仓库，远程的和本地的合并
+# 方法二
+$ git fetch origin master:temp           #从远程的origin仓库的master分支下载到本地并新建一个分支temp
+$ git diff temp                          #比较master分支和temp分支的不同
+$ git merge temp                         #合并temp分支到master分支
+$ git branch -d temp                     #删除temp
+```
+
+区别
+
+1. **是否需要本地初始化仓库**
+
+git clone 不需要，git pull 和 git fetch 需要。
+
+ 
+
+2. **是否可以指定分支推送到远程**
+
+git clone下来的项目可以直接推送到远程，git pull 和 git fetch 需要先执行 git remote add 添加远程仓库后才能 push。
+
 ### git分支
 
 我们可以通过命令git branch查看分支，会列出所有的分支，当前分支前面会添加一个星号。
