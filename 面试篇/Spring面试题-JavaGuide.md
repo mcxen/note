@@ -472,7 +472,7 @@ MVC 是模型(Model)、视图(View)、控制器(Controller)的简写，其核心
 
 网上有很多人说 MVC 不是设计模式，只是软件设计规范，我个人更倾向于 MVC 同样是众多设计模式中的一种。**[java-design-patterns](https://github.com/iluwatar/java-design-patterns)** 项目中就有关于 MVC 的相关介绍。
 
-![](https://oss.javaguide.cn/github/javaguide/system-design/framework/spring/159b3d3e70dd45e6afa81bf06d09264e.png)
+![](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/159b3d3e70dd45e6afa81bf06d09264e.png)
 
 想要真正理解 Spring MVC，我们先来看看 Model 1 和 Model 2 这两个没有 Spring MVC 的时代。
 
@@ -482,7 +482,7 @@ MVC 是模型(Model)、视图(View)、控制器(Controller)的简写，其核心
 
 这个模式下 JSP 即是控制层（Controller）又是表现层（View）。显而易见，这种模式存在很多问题。比如控制逻辑和表现逻辑混杂在一起，导致代码重用率极低；再比如前端和后端相互依赖，难以进行测试维护并且开发效率极低。
 
-![mvc-mode1](https://oss.javaguide.cn/java-guide-blog/mvc-mode1.png)
+![mvc-mode1](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/mvc-mode1.png)
 
 **Model 2 时代**
 
@@ -502,7 +502,7 @@ Model2 模式下还存在很多问题，Model2 的抽象和封装程度还远远
 
 随着 Spring 轻量级开发框架的流行，Spring 生态圈出现了 Spring MVC 框架， Spring MVC 是当前最优秀的 MVC 框架。相比于 Struts2 ， Spring MVC 使用更加简单和方便，开发效率更高，并且 Spring MVC 运行速度更快。
 
-MVC 是一种设计模式，Spring MVC 是一款很优秀的 MVC 框架。Spring MVC 可以帮助我们进行更简洁的 Web 层的开发，并且它天生与 Spring 框架集成。Spring MVC 下我们一般把后端项目分为 Service 层（处理业务）、Dao 层（数据库操作）、Entity 层（实体类）、Controller 层(控制层，返回数据给前台页面)。
+**MVC 是一种设计模式，Spring MVC 是一款很优秀的 MVC 框架。**Spring MVC 可以帮助我们进行更简洁的 Web 层的开发，并且它天生与 Spring 框架集成。Spring MVC 下我们一般把后端项目分为 Service 层（处理业务）、Dao 层（数据库操作）、Entity 层（实体类）、Controller 层(控制层，返回数据给前台页面)。
 
 ### Spring MVC 的核心组件有哪些？
 
@@ -841,16 +841,3 @@ public interface PasswordEncoder {
 
 从名字也能看出来，`DelegatingPasswordEncoder` 其实就是一个代理类，并非是一种全新的加密算法，它做的事情就是代理上面提到的加密算法实现类。在 Spring Security 5.0 之后，默认就是基于 `DelegatingPasswordEncoder` 进行密码加密的。
 
-## 参考
-
-- 《Spring 技术内幕》
-- 《从零开始深入学习 Spring》：<https://juejin.cn/book/6857911863016390663>
-- <http://www.cnblogs.com/wmyskxz/p/8820371.html>
-- <https://www.journaldev.com/2696/spring-interview-questions-and-answers>
-- <https://www.edureka.co/blog/interview-questions/spring-interview-questions/>
-- <https://www.cnblogs.com/clwydjgs/p/9317849.html>
-- <https://howtodoinjava.com/interview-questions/top-spring-interview-questions-with-answers/>
-- <http://www.tomaszezula.com/2014/02/09/spring-series-part-5-component-vs-bean/>
-- <https://stackoverflow.com/questions/34172888/difference-between-bean-and-autowired>
-
-<!-- @include: @article-footer.snippet.md -->
