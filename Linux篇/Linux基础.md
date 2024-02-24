@@ -1268,7 +1268,7 @@ $ git config --global user.email "imsalt@icloud.com"
 git config -l 可以查看现在的git环境详细配置：
 
 ```sh
-config --system --list #查看系统configgit 
+git config --system --list #查看系统configgit 
 git config --global  --list #查看当前用户（global）配置
 git config --local  --list #查看当前仓库配置信息
 ```
@@ -1331,7 +1331,66 @@ git log --pretty=oneline
 git reset --hard 75b036995f2ba5a6ebabaad22ce0a3d916c1b393
 ```
 
+### 查看当前的远程库
 
+可以使用`git remote`命令，它会列出每个远程库的简短名字。例如：
+
+```
+[T:wooden-dummy] (master)$ git remote
+origin
+```
+
+
+
+可以看到这个库有一个名为`origin`的远程仓库。
+
+可以配置参数`-v(--verbose)`来显示对应的克隆地址：
+
+```
+git remote -v
+origin  https://...wooden-dummy.git (fetch)
+origin  https://...wooden-dummy.git (push)
+```
+
+可以使用`git remote show`命令查看更多的关于远程git仓库的信息。
+
+### 给当前库添加远程库
+
+我们可以用`remote add`给项目增加一个新的远程git仓库，语法为：
+
+```
+git remote add <shortname> <url>
+```
+
+比方说我们在本地通过脚手架生成了一个项目，然后希望通过将该项目放到线上去，但是如果克隆项目必须当前目录为空目录。我们需要通过shell添加远程库：
+
+```
+git remote add origin https://...wooden-dummy.git
+```
+
+然后通过上面的`git remote -v`来查看刚刚添加的远程仓库是否添加上去了。
+
+### 远程仓库的重命名与移除
+
+可以使用`git remote rename` 来修改一个仓库的简写名字。比如，我们将现有的`origin`重命名为`old-origin`：
+
+```
+git remote rename origin old-origin
+```
+
+然后查看改的结果：
+
+```
+git remote -v
+old-origin	http://xxx.git (fetch)
+old-origin	http://xxx.git (push)
+```
+
+假设我们的远程git仓库挪到了一个新的域名，老的仓库不需要了，我们可以使用`git remote remove`来移除。比如，我们移除上面的`old-origin`源：
+
+```
+git remote remove old-origin
+```
 
 ### git分支
 
