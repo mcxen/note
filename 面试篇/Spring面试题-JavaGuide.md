@@ -423,7 +423,7 @@ AOP 切面编程涉及到的一些专业术语：
 
 Spring AOP 已经集成了 AspectJ ，AspectJ 应该算的上是 Java 生态系统中最完整的 AOP 框架了。AspectJ 相比于 Spring AOP 功能更加强大，但是 Spring AOP 相对来说更简单，
 
-如果我们的切面比较少，那么两者性能差异不大。但是，当切面太多的话，最好选择 AspectJ ，它比 Spring AOP 快很多。
+如果我们的切面比较少，那么两者性能差异不大。**但是，当切面太多的话，最好选择 AspectJ ，它比 Spring AOP 快很多。**
 
 ### AspectJ 定义的通知类型有哪些？
 

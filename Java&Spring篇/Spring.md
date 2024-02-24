@@ -1009,6 +1009,22 @@ public class Dog {
 
 还可以使用properties。
 
+### 面试题: Mybtais中#{}和${}的区别是什么？
+
+1）#{}是预编译处理，$ {}是字符串替换。
+
+2）MyBatis在处理#{}时，会将SQL中的#{}替换为?号，使用PreparedStatement的set方法来赋值；MyBatis在处理 $ { } 时，就是把 ${ } 替换成变量的值。
+
+3）使用 **#{} 可以有效的防止SQL注入**，提高系统安全性。
+
+项目实战中使用,请阅读我博客中Java项目实战分类中的--[MySQL中in('5,6,7')只取第一个id为5对应的数据的思考](https://www.cnblogs.com/liaowenhui/p/12217400.html)一文，谢谢。
+
+要理解记忆这个题目,我觉得要抓住两点：
+
+（1）$ 符号一般用来当作占位符，常使用Linux脚本的同学应该对此有更深的体会吧。既然是占位符，当然就是被用来替换的。知道了这点就能很容易区分$和#，从而不容易记错了。
+
+（2）预编译的机制。预编译是提前对SQL语句进行预编译，而其后注入的参数将不会再进行SQL编译。我们知道，SQL注入是发生在编译的过程中，因为恶意注入了某些特殊字符，最后被编译成了恶意的执行操作。而预编译机制则可以很好的防止SQL注入。在某些特殊场合下只能用${}，不能用#{}。例如：在使用排序时ORDER BY ${id}，如果使用#{id}，则会被解析成ORDER BY “id”,这显然是一种错误的写法。
+
 ## @Autowired-自动装配对象
 
 
@@ -1308,7 +1324,7 @@ XML可以适用于任何场景，就算Bean来自第三方也可以适用XML方�
 
 ## Java Config核心注解
 
-![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5448c2d20ba74c48bba766a507f5530b~tplv-k3u1fbpfcp-zoom-in-crop-mark:4536:0:0:0.awebp?)
+![image.png](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/5448c2d20ba74c48bba766a507f5530b~tplv-k3u1fbpfcp-zoom-in-crop-mark:4536:0:0:0.awebp)
 
 ### @Configuration
 
@@ -1831,7 +1847,7 @@ public class UserDao{
 }
 ```
 
-- joinpoint(连接点) ： 可以被拦截到的点。save(), query(),update(),delete()方法都可以增强，这些方法就可以称为连接点。
+- j(连接点) ： 可以被拦截到的点。save(), query(),update(),delete()方法都可以增强，这些方法就可以称为连接点。
 - pointcut(切入点)：真正被拦截到的点。在实际开发中，可以只对save()方法进行增强，那么save()方法就是切入点。
 - advice(增强)：方法层面的增强，现在可以对save()方法进行权限校验，权限校验(checkPri())的方法称为增强。
 - introduction(引介)：类层面的增强。
