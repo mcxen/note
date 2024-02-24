@@ -77,7 +77,7 @@ spring-test：该模块主要为测试提供支持的，通过 JUnit 和 TestNG 
 
 在Spring框架中实现控制反转的是**Spring IoC容器**，其**具体就是由容器来控制对象的生命周期和业务对象之间的依赖关系，而不是像传统方式(new 对象)中由代码来直接控制。**程序中所有的对象都会在Spring IoC容器中登记，告诉容器你是个什么，你需要什么，然后IoC容器会在系统运行到适当的时候，把你要的对象主动给你，同时也把你交给其它需要你的对象。也就是说控制对象生存周期的不再是引用它的对象，而是由Spring IoC容器来控制所有对象的创建、销毁。对于某个具体的对象而言，以前是它控制其它对象，现在是所有对象都被Spring IoC容器所控制，所以这叫控制反转。
 
-控制反转最直观的表达就是，IoC容器让对象的创建不用去new了，而是由Spring自动生产，使用java的反射机制，根据配置文件在运行时动态的去创建对象以及管理对象，并调用对象的方法。**控制反转的本质是控制权由应用代码转到了外部容器(IoC容器)，控制权的转移即是所谓的反转。**控制权的转移带来的好处就是降低了业务对象之间的依赖程度，即实现了解耦。即然控制反转中提到了反转，那么肯定有正转，正转和反转有什么区别呢？我曾经在博客上看到有人在面试的时候被问到Spring IoC知识点：什么是反转、正转？
+<mark>控制反转最直观的表达就是，IoC容器让对象的创建不用去new了，而是由Spring自动生产</mark>，使用java的反射机制，根据配置文件在运行时动态的去创建对象以及管理对象，并调用对象的方法。**控制反转的本质是控制权由应用代码转到了外部容器(IoC容器)，控制权的转移即是所谓的反转。**控制权的转移带来的好处就是降低了业务对象之间的依赖程度，即实现了解耦。即然控制反转中提到了反转，那么肯定有正转，正转和反转有什么区别呢？我曾经在博客上看到有人在面试的时候被问到Spring IoC知识点：什么是反转、正转？
 
 - 正转：如果我们要使用某个对象，就需要自己负责对象的创建。
 - 反转：如果要使用某个对象，只需要从Spring 容器中获取需要使用的对象，不关心对象的创建过程，也就是把创建对象的控制权反转给了Spring框架。
@@ -201,6 +201,8 @@ public class SpringApplication {
 
 在SpringIOC容器读取bean配置创建bean实例之前，必须对它进行实例化。只有在容器实例化后，才可以从IOC容器里获取bean实例并使用
 
+## 两种类型的IOC容器实现
+
 Spring提供了两种类型的IOC容器实现
 
 + **BeanFactory：IOC容器的基本实现，在调用getBean()方法时才会实例化对象**
@@ -209,6 +211,15 @@ Spring提供了两种类型的IOC容器实现
 `BeanFactory`是Spring框架的基础设施，面向Spring本身
 
 `ApplicationContext`面向使用Spring框架的开发者，几乎所有的应用场合都直接使用`ApplicationContext`而非底层的`BeanFactory`
+
+1.BeanFactroy采用的是延迟加载形式来注入Bean的，即只有在使用到某个Bean时(调用getBean())，才对该Bean进行加载实例化，**这样，我们就不能发现一些存在的Spring的配置问题。而ApplicationContext则相反，它是在容器启动时，一次性创建了所有的Bean。这样，在容器启动时，我们就可以发现Spring中存在的配置错误。** 相对于基本的BeanFactory，ApplicationContext 唯一的不足是占用内存空间。当应用程序配置Bean较多时，程序启动较慢。
+
+BeanFacotry延迟加载,如果Bean的某一个属性没有注入，BeanFacotry加载后，直至第一次使用调用getBean方法才会抛出异常；而ApplicationContext则在初始化自身是检验，这样有利于检查所依赖属性是否注入；所以通常情况下我们选择使用 ApplicationContext。
+应用上下文则会在上下文启动后预载入所有的单实例Bean。通过预载入单实例bean ,确保当你需要的时候，你就不用等待，因为它们已经创建好了。
+
+2.BeanFactory和ApplicationContext都支持BeanPostProcessor、BeanFactoryPostProcessor的使用，但两者之间的区别是：BeanFactory需要手动注册，而ApplicationContext则是自动注册。（Applicationcontext比 beanFactory 加入了一些更好使用的功能。而且 beanFactory 的许多功能需要通过编程实现而 Applicationcontext 可以通过配置实现。比如后处理 bean ， Applicationcontext 直接配置在配置文件即可而 beanFactory 这要在代码中显示的写出来才可以被容器识别。 ）
+
+3.beanFactory主要是面对与 spring 框架的基础设施，面对 spring 自己。而 Applicationcontex 主要面对与 spring 使用的开发者。基本都会使用 Applicationcontex 并非 beanFactory 。
 
 **无论使用何种方式，配置文件时都是相同的**
 
@@ -270,6 +281,58 @@ public void test(){
 > 
 
 + `FileSystemXmlApplicationContext`：加载文件系统里的配置文件
+
+ApplicationContext 是 Spring 应用程序中的中央接口，用于向应用程序提供配置信息 它继承了 BeanFactory 接口，所以 ApplicationContext 包含 BeanFactory 的所有功能以及更多功能！它的主要功能是支持大型的业务应用的创建 **特性：**
+
+- Bean instantiation/wiring
+- Bean 的实例化/串联
+- 自动的 BeanPostProcessor 注册
+- 自动的 BeanFactoryPostProcessor 注册
+- 方便的 MessageSource 访问（i18n）
+- ApplicationEvent 的发布 与 BeanFactory 懒加载的方式不同，它是预加载，所以，每一个 bean 都在 ApplicationContext 启动之后实例化 这里是 ApplicationContext 的使用例子：
+
+```java
+package com.zoltanraffai;  
+import org.springframework.core.io.ClassPathResource;  
+import org.springframework.beans.factory.InitializingBean; 
+import org.springframework.beans.factory.xml.XmlBeanFactory; 
+public class HelloWorldApp{ 
+   public static void main(String[] args) { 
+      ApplicationContext context=new ClassPathXmlApplicationContext("beans.xml"); 
+      HelloWorld obj = (HelloWorld) context.getBean("helloWorld");    
+      obj.getMessage();    
+   }
+}
+```
+
+###  常用的获取ApplicationContext
+
+FileSystemXmlApplicationContext：从文件系统或者url指定的xml配置文件创建，参数为配置文件名或文件名数组，有相对路径与绝对路径。
+
+```java
+ApplicationContext factory=new FileSystemXmlApplicationContext("src/applicationContext.xml");
+ApplicationContext factory=new FileSystemXmlApplicationContext("E:/Workspaces/MyEclipse 8.5/Hello/src/applicationContext.xml");
+```
+
+ClassPathXmlApplicationContext：从classpath的xml配置文件创建，可以从jar包中读取配置文件。ClassPathXmlApplicationContext 编译路径总有三种方式：
+
+```java
+ApplicationContext factory = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+ApplicationContext factory = new ClassPathXmlApplicationContext("applicationContext.xml"); 
+ApplicationContext factory = new ClassPathXmlApplicationContext("file:E:/Workspaces/MyEclipse 8.5/Hello/src/applicationContext.xml");
+```
+
+XmlWebApplicationContext：从web应用的根目录读取配置文件，需要先在web.xml中配置，可以配置监听器或者servlet来实现
+
+```xml
+<listener>
+<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+</listener>
+```
+
+#### 总结
+
+> ApplicationContext 包含 BeanFactory 的所有特性，通常推荐使用前者。但是也有一些限制情形，比如移动应用内存消耗比较严苛，在那些情景中，使用更轻量级的 BeanFactory 是更合理的。然而，在大多数企业级的应用中，ApplicationContext 是你的首选。
 
 ## ApplicationContext中Bean的相关配置
 
