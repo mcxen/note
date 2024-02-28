@@ -4,7 +4,7 @@
 
 我们直接看 Redis 官方是怎么介绍自己的。
 
-![img](https://cdn.xiaolincoding.com/gh/xiaolincoder/redis/%E5%85%AB%E8%82%A1%E6%96%87/redis%E7%AE%80%E4%BB%8B.png)
+![img](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/redis%25E7%25AE%2580%25E4%25BB%258B.png)
 
 Redis 官方的介绍原版是英文的，我翻译成了中文后截图的，所以有些文字读起来会比较拗口，没关系，我会把里面比较重要的特性抽出来讲一下。
 
