@@ -97,3 +97,99 @@ String 类的常见方法有以下这些：
 - toUpperCase()：将所有字符转换为大写。
 - trim()：去除字符串两端的空格。
 
+### 8. HashMap的问题
+
+**为啥不用红黑树？退化成链表**
+
+红黑树插入操作效率低，需要自平衡，综合考虑数据比较少就会退化成链表。
+
+**为啥要用红黑树**
+
+数据较多，链表查询效率低，红黑树有O(logn)效率高。
+
+**负载因子：**
+
+负载因子的默认值为 0.75，当负载因子设置比较大的时候，扩容的门槛就被提高了，扩容发生的频率比较低，占用的空间会比较小，但此时发生 Hash 冲突的几率就会提升，因此需要更复杂的数据结构来存储元素，这样对元素的操作时间就会增加，运行效率也会因此降低.
+
+## JUC Java并发编程
+
+### 1. 创建线程池的方法
+
+在Java中，创建线程池有两种常见的方式：
+
+ThreadPoolExecutor
+
+　　1.通过 Executors 工具类提供的静态方法创建线程池。
+
+　　2.通过 ThreadPoolExecutor 构造函数自定义线程池。
+
+> 下面是两种方式的代码示例：
+>
+> 1. 通过` Executors` 工具类提供的静态方法创建线程池：
+>
+> ```java
+> import java.util.concurrent.ExecutorService;
+> import java.util.concurrent.Executors;
+> 
+> public class ThreadPoolExample {
+> 
+>     public static void main(String[] args) {
+>         
+>         // 创建固定大小的线程池
+>         ExecutorService executor = Executors.newFixedThreadPool(5);
+> 
+>         // 提交任务给线程池
+>         for (int i = 0; i < 10; i++) {
+>             executor.execute(new Task());
+>         }
+> 
+>         // 关闭线程池
+>         executor.shutdown();
+>     }
+> 
+>     static class Task implements Runnable {
+>         public void run() {
+>             System.out.println("Executing task on thread: " + Thread.currentThread().getName());
+>         }
+>     }
+> }
+> ```
+>
+> 　　2.通过` ThreadPoolExecutor `构造函数自定义线程池：
+>
+> ```java
+> import java.util.concurrent.ExecutorService;
+> import java.util.concurrent.Executors;
+> import java.util.concurrent.ThreadPoolExecutor;
+> 
+> public class ThreadPoolExample {
+> 
+>     public static void main(String[] args) {
+>         
+>         // 自定义线程池
+>         ThreadPoolExecutor executor = new ThreadPoolExecutor(
+>             2, // 核心线程数
+>             5, // 最大线程数
+>             1, // 空闲线程存活时间
+>             TimeUnit.SECONDS, // 存活时间单位
+>             new LinkedBlockingQueue<Runnable>() // 任务队列
+>         );
+> 
+>         // 提交任务给线程池
+>         for (int i = 0; i < 10; i++) {
+>             executor.execute(new Task());
+>         }
+> 
+>         // 关闭线程池
+>         executor.shutdown();
+>     }
+> 
+>     static class Task implements Runnable {
+>         public void run() {
+>             System.out.println("Executing task on thread: " + Thread.currentThread().getName());
+>         }
+>     }
+> }
+> ```
+>
+> 　　在上面的示例中，我们创建了两个线程池，一个是固定大小的线程池，一个是自定义线程池。在两个线程池中，我们都提交了 10 个任务给线程池执行。每个任务都只是打印当前线程的名称。最后，我们调用了线程池的 shutdown() 方法关闭线程池。

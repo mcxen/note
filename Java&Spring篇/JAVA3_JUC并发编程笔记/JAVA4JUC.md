@@ -80,7 +80,11 @@ public class ThreadDemo {
 通过实现 `Runnable` 接口创建线程的步骤：
 
 1. 定义 `Runnable` 接口的实现类，并覆写该接口的 `run` 方法。该 `run` 方法的方法体同样是该线程的线程执行体。
+
+   > ![image-20240301140829796](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image-20240301140829796.png)
+
 2. 创建 `Runnable` 实现类的实例，并以此实例作为 `Thread` 的 target 来创建 `Thread` 对象，该 `Thread` 对象才是真正的线程对象。
+
 3. 调用线程对象的 `start` 方法来启动该线程。
 
 ```java
@@ -942,7 +946,7 @@ JUC中的线程池提供了一系列方法来管理和控制线程池的行为�
 
 **流程图**：
 
-![](https://raw.githubusercontent.com/MaJesTySA/JVM-JUC-Core/master/imgs/threadPoolProcedure.png)
+![](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/threadPoolProcedure.png)
 
 新任务到达→
 
@@ -990,12 +994,12 @@ JUC**线程池实现线任务复用的原理**
       ^
       |
 +-----+---------------------+
-|    ThreadPoolExecutor |
+|    ThreadPoolExecutor     |
 +-----+---------------------+
       ^
       |
 +-----+-----------------------------+
-| ScheduledThreadPoolExecutor |
+| ScheduledThreadPoolExecutor       |
 +-----------------------------------+
 ```
 
@@ -1552,7 +1556,7 @@ public class ThreadLocalUseage {
 - 此方法强调的是同一个请求内（同一个线程内）**不同方法**间的共享
 - 不需重写 initialValue() 方法，但是必须手动调用 set() 方法
 
-```text
+```java
 //演示 ThreadLocal 用法2：避免传递参数的麻烦
 public class ThreadLocalNormalUsage06 {
     public static void main(String[] args) {
