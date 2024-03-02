@@ -602,6 +602,38 @@ grep hello *.java		查找当前目录中所有.java结尾的文件中包含hello
 
 
 
+##### wc  (Word Count)  
+
+wc  (Word Count)  命令的功能为统计指定文件中的字节数、字数、行数，并将统计结果显示输出。
+
+  **1．**  **命令格式：**
+
+  wc [选项]文件...
+
+  **2．**  **命令功能：**
+
+  统计指定文件中的字节数、字数、行数，并将统计结果显示输出。该命令统计指定文件中的字节数、字数、行数。如果没有给出文件名，则从标准输入读取。wc同时也给出所指定文件的***计数。
+
+  **3．**  **命令参数：**
+
+  -c 统计字节数。
+
+  -l 统计行数。
+
+  -m 统计字符数。这个标志不能与 -c 标志一起使用。
+
+  -w 统计字数。一个字被定义为由空白、跳格或换行字符分隔的字符串。
+
+  -L 打印最长行的长度。
+
+  -help 显示帮助信息
+
+  --version 显示版本信息
+
+
+
+
+
 ### 文件目录管理
 
 ##### mkdir
@@ -1117,6 +1149,37 @@ crontab 是用来让使用者在固定时间或固定间隔执行程序之用，
   406  ./src/redis-cli 
   407  history 3
 ```
+
+##### lscpu 查看cpu信息
+
+```sh
+[root@ali ~]# lscpu
+Architecture:          x86_64
+CPU op-mode(s):        32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                2
+On-line CPU(s) list:   0,1
+Thread(s) per core:    2
+Core(s) per socket:    1
+Socket(s):             1
+NUMA node(s):          1
+Vendor ID:             GenuineIntel
+CPU family:            6
+Model:                 85
+Model name:            Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+Stepping:              7
+CPU MHz:               2500.002
+BogoMIPS:              5000.00
+Hypervisor vendor:     KVM
+Virtualization type:   full
+L1d cache:             32K
+L1i cache:             32K
+L2 cache:              1024K
+L3 cache:              36608K
+NUMA node0 CPU(s):     0,1
+```
+
+
 
 
 
