@@ -84,6 +84,16 @@
 - Buffer可以进行字符串拼接，线程安全的。
 - Builder和buffer的方法差不多，但是线程不安全，但是效率就更高了。
 
+**解析：**： 可以从：可变性，线程安全，性能三个方面来进行说明
+
+**参考回答：**
+
+> **可变性**：String 是不可变的（后面会详细分析原因）。StringBuilder 与 StringBuffer 都继承自 AbstractStringBuilder 类，在 AbstractStringBuilder 中也是使用字符数组保存字符串，不过没有使用 final 和 private 关键字修饰，最关键的是这个 AbstractStringBuilder 类还提供了很多修改字符串的方法比如 append 方法。
+>
+> **线程安全性** :String中的对象是不可变的，也就可以理解为常量，线程安全。AbstractStringBuilder 是 StringBuilder 与 StringBuffer 的公共父类，定义了一些字符串的基本操作，如 expandCapacity、append、insert、indexOf 等公共方法。StringBuffer 对方法加了同步锁或者对调用的方法加了同步锁，所以是线程安全的。StringBuilder 并没有对方法进行加同步锁，所以是非线程安全的。
+>
+> **性能差异**:每次对 String 类型进行改变的时候，都会生成一个新的 String 对象，然后将指针指向新的 String 对象。StringBuffer 每次都会对 StringBuffer 对象本身进行操作，而不是生成新的对象并改变对象引用。相同情况下使用 StringBuilder 相比使用 StringBuffer 仅能获得 10%~15% 左右的性能提升，但却要冒多线程不安全的风险。
+
 ### 7. String常用方法有哪些？
 
 String 类的常见方法有以下这些：
@@ -110,6 +120,26 @@ String 类的常见方法有以下这些：
 **负载因子：**
 
 负载因子的默认值为 0.75，当负载因子设置比较大的时候，扩容的门槛就被提高了，扩容发生的频率比较低，占用的空间会比较小，但此时发生 Hash 冲突的几率就会提升，因此需要更复杂的数据结构来存储元素，这样对元素的操作时间就会增加，运行效率也会因此降低.
+
+### 9. String为啥不可变
+
+**解析：**： 注意：很多资料直接说"String 类中使用 final 关键字修饰字符数组来保存字符串，所以String 对象是不可变的" 这是不准确的，因为 final修饰的Array数组 value 是不可变，也只是value这个“引用地址”不可变。挡不住Array数组是可变的事实，其实“私有 pribvate”可能也是不可变的重要原因之一
+
+**参考回答：**
+
+1.保存字符串的数组被 **final** 修饰且为**私有**的，并且String 类没有提供/暴露修改这个字符串的方法。
+
+2.String 类被 final 修饰导致其不能被继承，进而避免了子类破坏 String 不可变。
+
+### 10. 在循环内使用“+”进行字符串拼接的话会有什么问题？
+
+**解析：**： 属于Java String相关常考面试题之一，需要掌握
+
+**参考回答：**
+
+字符串对象通过“+”的字符串拼接方式，实际上是通过 StringBuilder 调用 append() 方法实现的，拼接完成之后调用 toString() 得到一个 String 对象 。不过，在循环内使用“+”进行字符串的拼接的话，存在比较明显的缺陷：编译器不会创建单个 StringBuilder 以复用，会导致创建过多的 StringBuilder 对象。
+
+扩展：不过，使用 “+” 进行字符串拼接会产生大量的临时对象的问题在 JDK9 中得到了解决。在 JDK9 当中，字符串相加 “+” 改为了用动态方法 makeConcatWithConstants() 来实现，而不是大量的 StringBuilder 了.
 
 ## JUC Java并发编程
 
@@ -193,3 +223,4 @@ ThreadPoolExecutor
 > ```
 >
 > 　　在上面的示例中，我们创建了两个线程池，一个是固定大小的线程池，一个是自定义线程池。在两个线程池中，我们都提交了 10 个任务给线程池执行。每个任务都只是打印当前线程的名称。最后，我们调用了线程池的 shutdown() 方法关闭线程池。
+
