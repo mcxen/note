@@ -125,7 +125,7 @@ public class HeapSizeDemo {
         long maxMemory = Runtime.getRuntime().maxMemory();
 
         System.out.println("-Xms:" + (initialMemory / 1024 / 1024) + " M");
-        System.out.println("-Xms:" + (maxMemory / 1024 / 1024) + " M");
+        System.out.println("-Xmx:" + (maxMemory / 1024 / 1024) + " M");
         System.out.println("系统内存大小：" + (initialMemory * 64 / 1024 / 1024 / 1024) + " G");
         System.out.println("系统内存大小：" + (maxMemory * 4 / 1024 / 1024 / 1024) + " G");
 
@@ -134,7 +134,7 @@ public class HeapSizeDemo {
 
 /**执行结果
  * -Xms:245 M
- * -Xms:3618 M
+ * -Xmx:3618 Mx
  * 系统内存大小：15 G
  * 系统内存大小：14 G
  */
@@ -148,6 +148,8 @@ public class HeapSizeDemo {
   - -XX:+PrintGCDetails （见下图）
 
 ![1598054410508](images/1598054410508.png)
+
+![image-20240306090418438](https://cdn.jsdelivr.net/gh/52chen/imagebed2023@main/picgo/image-20240306090418438.png)
 
 #### OutOfMemoryError 举例
 

@@ -141,6 +141,19 @@ String 类的常见方法有以下这些：
 
 扩展：不过，使用 “+” 进行字符串拼接会产生大量的临时对象的问题在 JDK9 中得到了解决。在 JDK9 当中，字符串相加 “+” 改为了用动态方法 makeConcatWithConstants() 来实现，而不是大量的 StringBuilder 了.
 
+### 11. Boolean是几个字节
+
+- boolean类型会使用`int`类型来代替，所以1个boolean类型变量使用了4个字节(32位)
+- boolean数组会使用`byte数组`来代替，所以1个boolean类型元素在数组中使用了1个字节(8位)
+
+> 整形：byte 1个字节，short：2个字节，int ： 4个字节，long : 8个字节，2的0次，1次，2次，3次
+>
+> 浮点型：float: 4个字节，Double 是 8个字节。也是 2 4 8 的规律
+>
+> 字符型：char: 2个字节
+
+
+
 ## JUC Java并发编程
 
 ### 1. 创建线程池的方法
