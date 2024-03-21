@@ -1,5 +1,19 @@
 # JVM
 
+## JVM基础
+
+### 1. 设置参数
+
+```bash
+-XX:+UseParallelGC
+-XX:+UseParNewGC
+-XX:+PrintGC
+-Xms50m
+-Xmx100m
+```
+
+
+
 ## JVM内存结构
 
 ### 1. Minor GC和Full GC的区别？
