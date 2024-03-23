@@ -4098,3 +4098,63 @@ Redis 实现的 LRU 算法的优点：
 - 不用在每次数据访问时都移动链表项，提升了缓存的性能；
 
 但是 LRU 算法有一个问题，**无法解决缓存污染问题**，比如应用一次读取了大量的数据，而这些数据只会被读取这一次，那么这些数据会留存在 Redis 缓存中很长一段时间，造成缓存污染。
+
+### Redis实现可重入锁
+
+```java
+package java.redis.impl;
+
+import com.redis.distribute.lock.demo.redis.RedisLock;
+import org.springframework.data.redis.core.RedisTemplate;
+
+import javax.annotation.Resource;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+/** redis可重入锁的实现，以及归一化处理，在分布式锁的基础上，增加锁的次数
+ * 原理：增加一个ThreadLocal变量来成为计数器，每次加锁计数器加一，只有计数器减为0再释放锁
+ */
+public class RedisLockImplReentry implements RedisLock {
+    @Resource
+    private RedisTemplate redisTemplate;
+    private static ThreadLocal<String> localUid = new ThreadLocal<String>();
+    private static ThreadLocal<Integer> localInteger = new ThreadLocal<Integer>();
+
+    @Override
+    public boolean tryLock(String key, long timeout, TimeUnit unit) {
+        boolean isLock = false;
+        //通过localUid判定本线程是否已经上锁
+        if(localUid.get() == null){
+            String uuid = UUID.randomUUID().toString();
+            localUid.set(uuid);
+            isLock = redisTemplate.opsForValue().setIfAbsent(key,uuid,timeout,unit);
+            localInteger.set(0);
+        }else {
+            isLock = true;
+        }
+        if(isLock){
+            //如果已经上锁，则设置重入次数加一
+            localInteger.set(localInteger.get()+1);
+        }
+        return isLock;
+    }
+
+    @Override
+    public void releaseLock(String key) {
+        if(localUid.get() != null
+                && localUid.get().equalsIgnoreCase((String) redisTemplate.opsForValue().get(key))){
+            if(localInteger.get() != null && localInteger.get() > 0){}
+                //如果已经是本线程，并且已经上锁,锁数量大于0
+                localInteger.set(localInteger.get()-1);
+            }else {
+                //计数器减为0则解锁
+                redisTemplate.delete(key);
+                localUid.remove();
+                localInteger.remove();
+        }
+
+    }
+
+}
+
+```
+
