@@ -257,11 +257,11 @@ GCT：垃圾回收消耗总时间
   - CMS收集器就非常符合这类应用的需求。
 - CMS的垃圾收集算法采用**标记-清除**算法，并且也会"Stop-the-world"
 
-- CMS 作为老年代的收集器，却无法与JDK1.4 中已经存在新生代收集器Parallel Scavenge 配合工作，所以采用CMS来收集老年代，新生代只能选择ParNew或者Serial收集器中选择一个
+- CMS **作为老年代的收集器**，却无法与JDK1.4 中已经存在新生代收集器Parallel Scavenge 配合工作，所以采用CMS来收集老年代，新生代只能选择ParNew或者Serial收集器中选择一个
 - 在G1出现之前，**CMS使用还是非常广泛的，一直到今天仍然有很多系统使用CMS GC**
 - > <img src="https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20230728212103341.png" alt="image-20230728212103341" style="zoom: 33%;" />
   >
-  > 根据上图，这个Parnew GC在JDK9之后就无法和SerisalOld组合。JDK1.5推出CMS，JDK 14中删除CMS垃圾回收器(EP 363)，也没办法和CMS GC组合，也就是说ParNew成了孤家寡人。JDK8使用的是`Parallel GC`.
+  > 根据上图，这个ParNew GC在JDK9之后就无法和SerisalOld组合。JDK1.5推出CMS，JDK 14中删除CMS垃圾回收器(EP 363)，也没办法和CMS GC组合，也就是说ParNew成了孤家寡人。JDK8使用的是`Parallel GC`.
 
 ![1598333581106](images/1598333581106.png)
 

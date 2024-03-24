@@ -74,7 +74,19 @@ public Object save(User user) {
 4. **支持的项目类型不同**：过滤器是 Servlet 规范中定义的，所以过滤器要依赖 Servlet 容器，它只能用在 Web 项目中；而拦截器是 Spring 中的一个组件，因此拦截器既可以用在 Web 项目中，同时还可以用在 Application 或 Swing 程序中；
 5. **使用的场景不同**：因为拦截器更接近业务系统，所以拦截器主要用来实现项目中的业务判断的，**比如：登录判断、权限判断、日志记录等业务；**而过滤器通常是用来实现通用功能过滤的，比如：敏感词过滤、字符集编码设置、响应数据压缩等功能。
 
-
+> 过滤器是Servlet规范定义的一种用于在请求到达Servlet之前或响应离开Servlet之后执行过滤任务的组件。过滤器的生命周期由Servlet容器管理。以下是过滤器的触发时机：
+>
+> 请求到达Servlet之前：在请求到达Servlet之前，过滤器可以执行一些预处理任务，例如身份验证、日志记录等。doFilter方法用于实际过滤操作。
+>
+> 响应离开Servlet之后：在Servlet处理完请求并生成响应后，响应离开Servlet之前，过滤器可以执行一些后处理任务。
+>
+> 拦截器是Spring MVC框架提供的组件，用于在请求到达控制器之前或离开控制器之后执行拦截任务。拦截器的生命周期由Spring容器管理。以下是拦截器的触发时机：
+>
+> 请求到达控制器之前：在请求到达Spring MVC控制器之前，拦截器可以执行一些预处理任务。preHandle方法用于实际拦截操作。
+>
+> 控制器处理完请求后：在控制器处理完请求后，返回视图之前，拦截器可以执行一些后处理任务。postHandle方法用于实际拦截操作。
+>
+> 视图渲染完毕后：在视图渲染完毕后，即响应已经生成并准备发送到客户端时，拦截器可以执行一些最终的任务。afterCompletion方法用于实际拦截操作。
 
 
 
@@ -257,3 +269,18 @@ Caused by: org.springframework.beans.factory.BeanCurrentlyInCreationException: E
 
 参考： https://www.panziye.com/java/4710.html
 
+## Spring Boot
+
+### 1.为什么需要Boot，什么是Boot
+
+spring boot 基于 spring 框架的快速开发整合包。内置了tomcat服务器，直接可以打包成jar包就能独立运行
+
+优先：
+
+快速开发：Spring Boot采用了约定大于配置的理念，提供了很多默认配置，可以快速搭建和开发应用，减少了开发者的工作量。
+
+自动配置：Spring Boot通过自动配置根据项目的依赖和约定自动配置应用程序，减少了手动配置的工作。
+
+内嵌服务器：Spring Boot内置了常用的Servlet容器（如 Tomcat、Jetty），简化了应用的部署过程，可以将应用打包成可执行的JAR文件。
+
+微服务支持：Spring Boot天然地支持构建和部署微服务架构，与Spring Cloud等配合使用，方便微服务的开发和管理。
