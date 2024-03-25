@@ -212,6 +212,61 @@ String, Set, Sorted Set, Hash, List
 
 除了以上五种基本数据类型，Redis还支持一些其他的数据结构和功能，如Bitmaps（位图）、HyperLogLog（基数统计）、Geospatial（地理位置）和Streams（流）等。
 
+### 1.1 图解数据类型
+
+1.Hash
+
+```
+RMap<Object, Object> map = redissonClient.getMap("myFirstMap");
+map.put("productId2","100055301");
+```
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/2572681-20211006165722044-1203871709.png)
+
+ 2.String
+
+```
+  RBucket<Object> bucket = redissonClient.getBucket("myString-key");
+  bucket.set("{\"userName\":\"test\",\"userPwd\":\"test\",\"email\":\"xxx@163.com\",\"captcha\":\"3552\"}");
+```
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/2572681-20211006165853508-1242293398.png)
+
+ 
+
+ 3.List
+
+```
+   List<String> list = redissonClient.getList("listKey-32");
+   list.add("listValue1");
+   list.add("listValue2");
+```
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/2572681-20211006165943709-450769865-20240325205326372.png)
+
+ 
+
+ 4.Set
+
+```
+   RSet<String> set = redissonClient.getSet("setKey-32");
+   set.add("setValue");
+```
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/2572681-20211006170035024-449447502.png)
+
+ 
+
+ 5.Zset
+
+```
+ RScoredSortedSet<String> sortedSet = redissonClient.getScoredSortedSet("sortedKey-32");
+ sortedSet.add(1.0, "zs");
+ sortedSet.add(2.0, "lisi");
+```
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/2572681-20211006170203428-366565426-20240325205321709.png)
+
 ### 2. redis的zset讲一下？
 
 > **解析：** redis的对象考察中，zset是一个设计上比较有特点的数据结。尤其是底层用到的跳表，是面试官喜欢考察的点。回答这个问题可以简单讲一下zset的特点，应用场景，底层数据结构就行。引入这个话题，其他的等面试官细问后再回答。
@@ -227,3 +282,100 @@ String, Set, Sorted Set, Hash, List
 
 底层数据结构： Redis的zset底层通过（压缩列表）或者（hash表+跳跃列表）实现。跳跃列表是一种可以进行对数级别查找的数据结构，**通过在每个节点上维护多个指向其他节点的指针，可以快速访问到其他节点。**
 
+## Redison
+
+### 1.redisson对应的数据结构
+
+RList 操作 Redis 列表
+
+```java
+				// RList 继承了 java.util.List 接口
+        RList<String> nameList = client.getList("nameList");
+        nameList.clear();
+        nameList.add("bingo");
+```
+
+Rmap操作redis 哈希
+
+```java
+        // 默认连接上127.0.0.1:6379
+        RedissonClient client = Redisson.create();
+        // RMap 继承了 java.util.concurrent.ConcurrentMap 接口
+        RMap<String, String> map = client.getMap("personalInfo");
+        map.put("name", "yanglbme");
+```
+
+使用 RLock 实现 Redis 分布式锁
+
+```java
+        // 默认连接上127.0.0.1:6379
+        RedissonClient client = Redisson.create();
+        // RLock 继承了 java.util.concurrent.locks.Lock 接口
+        RLock lock = client.getLock("lock");
+
+        lock.lock();
+        System.out.println("lock acquired");
+```
+
+RAtomicLong 实现 Redis 原子操作
+
+
+
+```
+RBucket
+RSet
+RScoredSortedSet
+```
+
+> 1.Hash
+>
+> ```
+> RMap<Object, Object> map = redissonClient.getMap("myFirstMap");
+> map.put("productId2","100055301");
+> ```
+>
+> ![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/2572681-20211006165722044-1203871709.png)
+>
+>  2.String
+>
+> ```
+>   RBucket<Object> bucket = redissonClient.getBucket("myString-key");
+>   bucket.set("{\"userName\":\"test\",\"userPwd\":\"test\",\"email\":\"xxx@163.com\",\"captcha\":\"3552\"}");
+> ```
+>
+> ![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/2572681-20211006165853508-1242293398.png)
+>
+>  
+>
+>  3.List
+>
+> ```
+>    List<String> list = redissonClient.getList("listKey-32");
+>    list.add("listValue1");
+>    list.add("listValue2");
+> ```
+>
+> ![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/2572681-20211006165943709-450769865-20240325205326372.png)
+>
+>  
+>
+>  4.Set
+>
+> ```
+>    RSet<String> set = redissonClient.getSet("setKey-32");
+>    set.add("setValue");
+> ```
+>
+> ![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/2572681-20211006170035024-449447502.png)
+>
+>  
+>
+>  5.Zset
+>
+> ```
+>  RScoredSortedSet<String> sortedSet = redissonClient.getScoredSortedSet("sortedKey-32");
+>  sortedSet.add(1.0, "zs");
+>  sortedSet.add(2.0, "lisi");
+> ```
+>
+> ![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/2572681-20211006170203428-366565426-20240325205321709.png)
