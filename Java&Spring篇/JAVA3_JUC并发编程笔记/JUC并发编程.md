@@ -5,7 +5,7 @@
 
 > **关键词：`Thread`、`Runnable`、`Callable`、`Future`、`wait`、`notify`、`notifyAll`、`join`、`sleep`、`yeild`、`线程状态`、`线程通信`**
 
-## 线程简介
+## 一、线程简介
 
 ### 什么是进程
 
@@ -21,7 +21,7 @@
 - 线程比进程划分更细，所以执行开销更小，并发性更高。
 - 进程是一个实体，拥有独立的资源；而同一个进程中的多个线程共享进程的资源。
 
-## 创建线程
+## 二、创建线程
 
 创建线程有三种方式：
 
@@ -29,7 +29,7 @@
 - 实现 `Runnable` 接口
 - 实现 `Callable` 接口
 
-### Thread
+### 1.Thread
 
 通过继承 `Thread` 类创建线程的步骤：
 
@@ -70,7 +70,7 @@ public class ThreadDemo {
 }
 ```
 
-### Runnable
+### 2.Runnable
 
 **实现 `Runnable` 接口优于继承 `Thread` 类**，因为：
 
@@ -116,7 +116,7 @@ public class RunnableDemo {
 }
 ```
 
-### Callable、Future、FutureTask - 解决缺陷
+### 3.Callable、Future、FutureTask - 解决缺陷
 
 **继承 Thread 类和实现 Runnable 接口这两种创建线程的方式都没有返回值**。所以，线程执行完后，无法得到执行结果。但如果期望得到执行结果该怎么做？
 
