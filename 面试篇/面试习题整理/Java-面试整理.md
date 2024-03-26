@@ -452,6 +452,14 @@ Java进程运行在各自独立的内存空间中，因此它们不能直接共�
 >
 > 
 
+### 5.1 Volatile底层原理
+
+ConcurrentHashMap、AtomicInteger、FutureTask、ThreadPoolExecutor等功能，它们的底层都使用了volatile关键字
+
+参考： [JMM内存模型.md](../../Java&Spring篇/JMM内存模型.md) 
+
+
+
 ### 6. **锁升级及实现原理？**
 
 Java 中的锁可以根据竞争情况和线程数量进行升级，主要有偏向锁、轻量级锁和重量级锁三种。这些锁的升级过程是为了在保证并发性的同时尽量减少性能开销。
