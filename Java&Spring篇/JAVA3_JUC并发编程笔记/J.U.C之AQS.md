@@ -1,22 +1,19 @@
-<!-- GFM-TOC -->
-* [J.U.C之AQS](#J.U.C之AQS)
-    * [介绍](#介绍)
-    * [设计原理](#设计原理)
-    * [具体实现思路](#具体实现思路)
-    * [同步组件](#同步组件)
-        * [CountDownLatch](#CountDownLatch)
-        * [Semaphore](#Semaphore)
-        * [CyclicBarrier](#CyclicBarrier)
-    * [JUC下的锁](#JUC下的锁)
-        * [ReentrantLock](#ReentrantLock)
-        * [ReentrantReadWriteLock](#ReentrantReadWriteLock)    
-        * [StampedLock](#StampedLock)
-        * [Condition](#Condition)
-    * [总结](#总结)
-    <!-- GFM-TOC -->
+# AQS
 
-# J.U.C之AQS
+》参考资料：[图解AQS](https://www.bilibili.com/video/BV1E14y1E7Q4/?p=4)
+
+AQS就是主要靠里面的Viotale的 state变量来实现的
+
+![image-20240327225937568](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20240327225937568.png)
+
+> CAS 全称是 Compare And Swap，是一种用于在多线程环境下实现同步功能的机制。CAS 操作包含三个操作数：内存位置、预期数值和新值.
+>
+> CAS 的实现逻辑是将内存位置处的数值与预期数值想比较，若相等，则将内存位置处的值替换为新值。若不相等，则不做任何操作。
+
+![image-20240327230016006](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20240327230016006.png)
+
 ## 介绍
+
 Java从1.5之后引入了JUC包，这个包大大提升了并发执行的性能，而AQS就JUC的核心。
 AQS使用了**一个int成员变量表示同步状态，通过内置的FIFO队列来完成资源获
 取线程的排队工作**，这个队列可以用来构建锁或者其他基础框架。
