@@ -35,6 +35,44 @@ DISTINCT和GROUP BY都用于对查询结果进行去重，但它们的用法和�
 
 在性能方面，通常来说使用DISTINCT比使用GROUP BY性能更好，因为DISTINCT只需要找出并返回唯一的值，而GROUP BY需要进行分组操作和聚合计算，消耗的资源更多。所以如果只是简单地去重，推荐使用DISTINCT；如果需要进行分组计算或者聚合操作，就需要使用GROUP BY。
 
+### 3.三个范式
+
+首先是第一范式1NF，要**确保数据库表字段的原子性。**比如字段 userlnfo： 广东省 10086，依照第一范式必须拆分成，userinfo：广东省和userTel（号码）：10086两个字段
+
+然后是第二范式2NF，首先要满足第一范式，另外包含两部分内容，**一是表必须有一个主键**，**二是非主键列必须完全依赖于主建，而不能只依赖于主键的一部分。**假定选课关系表为student course 表有6个字段，分别是student no, student_ name, age， course name, grade, credit，主键为（student no， course name）。其中学分完全依赖于课程名称， 姓名年龄完全依赖学号，不符合第二范式，会导致数据冗余（**学生选n门门课，姓名年龄有n条记录**）、**插入异常（插入一门新课，因为没有学号**，无法保存新课记录）等问题。应该拆分成三个表：学生：student （stuent_no， student_ name， 年龄）课程：'course （course name， credit）选课关系：`'student_ course_ relation （stude nt no, course name， grade）`。
+
+最后是第三范式3NF，首先要满足第二范式，另外**非主键列必须直接依赖于主键，不能存在传递依赖。**即不能存在：非主键列 A 依赖于非主键列 B，非主键列B依赖于主键的情况。假定学生关系表为student表有5个字段，分别为student no, student_ name, age， academy_ id （学院id）academy_ telephone，主键为学号student no，其中学院id依赖于学号，而学院地点和学院电话依赖于学院id，存在传递依赖，不符合第三范式。可以把学生关系表分为如下两个表：学生：（studentno，student name, age，academy_id）学院：（academy_id， academy telephone）。
+
+> 2NF依据是非主键列是否完全依赖于主键，还是依赖于主键的一部分。
+>
+> 3NF依据是非主键列是直接依赖手主键，还是直接依赖于非主键。
+
+
+
+### 窗口排序函数
+
+`RANK`函数
+
+计算排序时，如果存在相同位次的记录，则会跳过之后的位次有了条记录排在第1位时：1位、1位、1位、4位.
+
+`DENSE_RANK`函数
+
+同样是计算排序，即使存在相同位次的记录，也不会跳过之后的位次有了条记录排在第1位时：1位、1位、1位、2位
+
+`ROW_NUMBER`函数赋予唯一的连续位次。
+
+例有3条记录排在第1位时：1位、2位、3位、4位
+
+```sql
+<窗口函数>OVER ([PARTITION BY＜列清单>] ORDER BY<排序用列清单>）
+```
+
+如果不用PARTITION就是直接就会不分类，不根据科目排了，直接根据分数顺序排。
+
+![image-20240330164220631](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/image-20240330164220631.png)
+
+
+
 ## 索引
 
 ### 1.如何优化查询速度？
