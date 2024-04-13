@@ -77,7 +77,7 @@ JVM 并不是在启动时就把所有的`.class`文件都加载一遍，而是�
 
 ```java
 public class Hello {
- 
+  	// 加载，准备，验证，解析，初始化。
     //静态常量 == 准备阶段就赋予自己该有的值
     public static final String staticConstantField = "静态常量";
  
