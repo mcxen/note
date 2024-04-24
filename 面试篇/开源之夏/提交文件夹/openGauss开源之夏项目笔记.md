@@ -639,8 +639,6 @@ GRANT USAGE ON SCHEMA oaauth_1 TO oaauth_role_readonly;
 
 基于Springboot的gauss数据库权限扫描
 
-![image-20230918165423593](C:\Users\mcxen\AppData\Roaming\Typora\typora-user-images\image-20230918165423593.png)
-
 ## 1 在OpenGauss中创建数据库、用户和表
 
 ⚠️ 注意：假设先创建用户A，切换用户A后创建数据库DB，则数据库DB属于用户A；
