@@ -1,6 +1,3 @@
-# JUC并发编程
----
-
 # Java 线程基础
 
 > **关键词：`Thread`、`Runnable`、`Callable`、`Future`、`wait`、`notify`、`notifyAll`、`join`、`sleep`、`yeild`、`线程状态`、`线程通信`**
@@ -719,7 +716,7 @@ public class Piped {
 
 ## 线程生命周期
 
-![img](https://raw.githubusercontent.com/dunwu/images/dev/snap/20210102103928.png)
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/20210102103928.png)
 
 `java.lang.Thread.State` 中定义了 **6** 种不同的线程状态，在给定的一个时刻，线程只能处于其中的一个状态。
 
