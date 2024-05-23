@@ -1,0 +1,198 @@
+{
+  "main": {
+    "id": "29085ad40b706f8c",
+    "type": "split",
+    "children": [
+      {
+        "id": "5f8b547272e8ee3b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "be09bc042a6374a5",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "算法与数据结构篇/算法笔记.md",
+                "mode": "preview",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "0f89b3914cba7c53",
+    "type": "split",
+    "children": [
+      {
+        "id": "ad8c210510ab3b67",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3046b4ae2d460ad8",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "987965bbfdbb5a5e",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "dea7f7a2fb75eebd",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "0d3e99425c232d6a",
+    "type": "split",
+    "children": [
+      {
+        "id": "b1aec2bd274e5fc7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2ce7c9c7b90708b4",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "算法与数据结构篇/算法笔记.md",
+                "collapseAll": true,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "e7a62101b2138eb9",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "算法与数据结构篇/算法笔记.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "34d5261bd57cdda1",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "d52bd68a6993df86",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "算法与数据结构篇/算法笔记.md"
+              }
+            }
+          }
+        ],
+        "currentTab": 3
+      }
+    ],
+    "direction": "horizontal",
+    "width": 374.5
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false
+    }
+  },
+  "active": "be09bc042a6374a5",
+  "lastOpenFiles": [
+    "算法与数据结构篇/KMP算法.md",
+    "算法与数据结构篇/算法笔记.md",
+    "算法与数据结构篇/代码随想录-github/problems/二叉树的迭代遍历.md",
+    "算法与数据结构篇/代码随想录-github/代码随想LeetCode 刷题攻略.md",
+    "算法与数据结构篇/代码随想录-github/problems/0102.二叉树的层序遍历.md",
+    "面试篇/面试习题仓库/RocketMQ 面试题-Javabetter.md",
+    "面试篇/面试习题仓库/RocketMQ-如何保证消息不丢失.md",
+    "面试篇/面试习题仓库/MySQL面试问题整理/bucket/MySQL问题整理.md",
+    "MySQL篇/Mysql简介版/MySQL-基础篇-第4篇-数据库设计.md",
+    "面试篇/面试习题仓库/Java面试题库/MySQL.md",
+    "面试篇/面试习题仓库/Java JVM/Java核心面试题汇总.md",
+    "MySQL篇/MySQL高级篇/第07章 InnoDB数据存储结构.md",
+    "MySQL篇/MySQL高级篇/第06-12章_索引及调优篇.md",
+    "面试篇/面试习题仓库/MySQL面试问题整理/MySQL面试题-第2篇-索引.md",
+    "面试篇/面试习题仓库/MySQL面试问题整理/MySQL面试题-第1篇-基本概念.md",
+    "面试篇/面试习题仓库/MySQL面试问题整理/MySQL- 幻读.md",
+    "面试篇/面试习题仓库/Java面试题库/Spring.md",
+    "面试篇/面试习题仓库/Java面试题库/RocketMQ.md",
+    "面试篇/面试习题仓库/Java面试题库/RabbitMQ.md",
+    "面试篇/面试习题仓库/Java JVM/Java多线程.md",
+    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/集群脑裂导致的数据丢失问题.png",
+    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/脑裂导致数据丢失的问题如何降低损失.png",
+    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/系统处于不可用是什么意思.png",
+    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/异步复制导致的数据丢失问题.png",
+    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/异步复制导致数据丢失如何降低损失.png",
+    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/image-20200422093446392.png",
+    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/复制的完整的基本流程.png",
+    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/什么是99.99%高可用性.png",
+    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/redis的不可用.png",
+    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/redis基于哨兵的高可用性.png",
+    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images",
+    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/README.md",
+    "面试篇/面试习题仓库/进阶版面试题/9_Spring中的事务/images",
+    "面试篇/面试习题仓库/进阶版面试题/9_Spring中的事务/README.md",
+    "面试篇/面试习题仓库/进阶版面试题/8_分布式Session解决方案/images",
+    "面试篇/面试习题仓库/进阶版面试题/8_分布式Session解决方案/README.md",
+    "面试篇/面试习题仓库/进阶版面试题/9_分布式事务解决方案/images",
+    "面试篇/面试习题仓库/进阶版面试题/9_分布式事务解决方案/README.md",
+    "面试篇/面试习题仓库/进阶版面试题/5_Redis的面试连环炮2/images",
+    "面试篇/面试习题仓库/进阶版面试题/5_Redis的面试连环炮2/README.md",
+    "面试篇/面试习题仓库/进阶版面试题/6_分布式系统的面试连环炮/images",
+    "面试篇/面试习题仓库/进阶版面试题/6_分布式系统的面试连环炮/README.md",
+    "面试篇/面试习题仓库/进阶版面试题/7_分布式系统幂等性与顺序性及分布式锁/images",
+    "面试篇/面试习题仓库/进阶版面试题/3_分布式缓存/images",
+    "面试篇/面试习题仓库/进阶版面试题/2_分布式搜索引擎的面试连环炮/images",
+    "面试篇/面试习题仓库/进阶版面试题/1_消息队列的面试连环炮/images"
+  ]
+}
