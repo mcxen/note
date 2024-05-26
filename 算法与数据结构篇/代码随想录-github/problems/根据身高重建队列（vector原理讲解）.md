@@ -1,9 +1,4 @@
 
-<p align="center">
-<a href="https://programmercarl.com/other/xunlianying.html" target="_blank">
-  <img src="../pics/训练营.png" width="1000"/>
-</a>
-<p align="center"><strong><a href="https://mp.weixin.qq.com/s/tqCxrMEU-ajQumL1i8im9A">参与本项目</a>，贡献其他语言版本的代码，拥抱开源，让更多学习算法的小伙伴们收益！</strong></p>
 
 
 
@@ -191,7 +186,3 @@ Go中slice的`append`操作和C++中vector的扩容机制基本相同。
 
 
 
-<p align="center">
-<a href="https://programmercarl.com/other/kstar.html" target="_blank">
-  <img src="../pics/网站星球宣传海报.jpg" width="1000"/>
-</a>

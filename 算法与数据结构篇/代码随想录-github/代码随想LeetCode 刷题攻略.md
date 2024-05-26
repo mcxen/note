@@ -1,8 +1,10 @@
 
 # LeetCode 刷题攻略
 
-
-
+删除广告代码：
+```bash
+find . -name "*.md" -exec sed -i '' '/<p align="center">/,/<\/p>/d' {} +
+```
 
 ## 数组 
 

@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "5f8b547272e8ee3b",
+        "id": "8335bfec9de1c027",
         "type": "tabs",
         "children": [
           {
-            "id": "be09bc042a6374a5",
+            "id": "972babf666380315",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -18,8 +18,21 @@
                 "source": false
               }
             }
+          },
+          {
+            "id": "46a2e4be2dd2c76f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "算法与数据结构篇/算法笔记测试.md",
+                "mode": "source",
+                "source": false
+              }
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -85,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "算法与数据结构篇/算法笔记.md",
+                "file": "算法与数据结构篇/算法笔记测试.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "算法与数据结构篇/算法笔记.md",
+                "file": "算法与数据结构篇/算法笔记测试.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,12 +138,11 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "算法与数据结构篇/算法笔记.md"
+                "file": "算法与数据结构篇/算法笔记测试.md"
               }
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "horizontal",
@@ -146,28 +158,34 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "be09bc042a6374a5",
+  "active": "46a2e4be2dd2c76f",
   "lastOpenFiles": [
-    "算法与数据结构篇/KMP算法.md",
     "算法与数据结构篇/算法笔记.md",
-    "算法与数据结构篇/代码随想录-github/problems/二叉树的迭代遍历.md",
+    "算法与数据结构篇/算法笔记测试.md",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/拓扑排序.md",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/实现计算器.md",
     "算法与数据结构篇/代码随想录-github/代码随想LeetCode 刷题攻略.md",
-    "算法与数据结构篇/代码随想录-github/problems/0102.二叉树的层序遍历.md",
-    "面试篇/面试习题仓库/RocketMQ 面试题-Javabetter.md",
-    "面试篇/面试习题仓库/RocketMQ-如何保证消息不丢失.md",
-    "面试篇/面试习题仓库/MySQL面试问题整理/bucket/MySQL问题整理.md",
-    "MySQL篇/Mysql简介版/MySQL-基础篇-第4篇-数据库设计.md",
-    "面试篇/面试习题仓库/Java面试题库/MySQL.md",
+    "算法与数据结构篇/代码随想录-github/problems/数组理论基础.md",
+    "算法与数据结构篇/代码随想录-github/problems/0077.组合优化.md",
+    "算法与数据结构篇/代码随想录-github/problems/0017.电话号码的字母组合.md",
+    "算法与数据结构篇/代码随想录-github/problems/0020.有效的括号.md",
+    "算法与数据结构篇/代码随想录-github/problems/0024.两两交换链表中的节点.md",
+    "算法与数据结构篇/代码随想录-github/problems/0151.翻转字符串里的单词.md",
+    "算法与数据结构篇/图论详解.md",
+    "算法与数据结构篇/图论基础知识~.md",
+    "算法与数据结构篇/图论基础知识.md",
+    "算法与数据结构篇/代码随想录-github/problems/0383.赎金信.md",
+    "算法与数据结构篇/代码随想录-github/problems/哈希表理论基础.md",
+    "算法与数据结构篇/代码随想录-github/problems/背包理论基础01背包-1.md",
+    "算法与数据结构篇/代码随想录-github/problems/0135.分发糖果.md",
+    "算法与数据结构篇/代码随想录-github/problems/0055.跳跃游戏.md",
+    "算法与数据结构篇/代码随想录-github/problems/0045.跳跃游戏II.md",
+    "算法与数据结构篇/代码随想录-github/problems/0093.复原IP地址.md",
+    "算法与数据结构篇/代码随想录-github/problems/0039.组合总和.md",
     "面试篇/面试习题仓库/Java JVM/Java核心面试题汇总.md",
-    "MySQL篇/MySQL高级篇/第07章 InnoDB数据存储结构.md",
-    "MySQL篇/MySQL高级篇/第06-12章_索引及调优篇.md",
-    "面试篇/面试习题仓库/MySQL面试问题整理/MySQL面试题-第2篇-索引.md",
-    "面试篇/面试习题仓库/MySQL面试问题整理/MySQL面试题-第1篇-基本概念.md",
-    "面试篇/面试习题仓库/MySQL面试问题整理/MySQL- 幻读.md",
-    "面试篇/面试习题仓库/Java面试题库/Spring.md",
-    "面试篇/面试习题仓库/Java面试题库/RocketMQ.md",
-    "面试篇/面试习题仓库/Java面试题库/RabbitMQ.md",
-    "面试篇/面试习题仓库/Java JVM/Java多线程.md",
+    "面试篇/面试习题仓库/Java面试题库/设计模式.md",
+    "Java&Spring篇/JAVA1_基础知识/第17章_反射机制/尚硅谷_宋红康_第17章_反射机制.md",
+    "Java&Spring篇/过滤器和拦截器的区别.md",
     "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/集群脑裂导致的数据丢失问题.png",
     "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/脑裂导致数据丢失的问题如何降低损失.png",
     "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/系统处于不可用是什么意思.png",
@@ -179,17 +197,11 @@
     "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/redis的不可用.png",
     "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/redis基于哨兵的高可用性.png",
     "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images",
-    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/README.md",
     "面试篇/面试习题仓库/进阶版面试题/9_Spring中的事务/images",
-    "面试篇/面试习题仓库/进阶版面试题/9_Spring中的事务/README.md",
     "面试篇/面试习题仓库/进阶版面试题/8_分布式Session解决方案/images",
-    "面试篇/面试习题仓库/进阶版面试题/8_分布式Session解决方案/README.md",
     "面试篇/面试习题仓库/进阶版面试题/9_分布式事务解决方案/images",
-    "面试篇/面试习题仓库/进阶版面试题/9_分布式事务解决方案/README.md",
     "面试篇/面试习题仓库/进阶版面试题/5_Redis的面试连环炮2/images",
-    "面试篇/面试习题仓库/进阶版面试题/5_Redis的面试连环炮2/README.md",
     "面试篇/面试习题仓库/进阶版面试题/6_分布式系统的面试连环炮/images",
-    "面试篇/面试习题仓库/进阶版面试题/6_分布式系统的面试连环炮/README.md",
     "面试篇/面试习题仓库/进阶版面试题/7_分布式系统幂等性与顺序性及分布式锁/images",
     "面试篇/面试习题仓库/进阶版面试题/3_分布式缓存/images",
     "面试篇/面试习题仓库/进阶版面试题/2_分布式搜索引擎的面试连环炮/images",
