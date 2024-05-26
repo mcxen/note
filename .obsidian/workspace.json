@@ -14,7 +14,7 @@
               "type": "markdown",
               "state": {
                 "file": "算法与数据结构篇/算法笔记.md",
-                "mode": "preview",
+                "mode": "source",
                 "source": false
               }
             }
@@ -25,7 +25,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "算法与数据结构篇/算法笔记测试.md",
+                "file": "算法与数据结构篇/算法笔记.md",
                 "mode": "source",
                 "source": false
               }
@@ -98,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "算法与数据结构篇/算法笔记测试.md",
+                "file": "算法与数据结构篇/算法笔记.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -115,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "算法与数据结构篇/算法笔记测试.md",
+                "file": "算法与数据结构篇/算法笔记.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +138,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "算法与数据结构篇/算法笔记测试.md"
+                "file": "算法与数据结构篇/算法笔记.md"
               }
             }
           }
@@ -161,7 +161,8 @@
   "active": "46a2e4be2dd2c76f",
   "lastOpenFiles": [
     "算法与数据结构篇/算法笔记.md",
-    "算法与数据结构篇/算法笔记测试.md",
+    "算法与数据结构篇/算法笔记.md",
+    "算法与数据结构篇/KMP算法.md",
     "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/拓扑排序.md",
     "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/实现计算器.md",
     "算法与数据结构篇/代码随想录-github/代码随想LeetCode 刷题攻略.md",
@@ -185,7 +186,6 @@
     "面试篇/面试习题仓库/Java JVM/Java核心面试题汇总.md",
     "面试篇/面试习题仓库/Java面试题库/设计模式.md",
     "Java&Spring篇/JAVA1_基础知识/第17章_反射机制/尚硅谷_宋红康_第17章_反射机制.md",
-    "Java&Spring篇/过滤器和拦截器的区别.md",
     "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/集群脑裂导致的数据丢失问题.png",
     "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/脑裂导致数据丢失的问题如何降低损失.png",
     "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/系统处于不可用是什么意思.png",
