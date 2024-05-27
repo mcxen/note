@@ -1,7 +1,12 @@
----
-title: 'LRU 缓存淘汰算法设计'
-tags: ['链表', '设计']
----
+# LRU 缓存淘汰算法设计
+
+
+
+
+
+
+
+
 
 
 
@@ -23,19 +28,19 @@ LRU 缓存淘汰算法就是一种常用策略。LRU 的全称是 Least Recently
 
 举个简单的例子，安卓手机都可以把软件放到后台运行，比如我先后打开了「设置」「手机管家」「日历」，那么现在他们在后台排列的顺序是这样的：
 
-![](https://labuladong.github.io/pictures/LRU算法/1.jpg)
+![](https://labuladong.github.io/algo/images/LRU算法/1.jpg)
 
 但是这时候如果我访问了一下「设置」界面，那么「设置」就会被提前到第一个，变成这样：
 
-![](https://labuladong.github.io/pictures/LRU算法/2.jpg)
+![](https://labuladong.github.io/algo/images/LRU算法/2.jpg)
 
 假设我的手机只允许我同时开 3 个应用程序，现在已经满了。那么如果我新开了一个应用「时钟」，就必须关闭一个应用为「时钟」腾出一个位置，关那个呢？
 
 按照 LRU 的策略，就关最底下的「手机管家」，因为那是最久未使用的，然后把新开的应用放到最上面：
 
-![](https://labuladong.github.io/pictures/LRU算法/3.jpg)
+![](https://labuladong.github.io/algo/images/LRU算法/3.jpg)
 
-现在你应该理解 LRU（Least Recently Used）策略了。当然还有其他缓存淘汰策略，比如不要按访问的时序来淘汰，而是按访问频率（LFU 策略）来淘汰等等，各有应用场景。本文讲解 LRU 算法策略，我会在 [LFU 算法详解](https://labuladong.github.io/article/fname.html?fname=LFU) 中讲解 LFU 算法。
+现在你应该理解 LRU（Least Recently Used）策略了。当然还有其他缓存淘汰策略，比如不要按访问的时序来淘汰，而是按访问频率（LFU 策略）来淘汰等等，各有应用场景。本文讲解 LRU 算法策略。
 
 ### 一、LRU 算法描述
 
@@ -45,7 +50,6 @@ LRU 缓存淘汰算法就是一种常用策略。LRU 的全称是 Least Recently
 
 注意哦，`get` 和 `put` 方法必须都是 `O(1)` 的时间复杂度，我们举个具体例子来看看 LRU 算法怎么工作。
 
-<!-- muliti_language -->
 ```java
 /* 缓存容量为 2 */
 LRUCache cache = new LRUCache(2);
@@ -95,7 +99,7 @@ cache.put(1, 4);
 
 LRU 缓存算法的核心数据结构就是哈希链表，双向链表和哈希表的结合体。这个数据结构长这样：
 
-![](https://labuladong.github.io/pictures/LRU算法/4.jpg)
+![](https://labuladong.github.io/algo/images/LRU算法/4.jpg)
 
 借助这个结构，我们来逐一分析上面的 3 个条件：
 
@@ -115,7 +119,6 @@ LRU 缓存算法的核心数据结构就是哈希链表，双向链表和哈希�
 
 首先，我们把双链表的节点类写出来，为了简化，`key` 和 `val` 都认为是 int 类型：
 
-<!-- muliti_language -->
 ```java
 class Node {
     public int key, val;
@@ -129,7 +132,6 @@ class Node {
 
 然后依靠我们的 `Node` 类型构建一个双链表，实现几个 LRU 算法必须的 API：
 
-<!-- muliti_language -->
 ```java
 class DoubleList {  
     // 头尾虚节点
@@ -184,7 +186,6 @@ class DoubleList {
 
 有了双向链表的实现，我们只需要在 LRU 算法中把它和哈希表结合起来即可，先搭出代码框架：
 
-<!-- muliti_language -->
 ```java
 class LRUCache {
     // key -> Node(key, val)
@@ -207,48 +208,42 @@ class LRUCache {
 
 说的有点玄幻，实际上很简单，就是尽量让 LRU 的主方法 `get` 和 `put` 避免直接操作 `map` 和 `cache` 的细节。我们可以先实现下面几个函数：
 
-<!-- muliti_language -->
 ```java
-class LRUCache {
-    // 为了节约篇幅，省略上文给出的代码部分...
-
-    /* 将某个 key 提升为最近使用的 */
-    private void makeRecently(int key) {
-        Node x = map.get(key);
-        // 先从链表中删除这个节点
-        cache.remove(x);
-        // 重新插到队尾
-        cache.addLast(x);
-    }
-
-    /* 添加最近使用的元素 */
-    private void addRecently(int key, int val) {
-        Node x = new Node(key, val);
-        // 链表尾部就是最近使用的元素
-        cache.addLast(x);
-        // 别忘了在 map 中添加 key 的映射
-        map.put(key, x);
-    }
-
-    /* 删除某一个 key */
-    private void deleteKey(int key) {
-        Node x = map.get(key);
-        // 从链表中删除
-        cache.remove(x);
-        // 从 map 中删除
-        map.remove(key);
-    }
-
-    /* 删除最久未使用的元素 */
-    private void removeLeastRecently() {
-        // 链表头部的第一个元素就是最久未使用的
-        Node deletedNode = cache.removeFirst();
-        // 同时别忘了从 map 中删除它的 key
-        int deletedKey = deletedNode.key;
-        map.remove(deletedKey);
-    }
+/* 将某个 key 提升为最近使用的 */
+private void makeRecently(int key) {
+    Node x = map.get(key);
+    // 先从链表中删除这个节点
+    cache.remove(x);
+    // 重新插到队尾
+    cache.addLast(x);
 }
 
+/* 添加最近使用的元素 */
+private void addRecently(int key, int val) {
+    Node x = new Node(key, val);
+    // 链表尾部就是最近使用的元素
+    cache.addLast(x);
+    // 别忘了在 map 中添加 key 的映射
+    map.put(key, x);
+}
+
+/* 删除某一个 key */
+private void deleteKey(int key) {
+    Node x = map.get(key);
+    // 从链表中删除
+    cache.remove(x);
+    // 从 map 中删除
+    map.remove(key);
+}
+
+/* 删除最久未使用的元素 */
+private void removeLeastRecently() {
+    // 链表头部的第一个元素就是最久未使用的
+    Node deletedNode = cache.removeFirst();
+    // 同时别忘了从 map 中删除它的 key
+    int deletedKey = deletedNode.key;
+    map.remove(deletedKey);
+}
 ```
 
 这里就能回答之前的问答题「为什么要在链表中同时存储 key 和 val，而不是只存储 val」，注意 `removeLeastRecently` 函数中，我们需要用 `deletedNode` 得到 `deletedKey`。
@@ -257,55 +252,44 @@ class LRUCache {
 
 上述方法就是简单的操作封装，调用这些函数可以避免直接操作 `cache` 链表和 `map` 哈希表，下面我先来实现 LRU 算法的 `get` 方法：
 
-<!-- muliti_language -->
 ```java
-class LRUCache {
-    // 为了节约篇幅，省略上文给出的代码部分...
-
-    public int get(int key) {
-        if (!map.containsKey(key)) {
-            return -1;
-        }
-        // 将该数据提升为最近使用的
-        makeRecently(key);
-        return map.get(key).val;
+public int get(int key) {
+    if (!map.containsKey(key)) {
+        return -1;
     }
+    // 将该数据提升为最近使用的
+    makeRecently(key);
+    return map.get(key).val;
 }
 ```
 
 `put` 方法稍微复杂一些，我们先来画个图搞清楚它的逻辑：
 
-![](https://labuladong.github.io/pictures/LRU算法/put.jpg)
+![](https://labuladong.github.io/algo/images/LRU算法/put.jpg)
 
 这样我们可以轻松写出 `put` 方法的代码：
 
-<!-- muliti_language -->
 ```java
-class LRUCache {
-    // 为了节约篇幅，省略上文给出的代码部分...
-    
-    public void put(int key, int val) {
-        if (map.containsKey(key)) {
-            // 删除旧的数据
-            deleteKey(key);
-            // 新插入的数据为最近使用的数据
-            addRecently(key, val);
-            return;
-        }
-        
-        if (cap == cache.size()) {
-            // 删除最久未使用的元素
-            removeLeastRecently();
-        }
-        // 添加为最近使用的元素
+public void put(int key, int val) {
+    if (map.containsKey(key)) {
+        // 删除旧的数据
+        deleteKey(key);
+        // 新插入的数据为最近使用的数据
         addRecently(key, val);
+        return;
     }
+    
+    if (cap == cache.size()) {
+        // 删除最久未使用的元素
+        removeLeastRecently();
+    }
+    // 添加为最近使用的元素
+    addRecently(key, val);
 }
 ```
 
 至此，你应该已经完全掌握 LRU 算法的原理和实现了，我们最后用 Java 的内置类型 `LinkedHashMap` 来实现 LRU 算法，逻辑和之前完全一致，我就不过多解释了：
 
-<!-- muliti_language -->
 ```java
 class LRUCache {
     int cap;
@@ -350,42 +334,11 @@ class LRUCache {
 }
 ```
 
-至此，LRU 算法就没有什么神秘的了。更多数据结构设计相关的题目参见 [数据结构设计经典习题](https://appktavsiei5995.pc.xiaoe-tech.com/detail/i_6312b9e5e4b0eca59c2b7e93/1)。
+至此，LRU 算法就没有什么神秘的了。
 
 接下来可阅读：
 
 * [手把手带你实现 LFU 算法](https://labuladong.github.io/article/fname.html?fname=LFU)
-
-
-
-<hr>
-<details>
-<summary><strong>引用本文的文章</strong></summary>
-
- - [一文看懂 session 和 cookie](https://labuladong.github.io/article/fname.html?fname=session和cookie)
- - [常数时间删除/查找数组中的任意元素](https://labuladong.github.io/article/fname.html?fname=随机集合)
- - [数据结构设计：最大栈](https://labuladong.github.io/article/fname.html?fname=最大栈)
- - [算法就像搭乐高：带你手撸 LFU 算法](https://labuladong.github.io/article/fname.html?fname=LFU)
- - [算法笔试「骗分」套路](https://labuladong.github.io/article/fname.html?fname=刷题技巧)
-
-</details><hr>
-
-
-
-
-<hr>
-<details>
-<summary><strong>引用本文的题目</strong></summary>
-
-<strong>安装 [我的 Chrome 刷题插件](https://labuladong.github.io/article/fname.html?fname=chrome插件简介) 点开下列题目可直接查看解题思路：</strong>
-
-| LeetCode | 力扣 |
-| :----: | :----: |
-| - | [剑指 Offer II 031. 最近最少使用缓存](https://leetcode.cn/problems/OrIXps/?show=1) |
-
-</details>
-
-
 
 **＿＿＿＿＿＿＿＿＿＿＿＿＿**
 

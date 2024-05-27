@@ -1,7 +1,10 @@
----
-title: 'Union-Find 算法详解'
-tags: ['并查集', '图论算法', '数据结构']
----
+# Union-Find 算法详解
+
+
+
+
+
+
 
 
 
@@ -16,31 +19,22 @@ tags: ['并查集', '图论算法', '数据结构']
 
 **-----------**
 
-记得我之前在讲 [图论算法基础](https://labuladong.github.io/article/fname.html?fname=图) 时说图论相关的算法不会经常考，但最近被打脸了，因为一些读者和我反馈近期求职面试涉及很多图论相关的算法，可能是因为环境不好所以算法这块更卷了吧。
+今天讲讲 Union-Find 算法，也就是常说的并查集（Disjoint Set）结构，主要是解决图论中「动态连通性」问题的。名词很高端，其实特别好理解，等会解释，另外这个算法的应用都非常有趣。
 
-常见的图论算法我都已经写过了，这里按难度顺序列举一下：
+说起这个 Union-Find，应该算是我的「启蒙算法」了，因为《算法4》的开头就介绍了这款算法，可是把我秀翻了，感觉好精妙啊！
 
-1. [图论算法基础](https://labuladong.github.io/article/fname.html?fname=图)
-2. [二分图判定算法及应用](https://labuladong.github.io/article/fname.html?fname=二分图)
-3. [环检测/拓扑排序算法及应用](https://labuladong.github.io/article/fname.html?fname=拓扑排序)
-4. 并查集算法及应用（本文）
-5. [Kruskal 最小生成树算法及应用](https://labuladong.github.io/article/fname.html?fname=kruskal)
-6. [Prim 最小生成树算法及应用](https://labuladong.github.io/article/fname.html?fname=prim算法)
-7. [Dijkstra 算法模板及应用](https://labuladong.github.io/article/fname.html?fname=dijkstra算法)
+后来刷了 LeetCode，并查集相关的算法题目都非常有意思，而且《算法4》给的解法竟然还可以进一步优化，只要加一个微小的修改就可以把时间复杂度降到 O(1)。
 
-并查集（Union-Find）算法是一个专门针对「动态连通性」的算法，我之前写过两次，因为这个算法的考察频率高，而且它也是最小生成树算法的前置知识，所以我整合了本文，争取一篇文章把这个算法讲明白。
+废话不多说，直接上干货，先解释一下什么叫动态连通性吧。
 
-首先，从什么是图的动态连通性开始讲。
-
-### 一、动态连通性
+### 一、问题介绍
 
 简单说，动态连通性其实可以抽象成给一幅图连线。比如下面这幅图，总共有 10 个节点，他们互不相连，分别用 0~9 标记：
 
-![](https://labuladong.github.io/pictures/unionfind/1.jpg)
+![](https://labuladong.github.io/algo/images/unionfind/1.jpg)
 
 现在我们的 Union-Find 算法主要需要实现这两个 API：
 
-<!-- muliti_language -->
 ```java
 class UF {
     /* 将 p 和 q 连接 */
@@ -66,7 +60,7 @@ class UF {
 
 再调用 `union(1, 2)`，这时 0,1,2 都被连通，调用 `connected(0, 2)` 也会返回 true，连通分量变为 8 个。
 
-![](https://labuladong.github.io/pictures/unionfind/2.jpg)
+![](https://labuladong.github.io/algo/images/unionfind/2.jpg)
 
 判断这种「等价关系」非常实用，比如说编译器判断同一个变量的不同引用，比如社交网络中的朋友圈计算等等。
 
@@ -78,9 +72,8 @@ class UF {
 
 怎么用森林来表示连通性呢？我们设定树的每个节点有一个指针指向其父节点，如果是根节点的话，这个指针指向自己。比如说刚才那幅 10 个节点的图，一开始的时候没有相互连通，就是这样：
 
-![](https://labuladong.github.io/pictures/unionfind/3.jpg)
+![](https://labuladong.github.io/algo/images/unionfind/3.jpg)
 
-<!-- muliti_language -->
 ```java
 class UF {
     // 记录连通分量
@@ -104,53 +97,43 @@ class UF {
 
 **如果某两个节点被连通，则让其中的（任意）一个节点的根节点接到另一个节点的根节点上**：
 
-![](https://labuladong.github.io/pictures/unionfind/4.jpg)
+![](https://labuladong.github.io/algo/images/unionfind/4.jpg)
 
-<!-- muliti_language -->
 ```java
-class UF {
-    // 为了节约篇幅，省略上文给出的代码部分...
+public void union(int p, int q) {
+    int rootP = find(p);
+    int rootQ = find(q);
+    if (rootP == rootQ)
+        return;
+    // 将两棵树合并为一棵
+    parent[rootP] = rootQ;
+    // parent[rootQ] = rootP 也一样
+    count--; // 两个分量合二为一
+}
 
-    public void union(int p, int q) {
-        int rootP = find(p);
-        int rootQ = find(q);
-        if (rootP == rootQ)
-            return;
-        // 将两棵树合并为一棵
-        parent[rootP] = rootQ;
-        // parent[rootQ] = rootP 也一样
-        count--; // 两个分量合二为一
-    }
+/* 返回某个节点 x 的根节点 */
+private int find(int x) {
+    // 根节点的 parent[x] == x
+    while (parent[x] != x)
+        x = parent[x];
+    return x;
+}
 
-    /* 返回某个节点 x 的根节点 */
-    private int find(int x) {
-        // 根节点的 parent[x] == x
-        while (parent[x] != x)
-            x = parent[x];
-        return x;
-    }
-
-    /* 返回当前的连通分量个数 */
-    public int count() { 
-        return count;
-    }
+/* 返回当前的连通分量个数 */
+public int count() { 
+    return count;
 }
 ```
 
 **这样，如果节点 `p` 和 `q` 连通的话，它们一定拥有相同的根节点**：
 
-![](https://labuladong.github.io/pictures/unionfind/5.jpg)
+![](https://labuladong.github.io/algo/images/unionfind/5.jpg)
 
-<!-- muliti_language -->
 ```java
-class UF {
-    // 为了节约篇幅，省略上文给出的代码部分...
-
-    public boolean connected(int p, int q) {
-        int rootP = find(p);
-        int rootQ = find(q);
-        return rootP == rootQ;
-    }
+public boolean connected(int p, int q) {
+    int rootP = find(p);
+    int rootQ = find(q);
+    return rootP == rootQ;
 }
 ```
 
@@ -160,7 +143,7 @@ class UF {
 
 `find` 主要功能就是从某个节点向上遍历到树根，其时间复杂度就是树的高度。我们可能习惯性地认为树的高度就是 `logN`，但这并不一定。`logN` 的高度只存在于平衡二叉树，对于一般的树可能出现极端不平衡的情况，使得「树」几乎退化成「链表」，树的高度最坏情况下可能变成  `N`。
 
-![](https://labuladong.github.io/pictures/unionfind/6.jpg)
+![](https://labuladong.github.io/algo/images/unionfind/6.jpg)
 
 所以说上面这种解法，`find` , `union` , `connected` 的时间复杂度都是 O(N)。这个复杂度很不理想的，你想图论解决的都是诸如社交网络这样数据规模巨大的问题，对于 `union` 和 `connected` 的调用非常频繁，每次调用需要线性时间完全不可忍受。
 
@@ -170,31 +153,24 @@ class UF {
 
 我们要知道哪种情况下可能出现不平衡现象，关键在于 `union` 过程：
 
-<!-- muliti_language -->
 ```java
-class UF {
-    // 为了节约篇幅，省略上文给出的代码部分...
-
-    public void union(int p, int q) {
-        int rootP = find(p);
-        int rootQ = find(q);
-        if (rootP == rootQ)
-            return;
-        // 将两棵树合并为一棵
-        parent[rootP] = rootQ;
-        // parent[rootQ] = rootP 也可以
-        count--;
-    }
-}
+public void union(int p, int q) {
+    int rootP = find(p);
+    int rootQ = find(q);
+    if (rootP == rootQ)
+        return;
+    // 将两棵树合并为一棵
+    parent[rootP] = rootQ;
+    // parent[rootQ] = rootP 也可以
+    count--;
 ```
 
 我们一开始就是简单粗暴的把 `p` 所在的树接到 `q` 所在的树的根节点下面，那么这里就可能出现「头重脚轻」的不平衡状况，比如下面这种局面：
 
-![](https://labuladong.github.io/pictures/unionfind/7.jpg)
+![](https://labuladong.github.io/algo/images/unionfind/7.jpg)
 
 长此以往，树可能生长得很不平衡。**我们其实是希望，小一些的树接到大一些的树下面，这样就能避免头重脚轻，更平衡一些**。解决方法是额外使用一个 `size` 数组，记录每棵树包含的节点数，我们不妨称为「重量」：
 
-<!-- muliti_language -->
 ```java
 class UF {
     private int count;
@@ -219,29 +195,23 @@ class UF {
 
 比如说 `size[3] = 5` 表示，以节点 `3` 为根的那棵树，总共有 `5` 个节点。这样我们可以修改一下 `union` 方法：
 
-<!-- muliti_language -->
 ```java
-class UF {
-    // 为了节约篇幅，省略上文给出的代码部分...
-
-    public void union(int p, int q) {
-        int rootP = find(p);
-        int rootQ = find(q);
-        if (rootP == rootQ)
-            return;
-        
-        // 小树接到大树下面，较平衡
-        if (size[rootP] > size[rootQ]) {
-            parent[rootQ] = rootP;
-            size[rootP] += size[rootQ];
-        } else {
-            parent[rootP] = rootQ;
-            size[rootQ] += size[rootP];
-        }
-        count--;
+public void union(int p, int q) {
+    int rootP = find(p);
+    int rootQ = find(q);
+    if (rootP == rootQ)
+        return;
+    
+    // 小树接到大树下面，较平衡
+    if (size[rootP] > size[rootQ]) {
+        parent[rootQ] = rootP;
+        size[rootP] += size[rootQ];
+    } else {
+        parent[rootP] = rootQ;
+        size[rootQ] += size[rootP];
     }
+    count--;
 }
-
 ```
 
 这样，通过比较树的重量，就可以保证树的生长相对平衡，树的高度大致在 `logN` 这个数量级，极大提升执行效率。
@@ -256,7 +226,7 @@ class UF {
 
 因为无论树长啥样，树上的每个节点的根节点都是相同的，所以能不能进一步压缩每棵树的高度，使树高始终保持为常数？
 
-![](https://labuladong.github.io/pictures/unionfind/8.jpg)
+![](https://labuladong.github.io/algo/images/unionfind/8.jpg)
 
 这样每个节点的父节点就是整棵树的根节点，`find` 就能以 O(1) 的时间找到某一节点的根节点，相应的，`connected` 和 `union` 复杂度都下降为 O(1)。
 
@@ -264,51 +234,39 @@ class UF {
 
 第一种是在 `find` 中加一行代码：
 
-<!-- muliti_language -->
 ```java
-class UF {
-    // 为了节约篇幅，省略上文给出的代码部分...
-
-    private int find(int x) {
-        while (parent[x] != x) {
-            // 这行代码进行路径压缩
-            parent[x] = parent[parent[x]];
-            x = parent[x];
-        }
-        return x;
+private int find(int x) {
+    while (parent[x] != x) {
+        // 这行代码进行路径压缩
+        parent[x] = parent[parent[x]];
+        x = parent[x];
     }
+    return x;
 }
 ```
 
 这个操作有点匪夷所思，看个 GIF 就明白它的作用了（为清晰起见，这棵树比较极端）：
 
-![](https://labuladong.github.io/pictures/unionfind/9.gif)
+![](https://labuladong.github.io/algo/images/unionfind/9.gif)
 
-用语言描述就是，每次 while 循环都会让部分子节点向上移动，这样每次调用 `find` 函数向树根遍历的同时，顺手就将树高缩短了。
+用语言描述就是，每次 while 循环都会把一对儿父子节点改到同一层，这样每次调用 `find` 函数向树根遍历的同时，顺手就将树高缩短了。
 
 路径压缩的第二种写法是这样：
 
-<!-- muliti_language -->
 ```java
-class UF {
-    // 为了节约篇幅，省略上文给出的代码部分...
-    
-    // 第二种路径压缩的 find 方法
-    public int find(int x) {
-        if (parent[x] != x) {
-            parent[x] = find(parent[x]);
-        }
-        return parent[x];
+// 第二种路径压缩的 find 方法
+public int find(int x) {
+    if (parent[x] != x) {
+        parent[x] = find(parent[x]);
     }
+    return parent[x];
 }
-
 ```
 
 我一度认为这种递归写法和第一种迭代写法做的事情一样，但实际上是我大意了，有读者指出这种写法进行路径压缩的效率是高于上一种解法的。
 
 这个递归过程有点不好理解，你可以自己手画一下递归过程。我把这个函数做的事情翻译成迭代形式，方便你理解它进行路径压缩的原理：
 
-<!-- muliti_language -->
 ```java
 // 这段迭代代码方便你理解递归代码所做的事情
 public int find(int x) {
@@ -330,13 +288,12 @@ public int find(int x) {
 
 这种路径压缩的效果如下：
 
-![](https://labuladong.github.io/pictures/unionfind/10.jpeg)
+![](https://labuladong.github.io/algo/images/unionfind/10.jpeg)
 
 比起第一种路径压缩，显然这种方法压缩得更彻底，直接把一整条树枝压平，一点意外都没有。就算一些极端情况下产生了一棵比较高的树，只要一次路径压缩就能大幅降低树高，从 [摊还分析](https://labuladong.github.io/article/fname.html?fname=时间复杂度) 的角度来看，所有操作的平均时间复杂度依然是 O(1)，所以从效率的角度来说，推荐你使用这种路径压缩算法。
 
 **另外，如果使用路径压缩技巧，那么 `size` 数组的平衡优化就不是特别必要了**。所以你一般看到的 Union Find 算法应该是如下实现：
 
-<!-- muliti_language -->
 ```java
 class UF {
     // 连通分量个数
@@ -407,14 +364,12 @@ Union-Find 算法的复杂度可以这样分析：构造函数初始化数据结
 
 函数签名如下：
 
-<!-- muliti_language -->
 ```java
 int countComponents(int n, int[][] edges)
 ```
 
 这道题我们可以直接套用 `UF` 类来解决：
 
-<!-- muliti_language -->
 ```java
 public int countComponents(int n, int[][] edges) {
     UF uf = new UF(n);
@@ -437,16 +392,15 @@ class UF {
 
 给你一个 M×N 的二维矩阵，其中包含字符 `X` 和 `O`，让你找到矩阵中**四面**被 `X` 围住的 `O`，并且把它们替换成 `X`。
 
-<!-- muliti_language -->
 ```java
 void solve(char[][] board);
 ```
 
 注意哦，必须是四面被围的 `O` 才能被换成 `X`，也就是说边角上的 `O` 一定不会被围，进一步，与边角上的 `O` 相连的 `O` 也不会被 `X` 围四面，也不会被替换。
 
-![](https://labuladong.github.io/pictures/unionfind应用/2.jpg)
+![](https://labuladong.github.io/algo/images/unionfind应用/2.jpg)
 
-> note：这让我想起小时候玩的棋类游戏「黑白棋」，只要你用两个棋子把对方的棋子夹在中间，对方的子就被替换成你的子。可见，占据四角的棋子是无敌的，与其相连的边棋子也是无敌的（无法被夹掉）。
+> PS：这让我想起小时候玩的棋类游戏「黑白棋」，只要你用两个棋子把对方的棋子夹在中间，对方的子就被替换成你的子。可见，占据四角的棋子是无敌的，与其相连的边棋子也是无敌的（无法被夹掉）。
 
 其实这个问题应该归为 [岛屿系列问题](https://labuladong.github.io/article/fname.html?fname=岛屿题目) 使用 DFS 算法解决：
 
@@ -456,7 +410,7 @@ void solve(char[][] board);
 
 **你可以把那些不需要被替换的 `O` 看成一个拥有独门绝技的门派，它们有一个共同「祖师爷」叫 `dummy`，这些 `O` 和 `dummy` 互相连通，而那些需要被替换的 `O` 与 `dummy` 不连通**。
 
-![](https://labuladong.github.io/pictures/unionfind应用/3.jpg)
+![](https://labuladong.github.io/algo/images/unionfind应用/3.jpg)
 
 这就是 Union-Find 的核心思路，明白这个图，就很容易看懂代码了。
 
@@ -468,7 +422,6 @@ void solve(char[][] board);
 
 看解法代码：
 
-<!-- muliti_language -->
 ```java
 void solve(char[][] board) {
     if (board.length == 0) return;
@@ -532,7 +485,6 @@ class UF {
 
 **核心思想是，将 `equations` 中的算式根据 `==` 和 `!=` 分成两部分，先处理 `==` 算式，使得他们通过相等关系各自勾结成门派（连通分量）；然后处理 `!=` 算式，检查不等关系是否破坏了相等关系的连通性**。
 
-<!-- muliti_language -->
 ```java
 boolean equationsPossible(String[] equations) {
     // 26 个英文字母
@@ -566,45 +518,6 @@ class UF {
 至此，这道判断算式合法性的问题就解决了，借助 Union-Find 算法，是不是很简单呢？
 
 最后，Union-Find 算法也会在一些其他经典图论算法中用到，比如判断「图」和「树」，以及最小生成树的计算，详情见 [Kruskal 最小生成树算法](https://labuladong.github.io/article/fname.html?fname=kruskal)。
-
-
-
-<hr>
-<details>
-<summary><strong>引用本文的文章</strong></summary>
-
- - [Dijkstra 算法模板及应用](https://labuladong.github.io/article/fname.html?fname=dijkstra算法)
- - [Kruskal 最小生成树算法](https://labuladong.github.io/article/fname.html?fname=kruskal)
- - [Prim 最小生成树算法](https://labuladong.github.io/article/fname.html?fname=prim算法)
- - [一文秒杀所有岛屿题目](https://labuladong.github.io/article/fname.html?fname=岛屿题目)
- - [二分图判定算法](https://labuladong.github.io/article/fname.html?fname=二分图)
- - [我的刷题心得](https://labuladong.github.io/article/fname.html?fname=算法心得)
- - [番外：用算法打败算法](https://labuladong.github.io/article/fname.html?fname=PDF中的算法)
-
-</details><hr>
-
-
-
-
-<hr>
-<details>
-<summary><strong>引用本文的题目</strong></summary>
-
-<strong>安装 [我的 Chrome 刷题插件](https://labuladong.github.io/article/fname.html?fname=chrome插件简介) 点开下列题目可直接查看解题思路：</strong>
-
-| LeetCode | 力扣 |
-| :----: | :----: |
-| [1361. Validate Binary Tree Nodes](https://leetcode.com/problems/validate-binary-tree-nodes/?show=1) | [1361. 验证二叉树](https://leetcode.cn/problems/validate-binary-tree-nodes/?show=1) |
-| [200. Number of Islands](https://leetcode.com/problems/number-of-islands/?show=1) | [200. 岛屿数量](https://leetcode.cn/problems/number-of-islands/?show=1) |
-| [261. Graph Valid Tree](https://leetcode.com/problems/graph-valid-tree/?show=1)🔒 | [261. 以图判树](https://leetcode.cn/problems/graph-valid-tree/?show=1)🔒 |
-| [368. Largest Divisible Subset](https://leetcode.com/problems/largest-divisible-subset/?show=1) | [368. 最大整除子集](https://leetcode.cn/problems/largest-divisible-subset/?show=1) |
-| [582. Kill Process](https://leetcode.com/problems/kill-process/?show=1)🔒 | [582. 杀掉进程](https://leetcode.cn/problems/kill-process/?show=1)🔒 |
-| [765. Couples Holding Hands](https://leetcode.com/problems/couples-holding-hands/?show=1) | [765. 情侣牵手](https://leetcode.cn/problems/couples-holding-hands/?show=1) |
-| [947. Most Stones Removed with Same Row or Column](https://leetcode.com/problems/most-stones-removed-with-same-row-or-column/?show=1) | [947. 移除最多的同行或同列石头](https://leetcode.cn/problems/most-stones-removed-with-same-row-or-column/?show=1) |
-
-</details>
-
-
 
 **＿＿＿＿＿＿＿＿＿＿＿＿＿**
 

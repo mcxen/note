@@ -1,7 +1,10 @@
----
-title: '如何k个一组反转链表'
-tags: ['数据结构', '链表', '递归']
----
+# 如何k个一组反转链表
+
+
+
+
+
+
 
 
 
@@ -14,13 +17,11 @@ tags: ['数据结构', '链表', '递归']
 
 **-----------**
 
-之前的文章 [递归反转链表的一部分](https://labuladong.github.io/article/fname.html?fname=递归反转链表的一部分) 讲了如何递归地反转一部分链表，有读者就问如何迭代地反转链表，那么这篇文章的第一部分就会讲一讲如何用迭代方式解决反转单链表的问题。
+之前的文章「递归反转链表的一部分」讲了如何递归地反转一部分链表，有读者就问如何迭代地反转链表，这篇文章解决的问题也需要反转链表的函数，我们不妨就用迭代方式来解决。
 
-有了这个反转函数之后，我们还是会用递归的方式解决力扣第 25 题「K 个一组翻转链表」，所以检验你递归思维的时候到了，准备好了吗？
+本文要解决力扣第 25 题「K 个一组翻转链表」，题目不难理解：
 
-先看下题目，不难理解：
-
-![](https://labuladong.github.io/pictures/kgroup/title.png)
+![](https://labuladong.github.io/algo/images/kgroup/title.png)
 
 这个问题经常在面经中看到，而且力扣上难度是 Hard，它真的有那么难吗？
 
@@ -32,11 +33,11 @@ tags: ['数据结构', '链表', '递归']
 
 什么叫递归性质？直接上图理解，比如说我们对这个链表调用 `reverseKGroup(head, 2)`，即以 2 个节点为一组反转链表：
 
-![](https://labuladong.github.io/pictures/kgroup/1.jpg)
+![](https://labuladong.github.io/algo/images/kgroup/1.jpg)
 
 如果我设法把前 2 个节点反转，那么后面的那些节点怎么处理？后面的这些节点也是一条链表，而且规模（长度）比原来这条链表小，这就叫**子问题**。
 
-![](https://labuladong.github.io/pictures/kgroup/2.jpg)
+![](https://labuladong.github.io/algo/images/kgroup/2.jpg)
 
 我们可以把原先的 `head` 指针移动到后面这一段链表的开头，然后继续递归调用 `reverseKGroup(head, 2)`，因为子问题（后面这部分链表）和原问题（整条链表）的结构完全相同，这就是所谓的递归性质。
 
@@ -44,15 +45,15 @@ tags: ['数据结构', '链表', '递归']
 
 **1、先反转以 `head` 开头的 `k` 个元素**。
 
-![](https://labuladong.github.io/pictures/kgroup/3.jpg)
+![](https://labuladong.github.io/algo/images/kgroup/3.jpg)
 
 **2、将第 `k + 1` 个元素作为 `head` 递归调用 `reverseKGroup` 函数**。
 
-![](https://labuladong.github.io/pictures/kgroup/4.jpg)
+![](https://labuladong.github.io/algo/images/kgroup/4.jpg)
 
 **3、将上述两个过程的结果连接起来**。
 
-![](https://labuladong.github.io/pictures/kgroup/5.jpg)
+![](https://labuladong.github.io/algo/images/kgroup/5.jpg)
 
 整体思路就是这样了，最后一点值得注意的是，递归函数都有个 base case，对于这个问题是什么呢？
 
@@ -62,7 +63,6 @@ tags: ['数据结构', '链表', '递归']
 
 首先，我们要实现一个 `reverse` 函数反转一个区间之内的元素。在此之前我们再简化一下，给定链表头结点，如何反转整个链表？
 
-<!-- muliti_language -->
 ```java
 // 反转以 a 为头结点的链表
 ListNode reverse(ListNode a) {
@@ -83,7 +83,7 @@ ListNode reverse(ListNode a) {
 
 算法执行的过程如下 GIF 所示：：
 
-![](https://labuladong.github.io/pictures/kgroup/8.gif)
+![](https://labuladong.github.io/algo/images/kgroup/8.gif)
 
 这次使用迭代思路来实现的，借助动画理解应该很容易。
 
@@ -91,7 +91,6 @@ ListNode reverse(ListNode a) {
 
 只要更改函数签名，并把上面的代码中 `null` 改成 `b` 即可：
 
-<!-- muliti_language -->
 ```java
 /** 反转区间 [a, b) 的元素，注意是左闭右开 */
 ListNode reverse(ListNode a, ListNode b) {
@@ -111,7 +110,6 @@ ListNode reverse(ListNode a, ListNode b) {
 
 现在我们迭代实现了反转部分链表的功能，接下来就按照之前的逻辑编写 `reverseKGroup` 函数即可：
 
-<!-- muliti_language -->
 ```java
 ListNode reverseKGroup(ListNode head, int k) {
     if (head == null) return null;
@@ -133,13 +131,11 @@ ListNode reverseKGroup(ListNode head, int k) {
 
 解释一下 `for` 循环之后的几句代码，注意 `reverse` 函数是反转区间 `[a, b)`，所以情形是这样的：
 
-![](https://labuladong.github.io/pictures/kgroup/6.jpg)
+![](https://labuladong.github.io/algo/images/kgroup/6.jpg)
 
 递归部分就不展开了，整个函数递归完成之后就是这个结果，完全符合题意：
 
-![](https://labuladong.github.io/pictures/kgroup/7.jpg)
-
-<visual slug='reverse-nodes-in-k-group'/>
+![](https://labuladong.github.io/algo/images/kgroup/7.jpg)
 
 ### 三、最后说两句
 
@@ -147,36 +143,9 @@ ListNode reverseKGroup(ListNode head, int k) {
 
 大家喜欢看动态规划相关的问题，可能因为面试很常见，但就我个人理解，很多算法思想都是源于数据结构的。我们公众号的成名之作之一，[学习数据结构的框架思维](https://labuladong.github.io/article/fname.html?fname=学习数据结构和算法的高效方法) 就提过，什么动规、回溯、分治算法，其实都是树的遍历，树这种结构它不就是个多叉链表吗？你能处理基本数据结构的问题，解决一般的算法问题应该也不会太费事。
 
-那么如何分解问题、发现递归性质呢？这个只能多练习，我在数据结构精品课中讲解了 [单链表的递归实现](https://aep.h5.xeknow.com/s/1RQzXc)，应该能够让你进一步加深对递归的理解。
+那么如何分解问题、发现递归性质呢？这个只能多练习，也许后续可以专门写一篇文章来探讨一下，本文就到此为止吧，希望对大家有帮助！
 
-
-
-<hr>
-<details>
-<summary><strong>引用本文的文章</strong></summary>
-
- - [东哥带你刷二叉树（思路篇）](https://labuladong.github.io/article/fname.html?fname=二叉树系列1)
- - [算法笔试「骗分」套路](https://labuladong.github.io/article/fname.html?fname=刷题技巧)
- - [递归魔法：反转单链表](https://labuladong.github.io/article/fname.html?fname=递归反转链表的一部分)
-
-</details><hr>
-
-
-
-
-<hr>
-<details>
-<summary><strong>引用本文的题目</strong></summary>
-
-<strong>安装 [我的 Chrome 刷题插件](https://labuladong.github.io/article/fname.html?fname=chrome插件简介) 点开下列题目可直接查看解题思路：</strong>
-
-| LeetCode | 力扣 |
-| :----: | :----: |
-| [24. Swap Nodes in Pairs](https://leetcode.com/problems/swap-nodes-in-pairs/?show=1) | [24. 两两交换链表中的节点](https://leetcode.cn/problems/swap-nodes-in-pairs/?show=1) |
-
-</details>
-
-
+> 最后打个广告，我亲自制作了一门 [数据结构精品课](https://aep.h5.xeknow.com/s/1XJHEO)，以视频课为主，手把手带你实现常用的数据结构及相关算法，旨在帮助算法基础较为薄弱的读者深入理解常用数据结构的底层原理，在算法学习中少走弯路。
 
 **＿＿＿＿＿＿＿＿＿＿＿＿＿**
 

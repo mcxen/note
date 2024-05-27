@@ -4,47 +4,22 @@
     "type": "split",
     "children": [
       {
-        "id": "8335bfec9de1c027",
+        "id": "1f307a5ae0147375",
         "type": "tabs",
         "children": [
           {
-            "id": "972babf666380315",
+            "id": "171139c8e02ea4a4",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "算法与数据结构篇/算法笔记.md",
+                "file": "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/图论/Union-Find 并查集算法详解.md",
                 "mode": "source",
                 "source": false
               }
             }
-          },
-          {
-            "id": "46a2e4be2dd2c76f",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "算法与数据结构篇/算法笔记.md",
-                "mode": "preview",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "89eb27dd3749bb1e",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "算法与数据结构篇/算法笔记测试.md",
-                "mode": "preview",
-                "source": false
-              }
-            }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -110,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "算法与数据结构篇/算法笔记测试.md",
+                "file": "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/图论/Union-Find 并查集算法详解.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -127,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "算法与数据结构篇/算法笔记测试.md",
+                "file": "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/图论/Union-Find 并查集算法详解.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -150,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "算法与数据结构篇/算法笔记测试.md"
+                "file": "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/图论/Union-Find 并查集算法详解.md"
               }
             }
           }
@@ -159,7 +134,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 374.5
+    "width": 271.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -171,52 +146,53 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "89eb27dd3749bb1e",
+  "active": "3046b4ae2d460ad8",
   "lastOpenFiles": [
-    "算法与数据结构篇/算法笔记.md",
-    "算法与数据结构篇/算法笔记测试.md",
-    "算法与数据结构篇/KMP算法.md",
-    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/拓扑排序.md",
-    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/实现计算器.md",
-    "算法与数据结构篇/代码随想录-github/代码随想LeetCode 刷题攻略.md",
-    "算法与数据结构篇/代码随想录-github/problems/数组理论基础.md",
-    "算法与数据结构篇/代码随想录-github/problems/0077.组合优化.md",
-    "算法与数据结构篇/代码随想录-github/problems/0017.电话号码的字母组合.md",
-    "算法与数据结构篇/代码随想录-github/problems/0020.有效的括号.md",
-    "算法与数据结构篇/代码随想录-github/problems/0024.两两交换链表中的节点.md",
-    "算法与数据结构篇/代码随想录-github/problems/0151.翻转字符串里的单词.md",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/图论",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/图论/最小生成树-图论.md",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/图论/Union-Find 并查集算法详解.md",
+    "算法与数据结构篇/labuladong算法笔记-github/README.md",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/README.md",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/图论/图论基础-1.md",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/图论/二分图的判定-图论3.md",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/图论/拓扑排序-图论2.md",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/BST1.md",
     "算法与数据结构篇/图论详解.md",
-    "算法与数据结构篇/图论基础知识~.md",
-    "算法与数据结构篇/图论基础知识.md",
-    "算法与数据结构篇/代码随想录-github/problems/0383.赎金信.md",
-    "算法与数据结构篇/代码随想录-github/problems/哈希表理论基础.md",
-    "算法与数据结构篇/代码随想录-github/problems/背包理论基础01背包-1.md",
-    "算法与数据结构篇/代码随想录-github/problems/0135.分发糖果.md",
-    "算法与数据结构篇/代码随想录-github/problems/0055.跳跃游戏.md",
-    "算法与数据结构篇/代码随想录-github/problems/0045.跳跃游戏II.md",
-    "算法与数据结构篇/代码随想录-github/problems/0093.复原IP地址.md",
-    "算法与数据结构篇/代码随想录-github/problems/0039.组合总和.md",
-    "面试篇/面试习题仓库/Java JVM/Java核心面试题汇总.md",
-    "面试篇/面试习题仓库/Java面试题库/设计模式.md",
-    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/集群脑裂导致的数据丢失问题.png",
-    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/脑裂导致数据丢失的问题如何降低损失.png",
-    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/系统处于不可用是什么意思.png",
-    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/异步复制导致的数据丢失问题.png",
-    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/异步复制导致数据丢失如何降低损失.png",
-    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/image-20200422093446392.png",
-    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/复制的完整的基本流程.png",
-    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/什么是99.99%高可用性.png",
-    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/redis的不可用.png",
-    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images/redis基于哨兵的高可用性.png",
-    "面试篇/面试习题仓库/进阶版面试题/4_Redis的面试连环炮/images",
-    "面试篇/面试习题仓库/进阶版面试题/9_Spring中的事务/images",
-    "面试篇/面试习题仓库/进阶版面试题/8_分布式Session解决方案/images",
-    "面试篇/面试习题仓库/进阶版面试题/9_分布式事务解决方案/images",
-    "面试篇/面试习题仓库/进阶版面试题/5_Redis的面试连环炮2/images",
-    "面试篇/面试习题仓库/进阶版面试题/6_分布式系统的面试连环炮/images",
-    "面试篇/面试习题仓库/进阶版面试题/7_分布式系统幂等性与顺序性及分布式锁/images",
-    "面试篇/面试习题仓库/进阶版面试题/3_分布式缓存/images",
-    "面试篇/面试习题仓库/进阶版面试题/2_分布式搜索引擎的面试连环炮/images",
-    "面试篇/面试习题仓库/进阶版面试题/1_消息队列的面试连环炮/images"
+    "算法与数据结构篇/算法笔记.md",
+    "算法与数据结构篇/labuladong算法笔记-github/动态规划系列/最长公共子序列~.md",
+    "算法与数据结构篇/labuladong算法笔记-github/高频面试系列/README.md",
+    "算法与数据结构篇/labuladong算法笔记-github/高频面试系列/随机权重.md",
+    "算法与数据结构篇/labuladong算法笔记-github/高频面试系列/名人问题.md",
+    "算法与数据结构篇/labuladong算法笔记-github/高频面试系列/二分运用.md",
+    "算法与数据结构篇/labuladong算法笔记-github/高频面试系列/岛屿题目.md",
+    "算法与数据结构篇/labuladong算法笔记-github/高频面试系列/安排会议室.md",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/图论/dijkstra算法.md",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/BST2.md",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/二叉树总结.md",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/二叉树系列2.md",
+    "算法与数据结构篇/二叉树.md",
+    "算法与数据结构篇/算法仓库添加第三方仓库备注.md",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/概率问题/p.png",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/博弈问题/1.png",
+    "算法与数据结构篇/代码随想录-github/代码随想LeetCode 刷题攻略.md",
+    "算法与数据结构篇/代码随想录-github/problems/双指针总结.md",
+    "算法与数据结构篇/labuladong算法笔记-github/starHistory.jpg",
+    "算法与数据结构篇/labuladong算法笔记-github/contributor.jpg",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/洗牌算法/4.png",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/linuxshell/1.png",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/linuxshell",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/前缀和/1.jpg",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/前缀和/2.jpg",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/最长递增子序列/poker4.jpeg",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/最长递增子序列/2.jpeg",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/LCS",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/有序数组去重",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/最优子结构",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/unionfind应用",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/calculator",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/数组交换",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/最长回文子序列",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/栈队列",
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/二分应用"
   ]
 }
