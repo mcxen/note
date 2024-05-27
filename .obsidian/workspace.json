@@ -146,8 +146,9 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "3046b4ae2d460ad8",
+  "active": "171139c8e02ea4a4",
   "lastOpenFiles": [
+    "算法与数据结构篇/图论详解~.md",
     "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/图论",
     "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/图论/最小生成树-图论.md",
     "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/图论/Union-Find 并查集算法详解.md",
@@ -192,7 +193,6 @@
     "算法与数据结构篇/labuladong算法笔记-github/pictures/calculator",
     "算法与数据结构篇/labuladong算法笔记-github/pictures/数组交换",
     "算法与数据结构篇/labuladong算法笔记-github/pictures/最长回文子序列",
-    "算法与数据结构篇/labuladong算法笔记-github/pictures/栈队列",
-    "算法与数据结构篇/labuladong算法笔记-github/pictures/二分应用"
+    "算法与数据结构篇/labuladong算法笔记-github/pictures/栈队列"
   ]
 }
