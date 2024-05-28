@@ -287,3 +287,139 @@ class UF {
 ```
 
 Union-Find 算法的复杂度可以这样分析：构造函数初始化数据结构需要 O(N) 的时间和空间复杂度；连通两个节点`union`、判断两个节点的连通性`connected`、计算连通分量`count`所需的时间复杂度均为 O(1)。
+
+
+### LeetCode 684. 冗余连接
+
+[684. 冗余连接](https://leetcode-cn.com/problems/redundant-connection/)
+
+树可以看成是一个连通且 **无环** 的 **无向** 图。（关键是这一句，剩余部分钥匙联通没有环的）
+
+给定往一棵 `n` 个节点 (节点值 `1～n`) 的树中添加一条边后的图。添加的边的两个顶点包含在 `1` 到 `n` 中间，且这条附加的边不属于树中已存在的边。图的信息记录于长度为 `n` 的二维数组 `edges` ，`edges[i] = [ai, bi]` 表示图中在 `ai` 和 `bi` 之间存在一条边。
+
+请找出一条可以删去的边，删除后可使得剩余部分是一个有着 `n` 个节点的树。如果有多个答案，则返回数组 `edges` 中最后出现的那个。
+
+**示例 1：**
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/1626676174-hOEVUL-image.png)
+
+```cmd
+输入: edges = [[1,2], [1,3], [2,3]]  
+输出: [2,3]
+```
+
+**示例 2：**
+
+![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/1626676179-kGxcmu-image.png)
+
+```cmd
+输入: edges = [[1,2], [1,3], [2,3]]  
+输出: [2,3]
+```
+
+分析
+
+- 依次对每个边的两个顶点进行并查集合并。
+    
+- 当遇到一个边的两个顶点已经合并过，发现了环，返回这条边。
+    
+- 输出参数只有 `edges` 而没有N。对于有 `N` 个节点的树，应该有 `N-1` 条边，再加上附加的一条边，得到N条边。因此 `edges` 的size即为N。
+    
+
+代码
+
+```java
+class Solution {  
+​  
+    int[] parent;  
+​  
+    public int[] findRedundantConnection(int[][] edges) {  
+        // N = edges.length  
+        parent = new int[edges.length + 1];  
+        for (int i = 0; i < parent.length; ++i) {  
+            parent[i] = i;  
+        }  
+      // 2. 遍历二维数组的顶点对  
+        for (int[] edge : edges) {  
+          // 如果能加入到并查集返回true，否则返回false  
+            if (!union(edge[0], edge[1])) {  
+                return edge;  
+            }  
+        }  
+        return new int[]{-1,-1};  
+    }  
+​  
+    public int findRoot(int x) {  
+        while (x != parent[x]) {  
+            parent[x] = parent[parent[x]];  
+            x = parent[x];  
+        }  
+        return x;  
+    }  
+​  
+    public boolean union(int x, int y) {  
+        x = findRoot(x);  
+        y = findRoot(y);  
+        if (x == y) {  
+            return false;  
+        }  
+        parent[x] = y;  
+        return true;  
+    }  
+}
+
+```
+
+标准答案：
+
+```java
+class Solution {  
+    public int[] findRedundantConnection(int[][] edges) {  
+        UF uf = new UF(edges.length + 1);  
+        for (int[] edge : edges) {  
+            if (!uf.union(edge[0],edge[1])){  
+                return edge;  
+            }  
+        }  
+        return new int[]{-1,-1};  
+    }  
+    class UF{  
+        int count;//联通量  
+        int[] parent;  
+        // 记录树的“重量”  
+        private int[] size;  
+        UF(int n){  
+            parent = new int[n];  
+            size = new int[n];  
+            this.count = n;  
+            for (int i = 0; i < n; i++) {  
+                parent[i]=i;//初始化自己的祖先为自己  
+                size[i]=1;  
+            }  
+        }  
+        boolean union(int p,int q){  
+            int rootP = find(p);  
+            int rootQ = find(q);  
+            if (rootQ==rootP) return false;  
+            if (size[rootP]>size[rootQ]){  
+                parent[rootQ]=rootP;  
+                size[rootP]+=size[rootQ];  
+                // 小树接到大树下面，较平衡  
+            }else {  
+                parent[rootP]=rootQ;  
+                size[rootQ]+=size[rootP];  
+            }  
+            count--;  
+            return true;  
+        }  
+        int find(int p){  
+            //查找祖先  
+            while (p!=parent[p]){  
+                parent[p]=parent[parent[p]];  
+                p = parent[p];  
+            }  
+            return p;  
+        }  
+    }  
+}
+```
