@@ -818,7 +818,7 @@ int minimumEffortPath(int[][] heights) {
 
 最后看一道题吧，力扣第 1514 题「概率最大的路径」，看下题目：
 
-![](https://labuladong.github.io/pictures/dijkstra/title3.jpg)
+![tile](./assets/图论6-dijkstra算法/title3.jpg)
 
 函数签名如下：
 
@@ -953,7 +953,7 @@ src = 0, dst = 2, k = 1
 **输出:** 200
 **解释:** 
 城市航班图如下
-![](https://s3-lc-upload.s3.amazonaws.com/uploads/2018/02/16/995.png)
+![](./assets/图论6-dijkstra算法/995.png)
 
 从城市 0 到城市 2 在 1 站中转以内的最便宜价格是 200，如图中红色所示。
 
@@ -965,7 +965,7 @@ src = 0, dst = 2, k = 1
 
 航线就是如下这张图所示，有向边代表航向的方向，边上的数字代表航线的机票价格：
 
-![](https://labuladong.online/algo/images/%E6%97%85%E8%A1%8C%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/7.png)
+![](./assets/图论6-dijkstra算法/7.png)
 
 出发点是 `0`，到达点是 `2`，允许的最大中转次数 `K` 为 1，所以最小的开销就是图中红色的两条边，从 `0` 出发，经过中转城市 `1` 到达目标城市 `2`，所以算法的返回值应该是 200。
 

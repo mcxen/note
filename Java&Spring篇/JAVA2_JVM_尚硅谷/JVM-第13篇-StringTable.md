@@ -235,7 +235,7 @@ public class StringNewDemo {
 
   - `ldc <index>`在字节码中，ldc指令会将常量池中索引为`<index>`的常量加载到操作数栈中。
 
-    举例说明，假设常量池中有一个位于索引#5的字符串常量"Hello, World!"，使用ldc指令ldc #5将该字符串常量加载到操作数栈中，在这之后，可以对该字符串进行其他的操作和引用。
+    举例说明，假设常量池中有一个位于索引#5的字符串常量"Hello, World!"，使用ldc指令ldc `#5将该字符串常量加载到操作数栈中，在这之后，可以对该字符串进行其他的操作和引用。`
 
   - `invokespecial`：这是一条指令，用于调用非虚方法（private、constructor、super）。对于静态方法、私有方法、final方法和构造方法，它们都是非虚方法，因为它们无法被继承和重写。`<java/lang/String.<init>>`：这表示要调用的方法是String类的构造方法，它用于创建String对象。
 
