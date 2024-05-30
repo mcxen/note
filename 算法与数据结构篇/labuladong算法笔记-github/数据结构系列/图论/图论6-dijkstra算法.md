@@ -1,6 +1,8 @@
 ---
-title: '我写了一个模板，把 Dijkstra 算法变成了默写题'
-tags: ['数据结构', '图论算法']
+title: Dijkstra 算法
+tags:
+  - 数据结构
+  - 图论算法
 ---
 
 
@@ -594,7 +596,9 @@ int[] dijkstra(int start, List<int[]>[] graph) {
 int minimumEffortPath(int[][] heights);
 ```
 
-答案：
+
+
+#### 参考答案
 
 ```java
 import java.util.Arrays;
@@ -832,9 +836,9 @@ double maxProbability(int n, int[][] edges, double[] succProb, int start, int en
 
 问得好！
 
-首先关于有向图和无向图，前文 [图算法基础](https://labuladong.github.io/article/fname.html?fname=图) 说过，无向图本质上可以认为是「双向图」，从而转化成有向图。
+首先关于有向图和无向图，前文 [图算法基础](https://labuladong.github.io/article/fname.html?fname=图) 说过，**无向图本质上可以认为是「双向图」，从而转化成有向图。**
 
-重点说说最大值和最小值这个问题，其实 Dijkstra 和很多最优化算法一样，计算的是「最优值」，这个最优值可能是最大值，也可能是最小值。
+重点说说最大值和最小值这个问题，**其实 Dijkstra 和很多最优化算法一样，计算的是「最优值」，这个最优值可能是最大值，也可能是最小值。**
 
 标准 Dijkstra 算法是计算最短路径的，但你有想过为什么 Dijkstra 算法不允许存在负权重边么？
 
@@ -847,6 +851,8 @@ double maxProbability(int n, int[][] edges, double[] succProb, int start, int en
 你看这道题是不是符合这个条件？边和边之间是乘法关系，每条边的概率都是小于 1 的，所以肯定会越乘越小。
 
 只不过，这道题的解法要把优先级队列的排序顺序反过来，一些 if 大小判断也要反过来，我们直接看解法代码吧：
+
+#### 参考答案
 
 
 ```java
@@ -925,51 +931,209 @@ double dijkstra(int start, int end, List<double[]>[] graph) {
 }
 ```
 
-好了，到这里本文就结束了，总共 6000 多字，这三道例题都是比较困难的，如果你能够看到这里，真得给你鼓掌。
-
-其实前文 [毕业旅行省钱算法](https://labuladong.github.io/article/fname.html?fname=旅行最短路径) 中讲过限制之下的最小路径问题，当时是使用动态规划思路解决的，但文末也给了 Dijkstra 算法代码，仅仅在本文模板的基础上做了一些变换，你理解本文后可以对照着去看看那道题目。
-
-最后还是那句话，做题在质不在量，希望大家能够透彻理解最基本的数据结构，以不变应万变。
 
 
 
-<hr>
-<details>
-<summary><strong>引用本文的文章</strong></summary>
-
- - [BFS 算法解题套路框架](https://labuladong.github.io/article/fname.html?fname=BFS框架)
- - [Kruskal 最小生成树算法](https://labuladong.github.io/article/fname.html?fname=kruskal)
- - [Prim 最小生成树算法](https://labuladong.github.io/article/fname.html?fname=prim算法)
- - [东哥带你刷二叉树（纲领篇）](https://labuladong.github.io/article/fname.html?fname=二叉树总结)
- - [二分图判定算法](https://labuladong.github.io/article/fname.html?fname=二分图)
- - [图论基础及遍历算法](https://labuladong.github.io/article/fname.html?fname=图)
- - [并查集（Union-Find）算法](https://labuladong.github.io/article/fname.html?fname=UnionFind算法详解)
- - [我的刷题心得](https://labuladong.github.io/article/fname.html?fname=算法心得)
- - [旅游省钱大法：加权最短路径](https://labuladong.github.io/article/fname.html?fname=旅行最短路径)
- - [环检测及拓扑排序算法](https://labuladong.github.io/article/fname.html?fname=拓扑排序)
-
-</details><hr>
+### [787. K 站中转内最便宜的航班](https://leetcode.cn/problems/cheapest-flights-within-k-stops/)
 
 
+有 `n` 个城市通过一些航班连接。给你一个数组 `flights` ，其中 `flights[i] = [fromi, toi, pricei]` ，表示该航班都从城市 `fromi` 开始，以价格 `pricei` 抵达 `toi`。
+
+现在给定所有的城市和航班，以及出发城市 `src` 和目的地 `dst`，你的任务是找到出一条最多经过 `k` 站中转的路线，使得从 `src` 到 `dst` 的 **价格最便宜** ，并返回该价格。 如果不存在这样的路线，则输出 `-1`。
+
+**示例 1：**
+
+**输入:** 
+
+```cmd
+n = 3, edges = [[0,1,100],[1,2,100],[0,2,500]]
+src = 0, dst = 2, k = 1
+```
+
+**输出:** 200
+**解释:** 
+城市航班图如下
+![](https://s3-lc-upload.s3.amazonaws.com/uploads/2018/02/16/995.png)
+
+从城市 0 到城市 2 在 1 站中转以内的最便宜价格是 200，如图中红色所示。
+
+请你的算法计算，在 `K` 次中转之内，从 `src` 到 `dst` 所需的最小花费是多少钱，如果无法到达，则返回 -1。
+
+比方说题目给的例子：
+
+`n = 3, flights = [[0,1,100],[1,2,100],[0,2,500]], src = 0, dst = 2, K = 1`
+
+航线就是如下这张图所示，有向边代表航向的方向，边上的数字代表航线的机票价格：
+
+![](https://labuladong.online/algo/images/%E6%97%85%E8%A1%8C%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/7.png)
+
+出发点是 `0`，到达点是 `2`，允许的最大中转次数 `K` 为 1，所以最小的开销就是图中红色的两条边，从 `0` 出发，经过中转城市 `1` 到达目标城市 `2`，所以算法的返回值应该是 200。
+
+注意这个中转次数的上限 `K` 是比较棘手的，如果上述题目将 `K` 改为 0，也就是不允许中转，那么我们的算法只能返回 500 了，也就是直接从 `0` 飞到 `2`。
+
+**很明显，这题就是个加权有向图中求最短路径的问题**。
+
+说白了，就是给你一幅加权有向图，让你求 `src` 到 `dst` 权重最小的一条路径，同时要满足，**这条路径最多不能超过 `K + 1` 条边**（经过 `K` 个节点相当于经过 `K + 1` 条边）。
+
+#### 参考答案
 
 
-<hr>
-<details>
-<summary><strong>引用本文的题目</strong></summary>
+```java
+public int findCheapestPrice(int n, int[][] flights, int src, int dst, int K) {
+    List<int[]>[] graph = new LinkedList[n];
+    for (int i = 0; i < n; i++) {
+        graph[i] = new LinkedList<>();
+    }
+    for (int[] edge : flights) {
+        int from = edge[0];
+        int to = edge[1];
+        int price = edge[2];
+        graph[from].add(new int[]{to, price});
+    }
 
-<strong>安装 [我的 Chrome 刷题插件](https://labuladong.github.io/article/fname.html?fname=chrome插件简介) 点开下列题目可直接查看解题思路：</strong>
+    // 启动 dijkstra 算法
+    // 计算以 src 为起点在 k 次中转到达 dst 的最短路径
+    K++;
+    return dijkstra(graph, src, K, dst);
+}
 
-| LeetCode | 力扣 |
-| :----: | :----: |
-| [286. Walls and Gates](https://leetcode.com/problems/walls-and-gates/?show=1)🔒 | [286. 墙与门](https://leetcode.cn/problems/walls-and-gates/?show=1)🔒 |
-| [542. 01 Matrix](https://leetcode.com/problems/01-matrix/?show=1) | [542. 01 矩阵](https://leetcode.cn/problems/01-matrix/?show=1) |
+class State {
+    // 图节点的 id
+    int id;
+    // 从 src 节点到当前节点的花费
+    int costFromSrc;
+    // 从 src 节点到当前节点经过的节点个数
+    int nodeNumFromSrc;
 
-</details>
+    State(int id, int costFromSrc, int nodeNumFromSrc) {
+        this.id = id;
+        this.costFromSrc = costFromSrc;
+        this.nodeNumFromSrc = nodeNumFromSrc;
+    }
+}
+
+// 输入一个起点 src，计算从 src 到其他节点的最短距离
+int dijkstra(List<int[]>[] graph, int src, int k, int dst) {
+    // 定义：从起点 src 到达节点 i 的最短路径权重为 distTo[i]
+    int[] distTo = new int[graph.length];
+    // 定义：从起点 src 到达节点 i 的最小权重路径至少要经过 nodeNumTo[i] 个节点
+    int[] nodeNumTo = new int[graph.length];
+    Arrays.fill(distTo, Integer.MAX_VALUE);
+    Arrays.fill(nodeNumTo, Integer.MAX_VALUE);
+    // base case
+    distTo[src] = 0;
+    nodeNumTo[src] = 0;
+
+    // 优先级队列，costFromSrc 较小的排在前面
+    Queue<State> pq = new PriorityQueue<>((a, b) -> {
+        return a.costFromSrc - b.costFromSrc;
+    });
+    // 从起点 src 开始进行 BFS
+    pq.offer(new State(src, 0, 0));
+
+    while (!pq.isEmpty()) {
+        State curState = pq.poll();
+        int curNodeID = curState.id;
+        int costFromSrc = curState.costFromSrc;
+        int curNodeNumFromSrc = curState.nodeNumFromSrc;
+        
+        if (curNodeID == dst) {
+            // 找到最短路径
+            return costFromSrc;
+        }
+        if (curNodeNumFromSrc == k) {
+            // 中转次数耗尽
+            continue;
+        }
+
+        // 将 curNode 的相邻节点装入队列
+        for (int[] neighbor : graph[curNodeID]) {
+            int nextNodeID = neighbor[0];
+            int costToNextNode = costFromSrc + neighbor[1];
+            // 中转次数消耗 1
+            int nextNodeNumFromSrc = curNodeNumFromSrc + 1;
+
+            // 更新 dp table
+            if (distTo[nextNodeID] > costToNextNode) {
+                distTo[nextNodeID] = costToNextNode;
+                nodeNumTo[nextNodeID] = nextNodeNumFromSrc;
+            }
+            // 剪枝，如果中转次数更多，花费还更大，那必然不会是最短路径
+            if (costToNextNode > distTo[nextNodeID]
+                && nextNodeNumFromSrc > nodeNumTo[nextNodeID]) {
+                continue;
+            }
+            
+            pq.offer(new State(nextNodeID, costToNextNode, nextNodeNumFromSrc));
+        }
+    }
+    return -1;
+}
+
+```
 
 
 
-**＿＿＿＿＿＿＿＿＿＿＿＿＿**
+```java
+class Solution {
+    public int findCheapestPrice(int n, int[][] flights, int src, int dst, int k) {
+        List<int[]>[] graph = new LinkedList[n];
+        for (int i = 0; i < n; i++) {
+            graph[i] = new LinkedList();
+        }
+        //`flights[i] = [fromi, toi, pricei]`
+        for (int i = 0; i < flights.length; i++) {
+            int from = flights[i][0];
+            int to = flights[i][1];
+            int price = flights[i][2];
+            graph[from].add(new int[]{to, price});
+        }
+        int ans = dijikstra(graph, src, dst, k+1);
+        return ans;
+    }
+    class State{
+        int id;
+        int costFromStart;
+        int numFromStart;
+        State(int id, int costFromStart, int numFromStart){
+            this.id = id;
+            this.costFromStart = costFromStart;
+            this.numFromStart = numFromStart;
+        }
+    }
+    int dijikstra(List<int[]>[] graph, int src, int dst, int k) {
+        int[] costTo = new int[graph.length];
+        int[] numTo = new int[graph.length];
+        Arrays.fill(costTo,Integer.MAX_VALUE);
+        Arrays.fill(numTo,Integer.MAX_VALUE);
+        costTo[src] = 0;
+        numTo[src] = 0;
+        PriorityQueue<State> queue = new PriorityQueue<>((a, b) -> (a.costFromStart - b.costFromStart));
+        queue.add(new State(src, 0, 0));
+        while (!queue.isEmpty()) {
+            State curState = queue.poll();
+            int curCost = curState.costFromStart;
+            int curNum = curState.numFromStart;
+            int curId = curState.id;
+            if (curId == dst) {return curCost;}
+            if (curNum==k) continue;//中转次数用完了。
+            //if (costTo[curId]<curCost) continue;
+            for (int[] neighbor : graph[curId]) {
+                int neiId = neighbor[0];
+                int neiCost = neighbor[1]+curCost;
+                int neiNum = curNum+1;
+                //如果中转次数更多，花费还更大，那必然不会是最短路径
+                if (neiCost>costTo[neiId]&&neiNum>numTo[neiId]) continue;
+                if (neiCost<costTo[neiId]) {//花费少的话，才记录在costTO表
+                    costTo[neiId] = neiCost;
+                    numTo[neiId] = neiNum;
+                }
+                //花费多，但是num少的话，也会记录在queue
+                queue.offer(new State(neiId, neiCost, neiNum));
+            }
+        }
+        return -1;
+    }
+}
+```
 
-**《labuladong 的算法小抄》已经出版，关注公众号查看详情；后台回复关键词「**进群**」可加入算法群；回复「**全家桶**」可下载配套 PDF 和刷题全家桶**：
-
-![](https://labuladong.github.io/pictures/souyisou2.png)
