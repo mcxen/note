@@ -10,17 +10,18 @@ Kruskal 算法其实很容易理解和记忆，其关键是要熟悉并查集算
 
 **先说「树」和「图」的根本区别：树不会包含环，图可以包含环**。
 
-如果一幅图没有环，完全可以拉伸成一棵树的模样。说的专业一点，树就是「无环连通图」。
+如果一幅图没有环，完全可以拉伸成一棵树的模样。说的专业一点，**树就是「无环连通图」。**
 
 那么什么是图的「生成树」呢，其实按字面意思也好理解，就是在图中找一棵包含图中的所有节点的树。专业点说，生成树是含有图中所有顶点的「无环连通子图」。
 
 容易想到，一幅图可以有很多不同的生成树，比如下面这幅图，红色的边就组成了两棵不同的生成树：
 
-![](https://ask.qcloudimg.com/http-save/yehe-7432945/7225ee39cced8063c143184ec898c3ac.png)
+![[assets/图论5-最小生成树- kruskal/image-图论5-最小生成树-20240528153242640.png]]
+
 
 对于加权图，每条边都有权重，所以每棵生成树都有一个权重和。比如上图，右侧生成树的权重和显然比左侧生成树的权重和要小。
 
-**那么最小生成树很好理解了，所有可能的生成树中，权重和最小的那棵生成树就叫「最小生成树」**。
+**那么最小生成树很好理解了，*所有可能的生成树中，权重和最小的那棵生成树就叫「最小生成树」***。
 
 > PS：一般来说，我们都是在**无向加权图**中计算最小生成树的，所以使用最小生成树算法的现实场景中，图的边权重一般代表成本、距离这样的标量。
 
@@ -32,13 +33,9 @@ Kruskal 算法其实很容易理解和记忆，其关键是要熟悉并查集算
 
 那么说到连通性，相信老读者应该可以想到 Union-Find 并查集算法，用来高效处理图中联通分量的问题。
 
-前文 [Union-Find 并查集算法详解](https://cloud.tencent.com/developer/tools/blog-entry?target=https%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzAxODQxMDM0Mw%3D%3D%26mid%3D2247484751%26idx%3D1%26sn%3Da873c1f51d601bac17f5078c408cc3f6%26scene%3D21%23wechat_redirect&source=article&objectId=1899078) 详细介绍了 Union-Find 算法的实现原理，主要运用`size`数组和路径压缩技巧提高连通分量的判断效率。
+[[图论4-Union-Find 并查集算法]] 详细介绍了 Union-Find 算法的实现原理，主要运用`size`数组和路径压缩技巧提高连通分量的判断效率。本文直接给出 Union-Find 算法的实现：
 
-如果不了解 Union-Find 算法的读者可以去看前文，为了节约篇幅，本文直接给出 Union-Find 算法的实现：
-
-代码语言：javascript
-
-复制
+### UF算法的实现
 
 ```javascript
 class UF {
@@ -103,7 +100,7 @@ class UF {
 }
 ```
 
-前文 [Union-Find 并查集算法运用](https://cloud.tencent.com/developer/tools/blog-entry?target=https%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzAxODQxMDM0Mw%3D%3D%26mid%3D2247484759%26idx%3D1%26sn%3Da88337164c741b9740e50523b41b7659%26scene%3D21%23wechat_redirect&source=article&objectId=1899078) 介绍过 Union-Find 算法的一些算法场景，而它在 Kruskal 算法中的主要作用是保证最小生成树的合法性。
+前文 [[图论4-Union-Find 并查集算法]]介绍过 Union-Find 算法的一些算法场景，而它在 Kruskal 算法中的主要作用是保证最小生成树的合法性。
 
 因为在构造最小生成树的过程中，你首先得保证生成的那玩意是棵树（不包含环）对吧，那么 Union-Find 算法就是帮你干这个事儿的。
 
@@ -113,19 +110,11 @@ class UF {
 
 函数签名如下：
 
-代码语言：javascript
-
-复制
-
 ```javascript
 boolean validTree(int n, int[][] edges);
 ```
 
 比如输入如下：
-
-代码语言：javascript
-
-复制
 
 ```javascript
 n = 5
@@ -138,9 +127,6 @@ edges = [[0,1], [0,2], [0,3], [1,4]]
 
 但如果输入：
 
-代码语言：javascript
-
-复制
 
 ```javascript
 n = 5
@@ -166,10 +152,6 @@ edges = [[0,1],[1,2],[2,3],[1,3],[1,4]]
 **对于添加的这条边，如果该边的两个节点本来就在同一连通分量里，那么添加这条边会产生环；反之，如果该边的两个节点不在同一连通分量里，则添加这条边不会产生环**。
 
 而判断两个节点是否连通（是否在同一个连通分量中）就是 Union-Find 算法的拿手绝活，所以这道题的解法代码如下：
-
-代码语言：javascript
-
-复制
 
 ```javascript
 // 判断输入的若干条边是否能构造出一棵树结构
@@ -216,15 +198,14 @@ class UF {
 
 这样，最后`mst`集合中的边就形成了最小生成树，下面我们看两道例题来运用一下 Kruskal 算法。
 
+### 力扣第 1135 题「最低成本联通所有城市」
+
+
 第一题是力扣第 1135 题「最低成本联通所有城市」，这是一道标准的最小生成树问题：
 
 ![](https://ask.qcloudimg.com/http-save/yehe-7432945/7e43525b36d4e3fb0053a5ce99ccdaeb.png)
 
 每座城市相当于图中的节点，连通城市的成本相当于边的权重，连通所有城市的最小成本即是最小生成树的权重之和。
-
-代码语言：javascript
-
-复制
 
 ```javascript
 int minimumCost(int n, int[][] connections) {
@@ -250,6 +231,8 @@ int minimumCost(int n, int[][] connections) {
     // 按理说 uf.count() == 1 说明所有节点被连通
     // 但因为节点 0 没有被使用，所以 0 会额外占用一个连通分量
     return uf.count() == 2 ? mst : -1;
+    //这里琢磨了一下，就是有没有可能判断完了，导致有些权重大的可以连接所有城市但是不选导致了不连接呢？
+    //应该是不会的，这里一直选的是不会产生环的加入，如果加入了会有环，那就不是最小成本了，还是不能
 }
 
 class UF {
@@ -261,31 +244,30 @@ class UF {
 
 再来看看力扣第 1584 题「连接所有点的最小费用」：
 
-![](https://ask.qcloudimg.com/http-save/yehe-7432945/b32fbc687227f49503e02b5df644255e.png)
+给你一个`points` 数组，表示 2D 平面上的一些点，其中 `points[i] = [xi, yi]` 。
+
+连接点 `[xi, yi]` 和点 `[xj, yj]` 的费用为它们之间的 **曼哈顿距离** ：`|xi - xj| + |yi - yj|` ，其中 `|val|` 表示 `val` 的绝对值。
+
+请你返回将所有点连接的最小总费用。只有任意两点之间 **有且仅有** 一条简单路径时，才认为所有点都已连接。
+
 
 比如题目给的例子：
 
-代码语言：javascript
-
-复制
-
-```javascript
+```java
 points = [[0,0],[2,2],[3,10],[5,2],[7,0]]
 ```
 
 算法应该返回 20，按如下方式连通各点：
 
-![](https://ask.qcloudimg.com/http-save/yehe-7432945/58b1cc0915f9944e0bd4983a28a9e978.png)
+![[assets/图论5-最小生成树- kruskal/image-图论5-最小生成树-20240528160007089.png]]
+
+
 
 很显然这也是一个标准的最小生成树问题：每个点就是无向加权图中的节点，边的权重就是曼哈顿距离，连接所有点的最小费用就是最小生成树的权重和。
 
 所以解法思路就是先生成所有的边以及权重，然后对这些边执行 Kruskal 算法即可：
 
-代码语言：javascript
-
-复制
-
-```javascript
+```java
 int minCostConnectPoints(int[][] points) {
     int n = points.length;
     // 生成所有边及权重
@@ -324,6 +306,73 @@ int minCostConnectPoints(int[][] points) {
 ```
 
 这道题做了一个小的变通：每个坐标点是一个二元组，那么按理说应该用五元组表示一条带权重的边，但这样的话不便执行 Union-Find 算法；所以我们用 `points` 数组中的索引代表每个坐标点，这样就可以直接复用之前的 Kruskal 算法逻辑了。
+
+> 这里如果不使用第三方connect判断，可以直接将其整合到union里面：
+
+```java
+class Solution {  
+    public int minCostConnectPoints(int[][] points) {  
+        //权重和最小的无联通图就是最小生成树  
+        List<int[]> edges= new LinkedList<>();  
+        int n = points.length;  
+        for (int i = 0; i < n; i++) {  
+            for (int j = i+1; j < n; j++) {  
+                //去除重复的点位  
+                edges.add(new int[]{  
+                        i,j,  
+                        Math.abs(points[i][0]-points[j][0])+  
+                                Math.abs(points[i][1]-points[j][1])});  
+            }  
+        }  
+        Collections.sort(edges,(int[] a,int[] b)->Integer.compare(a[2],b[2]));  
+        UF uf = new UF(n);  
+        int minpath = 0;  
+        for (int[] edge : edges) {  
+            if (!uf.union(edge[0],edge[1])){  
+                continue;  
+            }  
+            minpath+=edge[2];  
+        }  
+        return minpath;  
+    }  
+    class UF{  
+        int count;  
+        int[] size;  
+        int[] parent;  
+        UF(int n){  
+            size = new int[n];  
+            parent = new int[n];  
+            for (int i = 0; i < n; i++) {  
+                parent[i] = i;  
+                size[i] = 1;  
+            }  
+            count=n;//当前并查集树的联通区  
+        }  
+        boolean union(int p,int q){  
+            int rootP = find(p);  
+            int rootQ = find(q);  
+            if (rootQ==rootP) return false;  
+            if (size[rootP]>size[rootQ]){  
+                parent[rootQ] = rootP;  
+                size[rootP]+=size[rootQ];  
+            }else {  
+                parent[rootP] = rootQ;  
+                size[rootQ]+=size[rootP];  
+            }  
+            count--;  
+            return true;  
+        }  
+        int find(int p){  
+            while (p!=parent[p]){  
+                parent[p] = parent[parent[p]];  
+                p = parent[p];  
+            }  
+            return p;  
+        }  
+    }  
+}
+```
+
 
 通过以上三道算法题，相信你已经掌握了 Kruskal 算法，主要的难点是利用 Union-Find 并查集算法向最小生成树中添加边，配合排序的贪心思路，从而得到一棵权重之和最小的生成树。
 

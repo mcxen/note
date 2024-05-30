@@ -3,54 +3,29 @@ title: '我写了一个模板，把 Dijkstra 算法变成了默写题'
 tags: ['数据结构', '图论算法']
 ---
 
-<p align='center'>
-<a href="https://github.com/labuladong/fucking-algorithm" target="view_window"><img alt="GitHub" src="https://img.shields.io/github/stars/labuladong/fucking-algorithm?label=Stars&style=flat-square&logo=GitHub"></a>
-<a href="https://appktavsiei5995.pc.xiaoe-tech.com/index" target="_blank"><img class="my_header_icon" src="https://img.shields.io/static/v1?label=精品课程&message=查看&color=pink&style=flat"></a>
-<a href="https://www.zhihu.com/people/labuladong"><img src="https://img.shields.io/badge/%E7%9F%A5%E4%B9%8E-@labuladong-000000.svg?style=flat-square&logo=Zhihu"></a>
-<a href="https://space.bilibili.com/14089380"><img src="https://img.shields.io/badge/B站-@labuladong-000000.svg?style=flat-square&logo=Bilibili"></a>
-</p>
-
-![](https://labuladong.github.io/pictures/souyisou1.png)
-
-**通知：[数据结构精品课](https://aep.h5.xeknow.com/s/1XJHEO) 已更新到 V2.1，[手把手刷二叉树系列课程](https://aep.xet.tech/s/3YGcq3) 上线。另外，建议你在我的 [网站](https://labuladong.github.io/algo/) 学习文章，体验更好。**
-
-
-
-读完本文，你不仅学会了算法套路，还可以顺便解决如下题目：
-
-| LeetCode | 力扣 | 难度 |
-| :----: | :----: | :----: |
-| [1514. Path with Maximum Probability](https://leetcode.com/problems/path-with-maximum-probability/) | [1514. 概率最大的路径](https://leetcode.cn/problems/path-with-maximum-probability/) | 🟠
-| [1631. Path With Minimum Effort](https://leetcode.com/problems/path-with-minimum-effort/) | [1631. 最小体力消耗路径](https://leetcode.cn/problems/path-with-minimum-effort/) | 🟠
-| [743. Network Delay Time](https://leetcode.com/problems/network-delay-time/) | [743. 网络延迟时间](https://leetcode.cn/problems/network-delay-time/) | 🟠
-
-**-----------**
 
 其实，很多算法的底层原理异常简单，无非就是一步一步延伸，变得**看起来**好像特别复杂，特别牛逼。
 
 但如果你看过历史文章，应该可以对算法形成自己的理解，就会发现很多算法都是换汤不换药，毫无新意，非常枯燥。
 
-比如，[东哥手把手带你刷二叉树（总纲）](https://labuladong.github.io/article/fname.html?fname=二叉树总结) 中说二叉树非常重要，你把这个结构掌握了，就会发现 [动态规划](https://labuladong.github.io/article/fname.html?fname=动态规划详解进阶)，[分治算法](https://labuladong.github.io/article/fname.html?fname=分治算法)，[回溯（DFS）算法](https://labuladong.github.io/article/fname.html?fname=回溯算法详解修订版)，[BFS 算法框架](https://labuladong.github.io/article/fname.html?fname=BFS框架)，[Union-Find 并查集算法](https://labuladong.github.io/article/fname.html?fname=UnionFind算法详解)，[二叉堆实现优先级队列](https://labuladong.github.io/article/fname.html?fname=二叉堆详解实现优先级队列) 就是把二叉树翻来覆去的运用。
+比如，东哥手把手带你刷二叉树（总纲） 中说二叉树非常重要，你把这个结构掌握了，就会发现 动态规划，分治算法，回溯（DFS）算法，BFS 算法框架，Union-Find 并查集算法，二叉堆实现优先级队列 就是把二叉树翻来覆去的运用。
 
-那么本文又要告诉你，Dijkstra 算法（一般音译成迪杰斯特拉算法）无非就是一个 BFS 算法的加强版，它们都是从二叉树的层序遍历衍生出来的。
-
-这也是为什么我在 [学习数据结构和算法的框架思维](https://labuladong.github.io/article/fname.html?fname=学习数据结构和算法的高效方法) 中这么强调二叉树的原因。
+那么本文又要告诉你，Dijkstra 算法（一般音译成迪杰斯特拉算法）**无非就是一个 BFS 算法的加强版，它们都是从二叉树的层序遍历衍生出来的。**
 
 **下面我们由浅入深，从二叉树的层序遍历聊到 Dijkstra 算法，给出 Dijkstra 算法的代码框架，顺手秒杀几道运用 Dijkstra 算法的题目**。
 
 ### 图的抽象
 
-前文 [图论第一期：遍历基础](https://labuladong.github.io/article/fname.html?fname=图) 说过「图」这种数据结构的基本实现，图中的节点一般就抽象成一个数字（索引），图的具体实现一般是「邻接矩阵」或者「邻接表」。
+前文[[图论1-图论基础]]说过「图」这种数据结构的基本实现，图中的节点一般就抽象成一个数字（索引），图的具体实现一般是「邻接矩阵」或者「邻接表」。
 
-![](https://labuladong.github.io/pictures/图/0.jpg)
+![](./assets/图论6-dijkstra算法/0.jpg)
 
 比如上图这幅图用邻接表和邻接矩阵的存储方式如下：
 
-![](https://labuladong.github.io/pictures/图/2.jpeg)
+![](./assets/图论6-dijkstra算法/2.jpeg)
 
-前文 [图论第二期：拓扑排序](https://labuladong.github.io/article/fname.html?fname=拓扑排序) 告诉你，我们用邻接表的场景更多，结合上图，一幅图可以用如下 Java 代码表示：
+我们用邻接表的场景更多，结合上图，一幅图可以用如下 Java 代码表示：
 
-<!-- muliti_language -->
 ```java
 // graph[s] 存储节点 s 指向的节点（出度）
 List<Integer>[] graph;
@@ -58,7 +33,6 @@ List<Integer>[] graph;
 
 **如果你想把一个问题抽象成「图」的问题，那么首先要实现一个 API `adj`**：
 
-<!-- muliti_language -->
 ```java
 // 输入节点 s 返回 s 的相邻节点
 List<Integer> adj(int s);
@@ -68,7 +42,6 @@ List<Integer> adj(int s);
 
 比如上面说的用邻接表表示「图」的方式，`adj` 函数就可以这样表示：
 
-<!-- muliti_language -->
 ```java
 List<Integer>[] graph;
 
@@ -80,7 +53,6 @@ List<Integer> adj(int s) {
 
 当然，对于「加权图」，我们需要知道两个节点之间的边权重是多少，所以还可以抽象出一个 `weight` 方法：
 
-<!-- muliti_language -->
 ```java
 // 返回节点 from 到节点 to 之间的边的权重
 int weight(int from, int to);
@@ -94,7 +66,6 @@ int weight(int from, int to);
 
 我们之前说过二叉树的层级遍历框架：
 
-<!-- muliti_language -->
 ```java
 // 输入一棵二叉树的根节点，层序遍历这棵二叉树
 void levelTraverse(TreeNode root) {
@@ -128,7 +99,7 @@ void levelTraverse(TreeNode root) {
 
 `while` 循环和 `for` 循环的配合正是这个遍历框架设计的巧妙之处：
 
-![](https://labuladong.github.io/pictures/dijkstra/1.jpeg)
+![](./assets/图论6-dijkstra算法/1.jpeg)
 
 **`while` 循环控制一层一层往下走，`for` 循环利用 `sz` 变量控制从左到右遍历每一层二叉树节点**。
 
@@ -138,7 +109,6 @@ void levelTraverse(TreeNode root) {
 
 基于二叉树的遍历框架，我们又可以扩展出多叉树的层序遍历框架：
 
-<!-- muliti_language -->
 ```java
 // 输入一棵多叉树的根节点，层序遍历这棵多叉树
 void levelTraverse(TreeNode root) {
@@ -167,7 +137,6 @@ void levelTraverse(TreeNode root) {
 
 基于多叉树的遍历框架，我们又可以扩展出 BFS（广度优先搜索）的算法框架：
 
-<!-- muliti_language -->
 ```java
 // 输入起点，进行 BFS 搜索
 int BFS(Node start) {
@@ -210,7 +179,7 @@ int BFS(Node start) {
 
 但是，到了「加权图」的场景，事情就没有这么简单了，因为你不能默认每条边的「权重」都是 1 了，这个权重可以是任意正数（Dijkstra 算法要求不能存在负权重边），比如下图的例子：
 
-![](https://labuladong.github.io/pictures/dijkstra/2.jpeg)
+![](./assets/图论6-dijkstra算法/2-20240529095427915.jpeg)
 
 如果沿用 BFS 算法中的 `step` 变量记录「步数」，显然红色路径一步就可以走到终点，但是这一步的权重很大；正确的最小权重路径应该是绿色的路径，虽然需要走很多步，但是路径权重依然很小。
 
@@ -226,7 +195,7 @@ int BFS(Node start) {
 
 怎么去掉？就拿二叉树的层级遍历来说，其实你可以直接去掉 `for` 循环相关的代码：
 
-<!-- muliti_language -->
+
 ```java
 // 输入一棵二叉树的根节点，遍历这棵二叉树所有节点
 void levelTraverse(TreeNode root) {
@@ -254,7 +223,7 @@ void levelTraverse(TreeNode root) {
 
 如果你想同时维护 `depth` 变量，让每个节点 `cur` 知道自己在第几层，可以想其他办法，比如新建一个 `State` 类，记录每个节点所在的层数：
 
-<!-- muliti_language -->
+
 ```java
 class State {
     // 记录 node 节点的深度
@@ -299,7 +268,6 @@ void levelTraverse(TreeNode root) {
 
 **首先，我们先看一下 Dijkstra 算法的签名**：
 
-<!-- muliti_language -->
 ```java
 // 输入一幅图和一个起点 start，计算 start 到其他节点的最短距离
 int[] dijkstra(int start, List<Integer>[] graph);
@@ -315,7 +283,6 @@ int[] dijkstra(int start, List<Integer>[] graph);
 
 **其次，我们也需要一个 `State` 类来辅助算法的运行**：
 
-<!-- muliti_language -->
 ```java
 class State {
     // 图节点的 id
@@ -344,7 +311,7 @@ class State {
 
 **其实，Dijkstra 可以理解成一个带 dp table（或者说备忘录）的 BFS 算法，伪码如下**：
 
-<!-- muliti_language -->
+
 ```java
 // 返回节点 from 到节点 to 之间的边的权重
 int weight(int from, int to);
@@ -413,7 +380,7 @@ int[] dijkstra(int start, List<Integer>[] graph) {
 
 `while` 循环每执行一次，都会往外拿一个元素，但想往队列里放元素，可就有很多限制了，必须满足下面这个条件：
 
-<!-- muliti_language -->
+
 ```java
 // 看看从 curNode 达到 nextNode 的距离是否会更短
 if (distTo[nextNodeID] > distToNextNode) {
@@ -453,7 +420,7 @@ if (distTo[nextNodeID] > distToNextNode) {
 
 需要在代码中做的修改也非常少，只要改改函数签名，再加个 if 判断就行了：
 
-<!-- muliti_language -->
+
 ```java
 // 输入起点 start 和终点 end，计算起点到终点的最短距离
 int dijkstra(int start, int end, List<Integer>[] graph) {
@@ -500,17 +467,16 @@ Dijkstra 算法的时间复杂度是多少？你去网上查，可能会告诉�
 
 不过就对数函数来说，就算真数大一些，对数函数的结果也大不了多少，所以这个算法实现的实际运行效率也是很高的，以上只是理论层面的时间复杂度分析，供大家参考。
 
-### 秒杀三道题目
-
 以上说了 Dijkstra 算法的框架，下面我们套用这个框架做几道题，实践出真知。
+
+### 743 题「网络延迟时间」
 
 第一题是力扣第 743 题「网络延迟时间」，题目如下：
 
-![](https://labuladong.github.io/pictures/dijkstra/title1.jpg)
+![](./assets/图论6-dijkstra算法/title1.jpg)
 
 函数签名如下：
 
-<!-- muliti_language -->
 ```java
 // times 记录边和权重，n 为节点个数（从 1 开始），k 为起点
 // 计算从 k 发出的信号至少需要多久传遍整幅图
@@ -523,7 +489,6 @@ int networkDelayTime(int[][] times, int n, int k)
 
 根据我们之前 Dijkstra 算法的框架，我们可以写出下面代码：
 
-<!-- muliti_language -->
 ```java
 int networkDelayTime(int[][] times, int n, int k) {
     // 节点编号是从 1 开始的，所以要一个大小为 n + 1 的邻接表
@@ -561,7 +526,7 @@ int[] dijkstra(int start, List<int[]>[] graph) {}
 
 上述代码首先利用题目输入的数据转化成邻接表表示一幅图，接下来我们可以直接套用 Dijkstra 算法的框架：
 
-<!-- muliti_language -->
+
 ```java
 class State {
     // 图节点的 id
@@ -616,25 +581,124 @@ int[] dijkstra(int start, List<int[]>[] graph) {
 
 你对比之前说的代码框架，只要稍稍修改，就可以把这道题目解决了。
 
+### 1631 题「最小体力消耗路径」
+
 感觉这道题完全没有难度，下面我们再看一道题目，力扣第 1631 题「最小体力消耗路径」：
 
 ![](https://labuladong.github.io/pictures/dijkstra/title2.jpg)
 
 函数签名如下：
 
-<!-- muliti_language -->
 ```java
 // 输入一个二维矩阵，计算从左上角到右下角的最小体力消耗
 int minimumEffortPath(int[][] heights);
 ```
 
+答案：
+
+```java
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.PriorityQueue;
+
+class Solution {
+    public int minimumEffortPath(int[][] heights) {
+        // 求最短路径，这里使用狄杰斯特拉Dijkstra算法
+        // 求从 (0, 0) 到 (m-1, n-1) 的最小体力消耗
+        int ans = dijikstra(heights);
+        return ans;
+    }
+
+    // 定义四个方向的移动
+    int[][] dir = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+
+    // 获取坐标 (x, y) 的合法相邻坐标
+    List<int[]> adjacency(int[][] matrix, int x, int y) {
+        int m = matrix.length;
+        int n = matrix[0].length;
+        List<int[]> neighbors = new LinkedList<>();
+        for (int[] d : dir) {
+            int nx = x + d[0];
+            int ny = y + d[1];
+            if (nx >= m || nx < 0 || ny >= n || ny < 0) continue;  // 检查边界条件
+            neighbors.add(new int[]{nx, ny});
+        }
+        return neighbors;
+    }
+
+    // 定义状态类，用于存储坐标和从起点到该点的消耗
+    class State {
+        int x, y;
+        int distFromStart;
+
+        public State(int x, int y, int distFromStart) {
+            this.x = x;
+            this.y = y;
+            this.distFromStart = distFromStart;
+        }
+    }
+
+    int dijikstra(int[][] heights) {
+        int m = heights.length;
+        int n = heights[0].length;
+        // 定义：从 (0, 0) 到 (i, j) 的最小体力消耗是 effort[i][j]
+        int[][] effort = new int[m][n];
+        for (int i = 0; i < m; i++) {
+            Arrays.fill(effort[i], Integer.MAX_VALUE);
+        }
+        effort[0][0] = 0;
+
+        // 优先队列，按从起点到当前点的消耗大小排序
+        PriorityQueue<State> queue = new PriorityQueue<>((a, b) -> (a.distFromStart - b.distFromStart));
+        queue.offer(new State(0, 0, 0));
+
+        while (!queue.isEmpty()) {
+            State curState = queue.poll();
+            int curX = curState.x;
+            int curY = curState.y;
+            int curDistFromStart = curState.distFromStart;
+
+            // 到达终点时提前结束
+            if (curX == m - 1 && curY == n - 1) return curDistFromStart;
+
+            // 如果当前路径消耗大于已知最小消耗，则跳过
+            if (curDistFromStart > effort[curX][curY]) continue;
+
+            // 将 (curX, curY) 的相邻坐标装入队列
+            for (int[] neighbor : adjacency(heights, curX, curY)) {
+                int nextX = neighbor[0];
+                int nextY = neighbor[1];
+                int maxNextDist = Math.max(effort[curX][curY],
+                        Math.abs(heights[nextX][nextY] - heights[curX][curY]));
+
+                // 更新 dp table
+                /*
+                Dijkstra 算法的核心思想是不断用更短的路径更新到达每个节点的距离。
+                因此，只有当 maxNextDist 小于当前记录的 effort[nextX][nextY] 时，
+                才需要更新 effort[nextX][nextY] 并将新的状态加入优先队列。
+                 */
+                if (effort[nextX][nextY] > maxNextDist) {
+                    effort[nextX][nextY] = maxNextDist;
+                    queue.offer(new State(nextX, nextY, maxNextDist));
+                }
+            }
+        }
+        return -1;
+    }
+}
+```
+
+
+
+解题思路：
+
 我们常见的二维矩阵题目，如果让你从左上角走到右下角，比较简单的题一般都会限制你只能向右或向下走，但这道题可没有限制哦，你可以上下左右随便走，只要路径的「体力消耗」最小就行。
 
 如果你把二维数组中每个 `(x, y)` 坐标看做一个节点，它的上下左右坐标就是相邻节点，它对应的值和相邻坐标对应的值之差的绝对值就是题目说的「体力消耗」，你就可以理解为边的权重。
 
-这样一想，是不是就在让你以左上角坐标为起点，以右下角坐标为终点，计算起点到终点的最短路径？Dijkstra 算法是不是可以做到？
+这样一想，是不是就在让你**以左上角坐标为起点，以右下角坐标为终点**，计算起点到终点的最短路径？Dijkstra 算法是不是可以做到？
 
-<!-- muliti_language -->
 ```java
 // 输入起点 start 和终点 end，计算起点到终点的最短距离
 int dijkstra(int start, int end, List<Integer>[] graph)
@@ -646,7 +710,6 @@ int dijkstra(int start, int end, List<Integer>[] graph)
 
 二维矩阵抽象成图，我们先实现一下图的 `adj` 方法，之后的主要逻辑会清晰一些：
 
-<!-- muliti_language -->
 ```java
 // 方向数组，上下左右的坐标偏移量
 int[][] dirs = new int[][]{{0,1}, {1,0}, {0,-1}, {-1,0}};
@@ -671,7 +734,7 @@ List<int[]> adj(int[][] matrix, int x, int y) {
 
 类似的，我们现在认为一个二维坐标 `(x, y)` 是图中的一个节点，所以这个 `State` 类也需要修改一下：
 
-<!-- muliti_language -->
+
 ```java
 class State {
     // 矩阵中的一个位置
@@ -689,7 +752,6 @@ class State {
 
 接下来，就可以套用 Dijkstra 算法的代码模板了：
 
-<!-- muliti_language -->
 ```java
 // Dijkstra 算法，计算 (0, 0) 到 (m - 1, n - 1) 的最小体力消耗
 int minimumEffortPath(int[][] heights) {
@@ -733,7 +795,7 @@ int minimumEffortPath(int[][] heights) {
             int effortToNextNode = Math.max(
                 effortTo[curX][curY], 
                 Math.abs(heights[curX][curY] - heights[nextX][nextY])
-            );
+            );//因为路径的消耗是由路径上最大的高度差决定的。所以Max
             // 更新 dp table
             if (effortTo[nextX][nextY] > effortToNextNode) {
                 effortTo[nextX][nextY] = effortToNextNode;
@@ -748,13 +810,15 @@ int minimumEffortPath(int[][] heights) {
 
 你看，稍微改一改代码模板，这道题就解决了。
 
+###  1514 题「概率最大的路径」
+
 最后看一道题吧，力扣第 1514 题「概率最大的路径」，看下题目：
 
 ![](https://labuladong.github.io/pictures/dijkstra/title3.jpg)
 
 函数签名如下：
 
-<!-- muliti_language -->
+
 ```java
 // 输入一幅无向图，边上的权重代表概率，返回从 start 到达 end 最大的概率
 double maxProbability(int n, int[][] edges, double[] succProb, int start, int end)
@@ -784,7 +848,7 @@ double maxProbability(int n, int[][] edges, double[] succProb, int start, int en
 
 只不过，这道题的解法要把优先级队列的排序顺序反过来，一些 if 大小判断也要反过来，我们直接看解法代码吧：
 
-<!-- muliti_language -->
+
 ```java
 double maxProbability(int n, int[][] edges, double[] succProb, int start, int end) {
     List<double[]>[] graph = new LinkedList[n];

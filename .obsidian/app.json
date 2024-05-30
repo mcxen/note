@@ -1,4 +1,7 @@
 {
   "promptDelete": false,
-  "alwaysUpdateLinks": true
+  "alwaysUpdateLinks": true,
+  "attachmentFolderPath": "./assets/图论6-dijkstra算法",
+  "newFileLocation": "current",
+  "newLinkFormat": "relative"
 }
