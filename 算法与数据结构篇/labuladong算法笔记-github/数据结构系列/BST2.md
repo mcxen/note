@@ -3,17 +3,6 @@ title: '手把手带你刷二叉搜索树（第二期）'
 tags: ['数据结构', '二叉搜索树', '二叉树', '分解问题的思路']
 ---
 
-<p align='center'>
-<a href="https://github.com/labuladong/fucking-algorithm" target="view_window"><img alt="GitHub" src="https://img.shields.io/github/stars/labuladong/fucking-algorithm?label=Stars&style=flat-square&logo=GitHub"></a>
-<a href="https://appktavsiei5995.pc.xiaoe-tech.com/index" target="_blank"><img class="my_header_icon" src="https://img.shields.io/static/v1?label=精品课程&message=查看&color=pink&style=flat"></a>
-<a href="https://www.zhihu.com/people/labuladong"><img src="https://img.shields.io/badge/%E7%9F%A5%E4%B9%8E-@labuladong-000000.svg?style=flat-square&logo=Zhihu"></a>
-<a href="https://space.bilibili.com/14089380"><img src="https://img.shields.io/badge/B站-@labuladong-000000.svg?style=flat-square&logo=Bilibili"></a>
-</p>
-
-![](https://labuladong.github.io/pictures/souyisou1.png)
-
-**通知：[数据结构精品课](https://aep.h5.xeknow.com/s/1XJHEO) 已更新到 V2.1，[手把手刷二叉树系列课程](https://aep.xet.tech/s/3YGcq3) 上线。另外，建议你在我的 [网站](https://labuladong.github.io/algo/) 学习文章，体验更好。**
-
 
 
 读完本文，你不仅学会了算法套路，还可以顺便解决如下题目：
@@ -25,9 +14,7 @@ tags: ['数据结构', '二叉搜索树', '二叉树', '分解问题的思路']
 | [701. Insert into a Binary Search Tree](https://leetcode.com/problems/insert-into-a-binary-search-tree/) | [701. 二叉搜索树中的插入操作](https://leetcode.cn/problems/insert-into-a-binary-search-tree/) | 🟠
 | [98. Validate Binary Search Tree](https://leetcode.com/problems/validate-binary-search-tree/) | [98. 验证二叉搜索树](https://leetcode.cn/problems/validate-binary-search-tree/) | 🟠
 
-**-----------**
 
-在开头先打个广告，我的 [手把手刷二叉树课程](https://aep.xet.tech/s/3YGcq3) 按照公式和套路讲解了 150 道二叉树题目，只需一顿饭钱，就能手把手带你刷完二叉树分类的题目，迅速掌握递归思维，让你豁然开朗。我绝对有这个信心，信不信，可以等你看完我的二叉树算法系列文章再做评判。
 
 我们前文 [东哥带你刷二叉搜索树（特性篇）](https://labuladong.github.io/article/fname.html?fname=BST1) 介绍了 BST 的基本特性，还利用二叉搜索树「中序遍历有序」的特性来解决了几道题目，本文来实现 BST 的基础操作：判断 BST 的合法性、增、删、查。其中「删」和「判断合法性」略微复杂。
 

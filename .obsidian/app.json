@@ -1,7 +1,7 @@
 {
   "promptDelete": false,
   "alwaysUpdateLinks": true,
-  "attachmentFolderPath": "./assets/图论7-名人问题",
+  "attachmentFolderPath": "./assets/README",
   "newFileLocation": "current",
   "newLinkFormat": "relative"
 }
