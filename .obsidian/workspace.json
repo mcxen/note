@@ -11,8 +11,12 @@
             "id": "1314eda57a3754d1",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {}
+              "type": "markdown",
+              "state": {
+                "file": "面试篇/面试习题仓库/华为机考.md",
+                "mode": "source",
+                "source": false
+              }
             }
           }
         ]
@@ -44,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "华为",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -61,7 +65,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -81,6 +86,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "面试篇/面试习题仓库/华为机考.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -97,6 +103,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "面试篇/面试习题仓库/华为机考.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -118,7 +125,9 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {}
+              "state": {
+                "file": "面试篇/面试习题仓库/华为机考.md"
+              }
             }
           }
         ],
@@ -141,6 +150,7 @@
   },
   "active": "1314eda57a3754d1",
   "lastOpenFiles": [
+    "面试篇/面试习题仓库/分布式框架面试题汇总.md",
     "面试篇/面试习题仓库/进阶版面试题/3_分布式缓存/README.md",
     "面试篇/面试习题仓库/进阶版面试题/6_分布式系统的面试连环炮/README.md",
     "面试篇/面试习题仓库/MySQL面试问题整理/MySQL面试题-第5篇-优化.md",
@@ -172,7 +182,6 @@
     "算法与数据结构篇/算法仓库添加第三方仓库备注.md",
     "算法与数据结构篇/KMP算法.md",
     "算法与数据结构篇/labuladong算法笔记-github/算法思维系列/区间调度问题之区间合并.md",
-    "算法与数据结构篇/labuladong算法笔记-github/算法思维系列/前缀和技巧.md",
     "算法与数据结构篇/图论/assets/图论7-名人问题/2-20240530223931091.jpeg",
     "算法与数据结构篇/图论/assets/图论7-名人问题/1-20240530223730089.jpeg",
     "算法与数据结构篇/图论/assets/图论7-名人问题",

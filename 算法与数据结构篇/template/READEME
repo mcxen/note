@@ -1,0 +1,12 @@
+BigNumberPlus      大数加法           用于大数加法，可以包含小数或者特殊字符加法
+BinaryIndexTree    树状数组           用于快速计算区间和，场景是单点修改
+BinarySearch       常见二分代码       用于在排好序的数列中查找指定的值
+KMP                KMP算法           用于字符串匹配
+MonotonicStack     单调栈             用于在一个数列中查找某一方向上第一个大于或者小于的数
+PreSumArray        前缀和              用于快速计算区间和，场景是数组不发生修改
+SegmentTreeDynamic 线段树              用于快速计算区间和，场景是范围修改，也支持单点修改
+StringHash         字符串Hash          用于字符串匹配，使用的是字符串Hash和前缀和，比滚动Hash看起来简单很多
+
+
+SuffixArray        后缀数组
+
