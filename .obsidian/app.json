@@ -1,7 +1,7 @@
 {
   "promptDelete": false,
   "alwaysUpdateLinks": true,
-  "attachmentFolderPath": "./assets/华为机考",
+  "attachmentFolderPath": "./assets/微服务",
   "newFileLocation": "current",
   "newLinkFormat": "relative"
 }

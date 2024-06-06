@@ -4,19 +4,15 @@
     "type": "split",
     "children": [
       {
-        "id": "47a07c02693fe3a4",
+        "id": "f52bf1b6c0f4d4bf",
         "type": "tabs",
         "children": [
           {
-            "id": "1314eda57a3754d1",
+            "id": "c49abc50b030906d",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "面试篇/面试习题仓库/华为机考.md",
-                "mode": "source",
-                "source": false
-              }
+              "type": "empty",
+              "state": {}
             }
           }
         ]
@@ -48,7 +44,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "华为",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -86,7 +82,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "面试篇/面试习题仓库/华为机考.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +98,6 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "面试篇/面试习题仓库/华为机考.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,9 +119,7 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {
-                "file": "面试篇/面试习题仓库/华为机考.md"
-              }
+              "state": {}
             }
           }
         ],
@@ -148,53 +140,53 @@
       "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "1314eda57a3754d1",
+  "active": "c49abc50b030906d",
   "lastOpenFiles": [
-    "面试篇/面试习题仓库/分布式框架面试题汇总.md",
-    "面试篇/面试习题仓库/进阶版面试题/3_分布式缓存/README.md",
+    "面试篇/面试习题仓库/Java面试题库/微服务.md",
+    "面试篇/面试习题仓库/Java面试题库/Dubbo.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/distributed-system/rpc/dubbo.md",
+    "面试篇/面试习题整理/项目信息-面试整理.md",
     "面试篇/面试习题仓库/进阶版面试题/6_分布式系统的面试连环炮/README.md",
-    "面试篇/面试习题仓库/MySQL面试问题整理/MySQL面试题-第5篇-优化.md",
-    "面试篇/面试习题仓库/MySQL面试问题整理/MySQL面试题-第3篇-事务.md",
-    "面试篇/面试习题仓库/Java面试题库/Mybatis.md",
-    "面试篇/面试习题仓库/Java面试题库/MongoDB.md",
-    "面试篇/面试习题仓库/Java面试题库/Jenkins.md",
-    "面试篇/面试习题仓库/Java面试题库/Java基础.md",
-    "面试篇/面试习题仓库/Java面试题库/设计模式.md",
-    "Java&Spring篇/JAVA1_基础知识/第08章_面向对象编程（高级）_抽象类_接口/尚硅谷_宋红康_第08章_面向对象编程（高级）.md",
-    "算法与数据结构篇/图论/图论2-拓扑排序.md",
-    "算法与数据结构篇/图论/图论1-图论基础.md",
-    "算法与数据结构篇/图论/图论4-Union-Find 并查集算法.md",
-    "算法与数据结构篇/算法笔记.md",
-    "算法与数据结构篇/图论/图论5-最小生成树- kruskal.md",
-    "算法与数据结构篇/图论/README.md",
-    "算法与数据结构篇/图论/assets/README/d.png",
-    "算法与数据结构篇/图论/assets/README",
-    "算法与数据结构篇/图论/图论8-最小生成树-Prim~.md",
-    "算法与数据结构篇/图论/assets/图论8-最小生成树-Prim/d.png",
-    "算法与数据结构篇/图论/图论6-dijkstra算法.md",
-    "算法与数据结构篇/图论/图论8-最小生成树-Prim.md",
-    "算法与数据结构篇/图论/图论3-二分图的判定.md",
-    "算法与数据结构篇/图论/图论5-最小生成树- kruskal~.md",
-    "算法与数据结构篇/图论/assets/图论5-最小生成树- kruskal/image-图论5-最小生成树-20240528160007089.png",
-    "算法与数据结构篇/图论/assets/图论8-最小生成树-Prim/584866-20200601105116381-1557763831.jpeg",
-    "算法与数据结构篇/图论/assets/图论8-最小生成树-Prim",
-    "算法与数据结构篇/图论详解.md",
-    "算法与数据结构篇/算法仓库添加第三方仓库备注.md",
-    "算法与数据结构篇/KMP算法.md",
-    "算法与数据结构篇/labuladong算法笔记-github/算法思维系列/区间调度问题之区间合并.md",
-    "算法与数据结构篇/图论/assets/图论7-名人问题/2-20240530223931091.jpeg",
-    "算法与数据结构篇/图论/assets/图论7-名人问题/1-20240530223730089.jpeg",
-    "算法与数据结构篇/图论/assets/图论7-名人问题",
-    "算法与数据结构篇/图论/assets/图论6-dijkstra算法/title3.jpg",
-    "算法与数据结构篇/图论/assets/图论6-dijkstra算法/995.png",
-    "算法与数据结构篇/图论/assets/图论6-dijkstra算法/7.png",
-    "算法与数据结构篇/图论/assets/图论6-dijkstra算法/title1.jpg",
-    "算法与数据结构篇/图论/assets/图论6-dijkstra算法",
-    "算法与数据结构篇/图论/assets/图论5-最小生成树- kruskal",
-    "算法与数据结构篇/图论/assets",
-    "算法与数据结构篇/图论",
-    "算法与数据结构篇/labuladong算法笔记-github/pictures/linuxshell",
-    "算法与数据结构篇/labuladong算法笔记-github/pictures/LCS",
-    "算法与数据结构篇/labuladong算法笔记-github/pictures/有序数组去重"
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/spring-transaction/roollbackFor.png",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/spring-annotations/@RequestBody.png",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/spring-transaction/PlatformTransactionManager.png",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/images/design-of-authority-system/permission-application.png",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/images/design-of-authority-system/new-authority-system-menu.png",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/images/design-of-authority-system/new-authority-system-menu-management-interface.png",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/images/design-of-authority-system/new-authority-system-management-interface.png",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/images/design-of-authority-system/new-authority-system-design.png",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/images/design-of-authority-system/new-authority-system-design-access-flow-chart.png",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/spring-transaction",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/spring-annotations",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/mvc-model2.drawio",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/mvc-mode1.drawio",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/java/jvm/pictures/jdk监控和故障处理工具总结/4线程监控.png",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/distributed-system/protocol/images/gossip/反熵-闭环.drawio",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/cs-basics/data-structure/pictures/线性数据结构/栈实现浏览器倒退和前进.drawio",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/images/design-of-authority-system",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/springboot-source-code.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/springboot-knowledge-and-questions-summary.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/spring-transaction.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/spring-knowledge-and-questions-summary.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/spring-design-patterns-summary.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/spring-common-annotations.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/spring-boot-auto-assembly-principles.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/ioc-and-aop.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/mybatis/mybatis-interview.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/basis/pictures/programming-principles.drawio",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/basis/pictures/common-design-patterns.drawio",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/distributed-system/distributed-process-coordination/zookeeper/zookeeper-plus.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/distributed-system/distributed-process-coordination/zookeeper/zookeeper-intro.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/distributed-system/distributed-process-coordination/zookeeper/zookeeper-in-action.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/tools/maven/maven-core-concepts.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/tools/maven/maven-best-practices.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/tools/gradle/gradle-core-concepts.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/tools/git/github-tips.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/tools/git/git-intro.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/tools/docker/docker-intro.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/tools/docker/docker-in-action.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/sso-intro.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/jwt-intro.md"
   ]
 }
