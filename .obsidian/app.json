@@ -1,7 +1,7 @@
 {
   "promptDelete": false,
   "alwaysUpdateLinks": true,
-  "attachmentFolderPath": "./assets/微服务",
+  "attachmentFolderPath": "./assets/Spring",
   "newFileLocation": "current",
   "newLinkFormat": "relative"
 }
