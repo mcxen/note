@@ -8,6 +8,7 @@ package template;
 public class BigNumberPlus {
 
     public static String bigNumberPlus (String s1, String s2) {
+        //这里是有小数的的加法,必须是\\. 1.112
         String s1Big = s1.split("\\.")[0];
         String s1Small = null;
         if (s1.split("\\.").length != 1) {
@@ -39,6 +40,19 @@ public class BigNumberPlus {
         int c = smallC;
         int i = s1.length() - 1;
         int j = s2.length() - 1;
+        /*
+        //可以直接简单写成这样/
+            while (i>=0||j>=0){
+                char ci =i>=0?s1.charAt(i):'0';
+                char cj =j>=0?s2.charAt(j):'0';
+                int sum = Character.getNumericValue(ci)+Character.getNumericValue(cj)+carry;
+                sb.insert(0,sum%10);
+                carry = sum/10;
+                i--;
+                j--;
+            }
+         */
+
         while (i >= 0 && j >= 0) {
             char c1 = s1.charAt(i);
             char c2 = s2.charAt(j);
@@ -74,6 +88,10 @@ public class BigNumberPlus {
         if (s1 == null || s1.length() == 0) {
             StringBuilder stringBuilder = new StringBuilder(s2);
             stringBuilder.insert(0, "0.");
+            /*
+            StringBuilder sb = new StringBuilder();
+            sb.append("0.").append(s2);
+             */
             return stringBuilder.toString();
         }
         if (s2 == null || s2.length() == 0) {
@@ -97,9 +115,9 @@ public class BigNumberPlus {
         while (i >= 0 && j >= 0) {
             char c1 = s1.charAt(i);
             char c2 = s2.charAt(j);
-            int sum = calculate(c1, c2) + c;
+            int sum = calculate(c1, c2) + c;//单个字符相加
             c = sum / 10;
-            ans.insert(0, sum % 10);
+            ans.insert(0, sum % 10);//将结果插在前面
             i--;
             j--;
         }
@@ -111,7 +129,7 @@ public class BigNumberPlus {
         while (k >= 0 && ans.charAt(k) == '0') {
             k--;
         }
-        ans.delete(k + 1, ans.length());
+        ans.delete(k + 1, ans.length());//删除多余的0；
         return ans.toString();
     }
 

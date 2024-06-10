@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "f52bf1b6c0f4d4bf",
+        "id": "80204b98260e0ee1",
         "type": "tabs",
         "children": [
           {
-            "id": "c49abc50b030906d",
+            "id": "f62595b6e4fa1e39",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Java&Spring篇/Spring.md",
+                "file": "MySQL篇/MySQL高级篇/第06-12章_索引及调优篇.md",
                 "mode": "preview",
                 "source": false
               }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "存储引擎",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -65,7 +65,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -85,7 +86,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Java&Spring篇/Spring.md",
+                "file": "MySQL篇/MySQL高级篇/第06-12章_索引及调优篇.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +103,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Java&Spring篇/Spring.md",
+                "file": "MySQL篇/MySQL高级篇/第06-12章_索引及调优篇.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +126,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Java&Spring篇/Spring.md"
+                "file": "MySQL篇/MySQL高级篇/第06-12章_索引及调优篇.md"
               }
             }
           }
@@ -147,10 +148,18 @@
       "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "c49abc50b030906d",
+  "active": "f62595b6e4fa1e39",
   "lastOpenFiles": [
-    "Java&Spring篇/SpringBoot笔记.md",
+    "MySQL篇/MySQL基础篇/第00章_写在前面.md",
+    "算法与数据结构篇/代码随想录-github/problems/0121.买卖股票的最佳时机.md",
+    "Java&Spring篇/linux下的java部署.md",
+    "算法与数据结构篇/图论/图论1-图论基础.md",
+    "算法与数据结构篇/template/StateConpressBFS.java",
+    "算法与数据结构篇/图论/图论2-拓扑排序.md",
+    "算法与数据结构篇/图论/图论5-最小生成树- kruskal.md",
+    "算法与数据结构篇/图论/图论6-dijkstra算法.md",
     "Java&Spring篇/Spring.md",
+    "Java&Spring篇/SpringBoot笔记.md",
     "Java&Spring篇/JavaWeb发展路程1.md",
     "Java&Spring篇/Java jar.md",
     "面试篇/面试习题仓库/Java面试题库/微服务.md",
@@ -186,14 +195,6 @@
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/mybatis/mybatis-interview.md",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/basis/pictures/programming-principles.drawio",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/basis/pictures/common-design-patterns.drawio",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/distributed-system/distributed-process-coordination/zookeeper/zookeeper-plus.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/distributed-system/distributed-process-coordination/zookeeper/zookeeper-intro.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/distributed-system/distributed-process-coordination/zookeeper/zookeeper-in-action.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/tools/maven/maven-core-concepts.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/tools/maven/maven-best-practices.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/tools/gradle/gradle-core-concepts.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/tools/git/github-tips.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/tools/git/git-intro.md"
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/distributed-system/distributed-process-coordination/zookeeper/zookeeper-plus.md"
   ]
 }
