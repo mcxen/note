@@ -4,19 +4,15 @@
     "type": "split",
     "children": [
       {
-        "id": "80204b98260e0ee1",
+        "id": "fbaefd91ad47837b",
         "type": "tabs",
         "children": [
           {
-            "id": "f62595b6e4fa1e39",
+            "id": "a06e4062f5d9c366",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "MySQL篇/MySQL高级篇/第06-12章_索引及调优篇.md",
-                "mode": "preview",
-                "source": false
-              }
+              "type": "empty",
+              "state": {}
             }
           }
         ]
@@ -48,7 +44,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "存储引擎",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -65,8 +61,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -86,7 +81,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "MySQL篇/MySQL高级篇/第06-12章_索引及调优篇.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +97,6 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "MySQL篇/MySQL高级篇/第06-12章_索引及调优篇.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,9 +118,7 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {
-                "file": "MySQL篇/MySQL高级篇/第06-12章_索引及调优篇.md"
-              }
+              "state": {}
             }
           }
         ],
@@ -148,8 +139,17 @@
       "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "f62595b6e4fa1e39",
+  "active": "3046b4ae2d460ad8",
   "lastOpenFiles": [
+    "面试篇/面试习题整理/assets/智力测验题/202205220037703.png",
+    "面试篇/面试习题整理/assets/智力测验题/202205220037552.png",
+    "面试篇/面试习题整理/assets/智力测验题/202205220037469.png",
+    "面试篇/面试习题整理/assets/智力测验题/202205220037654.png",
+    "面试篇/面试习题整理/assets/智力测验题/202305051050008.png",
+    "面试篇/面试习题整理/assets/智力测验题",
+    "面试篇/面试习题整理/assets",
+    "面试篇/面试习题整理/智力测验题.md",
+    "MySQL篇/MySQL高级篇/第06-12章_索引及调优篇.md",
     "MySQL篇/MySQL基础篇/第00章_写在前面.md",
     "算法与数据结构篇/代码随想录-github/problems/0121.买卖股票的最佳时机.md",
     "Java&Spring篇/linux下的java部署.md",
@@ -173,14 +173,10 @@
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/images/design-of-authority-system/permission-application.png",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/images/design-of-authority-system/new-authority-system-menu.png",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/images/design-of-authority-system/new-authority-system-menu-management-interface.png",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/images/design-of-authority-system/new-authority-system-management-interface.png",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/images/design-of-authority-system/new-authority-system-design.png",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/images/design-of-authority-system/new-authority-system-design-access-flow-chart.png",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/spring-transaction",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/spring-annotations",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/mvc-model2.drawio",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/mvc-mode1.drawio",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/java/jvm/pictures/jdk监控和故障处理工具总结/4线程监控.png",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/distributed-system/protocol/images/gossip/反熵-闭环.drawio",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/cs-basics/data-structure/pictures/线性数据结构/栈实现浏览器倒退和前进.drawio",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/security/images/design-of-authority-system",
@@ -190,11 +186,6 @@
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/spring-knowledge-and-questions-summary.md",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/spring-design-patterns-summary.md",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/spring-common-annotations.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/spring-boot-auto-assembly-principles.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/ioc-and-aop.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/mybatis/mybatis-interview.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/basis/pictures/programming-principles.drawio",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/distributed-system/distributed-process-coordination/zookeeper/zookeeper-plus.md"
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/spring-boot-auto-assembly-principles.md"
   ]
 }
