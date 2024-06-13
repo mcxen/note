@@ -1,7 +1,7 @@
 {
   "promptDelete": false,
   "alwaysUpdateLinks": true,
-  "attachmentFolderPath": "./assets/智力测验题",
+  "attachmentFolderPath": "./assets/README",
   "newFileLocation": "current",
   "newLinkFormat": "relative"
 }
