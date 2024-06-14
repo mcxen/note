@@ -1,7 +1,7 @@
 {
   "promptDelete": false,
   "alwaysUpdateLinks": true,
-  "attachmentFolderPath": "./assets/README",
+  "attachmentFolderPath": "./assets/动态规划-股票问题总结篇",
   "newFileLocation": "current",
   "newLinkFormat": "relative"
 }
