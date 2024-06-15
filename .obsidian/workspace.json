@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "a06509a2761d9c00",
+        "id": "ebd56880d36d8f36",
         "type": "tabs",
         "children": [
           {
-            "id": "f22f4f421f7674e5",
+            "id": "037a5ee98ff77248",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "算法与数据结构篇/代码随想录-github/problems/动态规划-股票问题总结篇.md",
+                "file": "算法与数据结构篇/代码随想录-github/代码随想LeetCode 刷题攻略.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "算法与数据结构篇/代码随想录-github/problems/动态规划-股票问题总结篇.md",
+                "file": "算法与数据结构篇/代码随想录-github/代码随想LeetCode 刷题攻略.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "算法与数据结构篇/代码随想录-github/problems/动态规划-股票问题总结篇.md",
+                "file": "算法与数据结构篇/代码随想录-github/代码随想LeetCode 刷题攻略.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,12 +125,11 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "算法与数据结构篇/代码随想录-github/problems/动态规划-股票问题总结篇.md"
+                "file": "算法与数据结构篇/代码随想录-github/代码随想LeetCode 刷题攻略.md"
               }
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "horizontal",
@@ -147,13 +146,24 @@
       "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "f22f4f421f7674e5",
+  "active": "037a5ee98ff77248",
   "lastOpenFiles": [
-    "算法与数据结构篇/代码随想录-github/problems/动态规划-股票问题总结篇.md",
-    "算法与数据结构篇/代码随想录-github/problems/assets/动态规划-股票问题总结篇/image-动态规划-股票问题总结篇-20240614125700099.png",
-    "算法与数据结构篇/代码随想录-github/problems/assets/动态规划-股票问题总结篇",
-    "算法与数据结构篇/代码随想录-github/problems/assets",
+    "算法与数据结构篇/代码随想录-github/problems/0494.目标和.md",
     "算法与数据结构篇/代码随想录-github/代码随想LeetCode 刷题攻略.md",
+    "算法与数据结构篇/代码随想录-github/problems/0062.不同路径.md",
+    "算法与数据结构篇/代码随想录-github/problems/周总结/20210107动规周末总结.md",
+    "算法与数据结构篇/代码随想录-github/problems/动态规划理论基础.md",
+    "算法与数据结构篇/代码随想录-github/problems/回溯算法理论基础.md",
+    "算法与数据结构篇/代码随想录-github/problems/贪心算法理论基础.md",
+    "算法与数据结构篇/动态规划/动态规划-股票问题总结篇.md",
+    "算法与数据结构篇/动态规划/[.md",
+    "算法与数据结构篇/代码随想录-github/problems/背包总结篇.md",
+    "算法与数据结构篇/动态规划/assets/动态规划-股票问题总结篇/image-动态规划-股票问题总结篇-20240614125700099.png",
+    "算法与数据结构篇/动态规划/assets",
+    "算法与数据结构篇/assets",
+    "算法与数据结构篇/动态规划",
+    "算法与数据结构篇/动态规划/assets/动态规划-股票问题总结篇",
+    "算法与数据结构篇/代码随想录-github/problems/assets",
     "算法与数据结构篇/代码随想录-github/problems/周总结/20210304动规周末总结.md",
     "算法与数据结构篇/代码随想录-github/problems/0122.买卖股票的最佳时机II（动态规划）.md",
     "面试篇/面试习题仓库/进阶版面试题/1_消息队列的面试连环炮/README.md",
@@ -170,13 +180,6 @@
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/books/cs-basics.md",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/about-the-author/zhishixingqiu-two-years.md",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/about-the-author/javaguide-100k-star.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/about-the-author/feelings-of-half-a-year-from-graduation-to-entry.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/about-the-author/dog-that-copies-other-people-essay.md",
-    "面试篇/面试习题仓库/Spring中都用到了那些设计模式.md",
-    "面试篇/面试习题仓库/Spring面试题-JavaGuide.md",
-    "面试篇/面试习题仓库/RocketMQ 面试题-Javabetter.md",
-    "面试篇/面试习题仓库/RabbitMQ消息队列面试题汇总.md",
-    "面试篇/面试习题仓库/Java面试题库/消息队列.md",
     "面试篇/面试习题仓库/马丁12306问题/assets/延迟关闭订单/1691251879853-6fe895ae-7912-4fdc-b765-4cc6933b0796.png",
     "面试篇/面试习题仓库/马丁12306问题/assets/延迟关闭订单/1691251642920-1ce2cb2e-9076-4aff-a936-7a95342fa9f0.png",
     "面试篇/面试习题仓库/马丁12306问题/assets/延迟关闭订单/1691251493023-9e935d6a-087c-424f-a379-e9994b4f4dda.png",
@@ -190,9 +193,6 @@
     "面试篇/面试习题整理/assets/智力测验题",
     "面试篇/面试习题整理/assets",
     "算法与数据结构篇/template/StateConpressBFS.java",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/spring-transaction",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/spring-annotations",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/mvc-model2.drawio",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/mvc-mode1.drawio"
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/system-design/framework/spring/images/spring-transaction"
   ]
 }

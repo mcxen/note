@@ -1,7 +1,7 @@
 {
   "promptDelete": false,
   "alwaysUpdateLinks": true,
-  "attachmentFolderPath": "./assets/动态规划-股票问题总结篇",
+  "attachmentFolderPath": "./assets/代码随想LeetCode 刷题攻略",
   "newFileLocation": "current",
   "newLinkFormat": "relative"
 }
