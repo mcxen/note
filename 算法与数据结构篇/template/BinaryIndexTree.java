@@ -9,6 +9,10 @@ class BinaryIndexTree {
     // 原数组
     int [] nums;
 
+    public BinaryIndexTree(int n) {
+        tree = new int[n + 1];
+    }
+
     public BinaryIndexTree(int[] nums) {
         int n = nums.length;
         tree = new int[n + 1];
@@ -18,13 +22,13 @@ class BinaryIndexTree {
         }
     }
 
-    // 更新操作
+    // 更新操作，直接传进来nums的下标就可以
     public void update(int index, int val) {
         add(index + 1, val - nums[index]);
         nums[index] = val;
     }
 
-    // add操作，给下标给index的点加上val。注意是加上。
+    // add操作，给下标给index的点加上val。注意是加上。这里是直接操作tree,tree坐标比nums多一、
     public void add(int index, int val) {
         while (index < tree.length) {
             tree[index] += val;
@@ -42,9 +46,10 @@ class BinaryIndexTree {
         return sum;
     }
 
-    // 区间和
+    // 区间和[left,right]包含的区间
     public int sumRange(int left, int right) {
-        return sum(right + 1) - sum(left);
+        if (left>=right) return 0;
+        return sum(right) - sum(left-1);
     }
 
     public int lowBit(int x) {
