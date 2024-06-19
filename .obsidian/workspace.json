@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "MySQL篇/MySQL高级篇/第17-19章_日志与备份篇.md",
+                "file": "面试篇/面试习题仓库/Java JVM/Java虚拟机面试题汇总.md",
                 "mode": "source",
                 "source": false
               }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "内存泄漏",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -65,7 +65,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -85,7 +86,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "MySQL篇/MySQL高级篇/第17-19章_日志与备份篇.md",
+                "file": "面试篇/面试习题仓库/Java JVM/Java虚拟机面试题汇总.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +103,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "MySQL篇/MySQL高级篇/第17-19章_日志与备份篇.md",
+                "file": "面试篇/面试习题仓库/Java JVM/Java虚拟机面试题汇总.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +126,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "MySQL篇/MySQL高级篇/第17-19章_日志与备份篇.md"
+                "file": "面试篇/面试习题仓库/Java JVM/Java虚拟机面试题汇总.md"
               }
             }
           }
@@ -149,7 +150,11 @@
   },
   "active": "efde748a9a90eb34",
   "lastOpenFiles": [
+    "面试篇/面试习题仓库/Java JVM/Java基础面试.md",
     "面试篇/面试习题仓库/Java JVM/Java核心面试题汇总.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/high-availability/high-availability-system-design.md",
+    "Java&Spring篇/JAVA3_JUC并发编程笔记/线程安全策略.md",
+    "MySQL篇/MySQL高级篇/第17-19章_日志与备份篇.md",
     "面试篇/面试习题仓库/Java面试题库/微服务.md",
     "面试篇/面试习题仓库/面经记录.md",
     "算法与数据结构篇/动态规划/动态规划-打家劫舍总结.md",
@@ -171,12 +176,8 @@
     "面试篇/面试习题仓库/分布式框架面试题汇总.md",
     "面试篇/面试习题仓库/进阶版面试题/8_分布式Session解决方案/README.md",
     "面试篇/面试习题仓库/进阶版面试题/12_MySQL读写复制及主从同步时延/README.md",
-    "面试篇/面试习题仓库/进阶版面试题/README.md",
-    "算法与数据结构篇/代码随想录-github/problems/背包总结篇.md",
-    "算法与数据结构篇/代码随想录-github/problems/背包理论基础01背包-1.md",
     "算法与数据结构篇/动态规划/assets/动态规划-背包算法总结/2021011010304192.png",
     "算法与数据结构篇/动态规划/assets/动态规划-背包算法总结",
-    "算法与数据结构篇/动态规划/动态规划-背包算法总结~.md",
     "算法与数据结构篇/动态规划/assets/动态规划-股票问题总结篇/image-动态规划-股票问题总结篇-20240614125700099.png",
     "算法与数据结构篇/动态规划/assets",
     "算法与数据结构篇/assets",
