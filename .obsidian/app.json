@@ -1,7 +1,11 @@
 {
   "promptDelete": false,
   "alwaysUpdateLinks": true,
+<<<<<<< HEAD
   "attachmentFolderPath": "./assets/尚硅谷_宋红康_第17章_反射机制",
+=======
+  "attachmentFolderPath": "./assets/Java虚拟机面试题汇总",
+>>>>>>> origin/main
   "newFileLocation": "current",
   "newLinkFormat": "relative"
 }
