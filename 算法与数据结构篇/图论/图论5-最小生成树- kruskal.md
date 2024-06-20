@@ -125,7 +125,7 @@ edges = [[0,1], [0,2], [0,3], [1,4]]
 
 这些边构成的是一棵树，算法应该返回 true：
 
-![](https://ask.qcloudimg.com/http-save/yehe-7432945/794597e7c84a24d457bd022f172fe1e8.png)
+![](./assets/图论5-最小生成树- kruskal/794597e7c84a24d457bd022f172fe1e8.png)
 
 但如果输入：
 
@@ -137,17 +137,17 @@ edges = [[0,1],[1,2],[2,3],[1,3],[1,4]]
 
 形成的就不是树结构了，因为包含环：
 
-![](https://ask.qcloudimg.com/http-save/yehe-7432945/002db42c2654a51529a87e1010efb313.png)
+![](./assets/图论5-最小生成树- kruskal/002db42c2654a51529a87e1010efb313.png)
 
 **对于这道题，我们可以思考一下，什么情况下加入一条边会使得树变成图（出现环）**？
 
 显然，像下面这样添加边会出现环：
 
-![](https://ask.qcloudimg.com/http-save/yehe-7432945/d7b329a576ffb00430a04a3da6a3f85e.png)
+![](./assets/图论5-最小生成树- kruskal/d7b329a576ffb00430a04a3da6a3f85e.png)
 
 而这样添加边则不会出现环：
 
-![](https://ask.qcloudimg.com/http-save/yehe-7432945/1fc4e2c4326ae896cac3c02fcd932678.png)
+![](./assets/图论5-最小生成树- kruskal/1fc4e2c4326ae896cac3c02fcd932678.png)
 
 总结一下规律就是：
 
@@ -205,7 +205,7 @@ class UF {
 
 第一题是力扣第 1135 题「最低成本联通所有城市」，这是一道标准的最小生成树问题：
 
-![](https://ask.qcloudimg.com/http-save/yehe-7432945/7e43525b36d4e3fb0053a5ce99ccdaeb.png)
+![](./assets/图论5-最小生成树- kruskal/7e43525b36d4e3fb0053a5ce99ccdaeb.png)
 
 每座城市相当于图中的节点，连通城市的成本相当于边的权重，连通所有城市的最小成本即是最小生成树的权重之和。
 
