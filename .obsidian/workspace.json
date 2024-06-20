@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "a0c6725304406cd3",
+        "id": "fa8f8cdb6c2cedc6",
         "type": "tabs",
         "children": [
           {
-            "id": "5a770d2ff7fa5b64",
+            "id": "53b94e5fa74d6fdc",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -61,8 +61,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -82,7 +81,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "collapseAll": false,
+                "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
                 "showSearch": false,
@@ -122,12 +121,12 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -140,10 +139,11 @@
       "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "223d851b569744a8",
+  "active": "53b94e5fa74d6fdc",
   "lastOpenFiles": [
-    "算法与数据结构篇/特殊典型算法/二分查找~.md",
     "算法与数据结构篇/特殊典型算法/二分查找.md",
+    "算法与数据结构篇/特殊典型算法/二叉索引树.md",
+    "算法与数据结构篇/特殊典型算法/二分查找~.md",
     "算法与数据结构篇/特殊典型算法/二分法.md",
     "算法与数据结构篇/特殊典型算法/未命名Markdown.md",
     "算法与数据结构篇/图论/图论5-最小生成树- kruskal~.md",
