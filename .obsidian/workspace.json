@@ -4,17 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "fa8f8cdb6c2cedc6",
+        "id": "9c218ce078e00aa0",
         "type": "tabs",
         "children": [
           {
-            "id": "53b94e5fa74d6fdc",
+            "id": "88e1e92f39fe439e",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "面试篇/面试习题仓库/JavaGuide面试习题仓库/high-performance/load-balancing.md",
-                "mode": "source",
+                "file": "算法与数据结构篇/算法笔记.md",
+                "mode": "preview",
                 "source": false
               }
             }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "NGINX",
+                "query": "前缀和算法",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -86,7 +86,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "面试篇/面试习题仓库/JavaGuide面试习题仓库/high-performance/load-balancing.md",
+                "file": "算法与数据结构篇/算法笔记.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +103,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "面试篇/面试习题仓库/JavaGuide面试习题仓库/high-performance/load-balancing.md",
+                "file": "算法与数据结构篇/算法笔记.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -126,7 +126,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "面试篇/面试习题仓库/JavaGuide面试习题仓库/high-performance/load-balancing.md"
+                "file": "算法与数据结构篇/算法笔记.md"
               }
             }
           }
@@ -148,8 +148,27 @@
       "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "53b94e5fa74d6fdc",
+  "active": "88e1e92f39fe439e",
   "lastOpenFiles": [
+    "算法与数据结构篇/assets/前缀和算法/1719130890854-25e2bb70-67b8-4218-8cca-ca119e452fb9.gif",
+    "算法与数据结构篇/assets/前缀和算法/1719130883856-9e6e85d8-b2cd-47cf-bf41-8a3e767a8569.png",
+    "算法与数据结构篇/assets/前缀和算法/1719130883830-087c11bb-1119-48b2-b79f-6e9c70ba76f1.png",
+    "算法与数据结构篇/assets/前缀和算法/1719130883736-f2293d87-b3ec-4f58-8446-2a77f64b9c47.png",
+    "算法与数据结构篇/assets/前缀和算法/1719130883971-c353cb72-2d54-4cf3-80b3-13b20052243f.png",
+    "算法与数据结构篇/assets/前缀和算法/1719130883475-6f540528-185a-4005-b4d9-816414327b6d.png",
+    "算法与数据结构篇/assets/前缀和算法/1719130883551-2e5a3fc8-51c3-4433-b724-5778e32046aa.png",
+    "算法与数据结构篇/assets/前缀和算法/1719130883829-663bb91f-89d5-470e-b6d8-0d075c1b89f0.png",
+    "算法与数据结构篇/assets/前缀和算法/1719130883794-d4c73c29-18c2-40e1-a19c-d62929a91a1f.png",
+    "算法与数据结构篇/assets/前缀和算法/1719130883379-5e0c96ed-6215-4e37-a34b-23e645ed2821.png",
+    "算法与数据结构篇/assets/前缀和算法/1719130883418-31003f67-5476-4409-a329-b1aa69d1eefd.jpeg",
+    "算法与数据结构篇/assets/前缀和算法",
+    "算法与数据结构篇/assets",
+    "算法与数据结构篇/前缀和算法~.md",
+    "算法与数据结构篇/前缀和算法.md",
+    "算法与数据结构篇/代码随想录-github/problems/0028.实现strStr.md",
+    "算法与数据结构篇/labuladong算法笔记-github/算法思维系列/前缀和技巧.md",
+    "算法与数据结构篇/算法笔记.md",
+    "面试篇/面试习题仓库/JavaGuide面试习题仓库/high-performance/load-balancing.md",
     "Linux篇/Linux性能优化.md",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/tools/docker/docker-in-action.md",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/distributed-system/api-gateway.md",
@@ -174,19 +193,7 @@
     "算法与数据结构篇/特殊典型算法/二分法.md",
     "算法与数据结构篇/特殊典型算法/未命名Markdown.md",
     "算法与数据结构篇/图论/图论5-最小生成树- kruskal~.md",
-    "算法与数据结构篇/图论/assets/图论5-最小生成树- kruskal/7e43525b36d4e3fb0053a5ce99ccdaeb.png",
-    "算法与数据结构篇/图论/assets/图论5-最小生成树- kruskal/1fc4e2c4326ae896cac3c02fcd932678.png",
-    "算法与数据结构篇/图论/assets/图论5-最小生成树- kruskal/d7b329a576ffb00430a04a3da6a3f85e.png",
-    "算法与数据结构篇/图论/assets/图论5-最小生成树- kruskal/002db42c2654a51529a87e1010efb313.png",
-    "算法与数据结构篇/图论/assets/图论5-最小生成树- kruskal/794597e7c84a24d457bd022f172fe1e8.png",
     "算法与数据结构篇/特殊典型算法/字符串加法-带小数点~.md",
-    "算法与数据结构篇/特殊典型算法/字符串加法-带小数点.md",
-    "算法与数据结构篇/特殊典型算法/assets/LFU缓存/CleanShot 2024-06-20 at 14.46.24@2x.png",
-    "算法与数据结构篇/特殊典型算法/assets/LFU缓存/CleanShot 2024-06-20 at 14.46.08@2x.png",
-    "算法与数据结构篇/特殊典型算法/assets/LFU缓存/CleanShot 2024-06-20 at 14.44.39@2x.png",
-    "算法与数据结构篇/特殊典型算法/assets/LFU缓存/CleanShot 2024-06-20 at 14.42.11@2x.png",
-    "算法与数据结构篇/特殊典型算法/assets/LFU缓存",
-    "算法与数据结构篇/特殊典型算法/LFU缓存~.md",
-    "算法与数据结构篇/特殊典型算法/LFU缓存.md"
+    "算法与数据结构篇/特殊典型算法/assets/LFU缓存"
   ]
 }
