@@ -4,31 +4,15 @@
     "type": "split",
     "children": [
       {
-        "id": "28b55b4d1235d786",
+        "id": "82d8fee0a3f775c0",
         "type": "tabs",
         "children": [
           {
-            "id": "64e951ec23826247",
+            "id": "a58395c1297a7be7",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "面试篇/面试习题仓库/进阶版面试题/1_消息队列的面试连环炮/README.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "c53196ba2bb7e965",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "面试篇/面试习题整理/智力测验题.md",
-                "mode": "source",
-                "source": false
-              }
+              "type": "empty",
+              "state": {}
             }
           }
         ]
@@ -97,7 +81,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "面试篇/面试习题仓库/进阶版面试题/1_消息队列的面试连环炮/README.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +97,6 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "面试篇/面试习题仓库/进阶版面试题/1_消息队列的面试连环炮/README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -136,9 +118,7 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {
-                "file": "面试篇/面试习题仓库/进阶版面试题/1_消息队列的面试连环炮/README.md"
-              }
+              "state": {}
             }
           }
         ],
@@ -156,16 +136,24 @@
       "daily-notes:打开/创建今天的日记": false,
       "templates:插入模板": false,
       "command-palette:打开命令面板": false,
-      "markdown-importer:打开 Markdown 格式转换器": false
+      "markdown-importer:打开 Markdown 格式转换器": false,
+      "weather-fetcher:Insert Weather": false,
+      "open-weather:OpenWeather": false
     }
   },
-  "active": "64e951ec23826247",
+  "active": "a58395c1297a7be7",
   "lastOpenFiles": [
+    "算法与数据结构篇/排序算法.md",
     "面试篇/面试习题整理/智力测验题.md",
+    "面试篇/面试经历/深X服.md",
+    "面试篇/面试习题整理/项目信息-面试整理.md",
+    "面试篇/面试习题整理/算法结构常用-面试整理.md",
+    "面试篇/面试习题整理/手撕设计模式之「工厂模式」.md",
+    "面试篇/面试习题整理/手撕设计模式之「单例模式」.md",
+    "面试篇/面试习题仓库/进阶版面试题/1_消息队列的面试连环炮/README.md",
     "面试篇/面试习题整理/智力测验-大数据题目.md",
     "面试篇/面试习题整理/MySQL-面试整理--转为yuque.md",
     "面试篇/面试习题整理/面经总结.md",
-    "面试篇/面试经历/深X服.md",
     "面试篇/面试经历/华为机考.md",
     "面试篇/面试习题仓库/BeanFactory.md",
     "面试篇/面试习题仓库/Spring面试题汇总.md",
@@ -173,8 +161,6 @@
     "面试篇/面试习题仓库/分布式框架面试题汇总.md",
     "面试篇/面试习题仓库/postmates外卖点单项目.md",
     "面试篇/面试习题仓库/算法常用面试题汇总.md",
-    "面试篇/面试习题整理/项目信息-面试整理.md",
-    "面试篇/面试习题整理/算法结构常用-面试整理.md",
     "面试篇/面试习题整理/操作系统-面试整理.md",
     "算法与数据结构篇/算法笔记.md",
     "算法与数据结构篇/assets/前缀和算法/1719130890854-25e2bb70-67b8-4218-8cca-ca119e452fb9.gif",
@@ -195,10 +181,6 @@
     "算法与数据结构篇/labuladong算法笔记-github/算法思维系列/前缀和技巧.md",
     "面试篇/面试习题仓库/JavaGuide面试习题仓库/high-performance/load-balancing.md",
     "Linux篇/Linux性能优化.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/tools/docker/docker-in-action.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/distributed-system/api-gateway.md",
-    "面试篇/面试习题仓库/Java面试题库/分布式.md",
-    "算法与数据结构篇/labuladong算法笔记-github/技术/密码技术.md",
     "面试篇/面试经历/深X服/.txt",
     "面试篇/面试经历/深X服/新建文本文档.txt",
     "面试篇/面试经历/深X服",
