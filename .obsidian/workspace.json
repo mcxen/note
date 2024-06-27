@@ -144,9 +144,7 @@
       "daily-notes:打开/创建今天的日记": false,
       "templates:插入模板": false,
       "command-palette:打开命令面板": false,
-      "markdown-importer:打开 Markdown 格式转换器": false,
-      "weather-fetcher:Insert Weather": false,
-      "open-weather:OpenWeather": false
+      "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
   "active": "a58395c1297a7be7",
