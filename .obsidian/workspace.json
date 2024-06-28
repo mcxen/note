@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "面试篇/面试习题整理/智力测验题.md",
+                "file": "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/二叉树系列2.md",
                 "mode": "source",
                 "source": false
               }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "还原二叉树",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -65,7 +65,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -85,7 +86,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "面试篇/面试习题整理/智力测验题.md",
+                "file": "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/二叉树系列2.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +103,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "面试篇/面试习题整理/智力测验题.md",
+                "file": "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/二叉树系列2.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +126,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "面试篇/面试习题整理/智力测验题.md"
+                "file": "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/二叉树系列2.md"
               }
             }
           }
@@ -149,6 +150,7 @@
   },
   "active": "a58395c1297a7be7",
   "lastOpenFiles": [
+    "面试篇/面试习题整理/智力测验题.md",
     "面试篇/面试习题整理/智力测验-大数据题目.md",
     "面试篇/面试习题整理/算法结构常用-面试整理.md",
     "面试篇/面试习题整理/项目信息-面试整理.md",
@@ -158,7 +160,6 @@
     "算法与数据结构篇/assets/排序算法/image-20240328141137700.png",
     "算法与数据结构篇/assets/排序算法/1204111-20180418161828576-2022876788.png",
     "算法与数据结构篇/assets/排序算法",
-    "面试篇/面试习题整理/智力测验题.md",
     "面试篇/面试经历/深X服.md",
     "面试篇/面试习题整理/手撕设计模式之「工厂模式」.md",
     "面试篇/面试习题仓库/进阶版面试题/1_消息队列的面试连环炮/README.md",
