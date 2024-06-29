@@ -20,3 +20,16 @@
 ```cmd
 ./assets/${filename}
 ```
+
+### Git 设置
+
+#### 一键Push
+
+```sh
+创建Git别名命令: 
+git config --global alias.pa '!git add -A && git commit -m "Small Auto Commit" && git push'
+
+每次只需要执行: 
+git pa
+```
+
