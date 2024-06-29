@@ -9,7 +9,7 @@
 
 简单说，动态连通性其实可以抽象成给一幅图连线。比如下面这幅图，总共有 10 个节点，他们互不相连，分别用 0~9 标记：
 
-![](https://cdn.nlark.com/yuque/0/2024/jpeg/1389077/1716801639614-1cd699eb-a256-4785-b7f5-fc8115fe3052.jpeg)
+![](./assets/图论4-Union-Find 并查集算法/1716801639614-1cd699eb-a256-4785-b7f5-fc8115fe3052.jpeg)
 
 现在我们的 Union-Find 算法主要需要实现这两个 API：  
 
@@ -229,7 +229,7 @@ private int find(int x) {
 
 PS：读者可能会问，这个 GIF 图的`find`过程完成之后，树高恰好等于 3 了，但是如果更高的树，压缩后高度依然会大于 3 呀？不能这么想。这个 GIF 的情景是我编出来方便大家理解路径压缩的，但是实际中，每次`find`都会进行路径压缩，所以树本来就不可能增长到这么高，你的这种担心应该是多余的。
 
-### 五、最后总结
+### 五、完整代码模版
 
 我们先来看一下完整代码：
 
@@ -268,6 +268,25 @@ class UF {
         }
         count--;
     }
+  /*
+  public boolean union(int p, int q) {
+        int rootP = find(p);
+        int rootQ = find(q);
+        if (rootP == rootQ)
+            return false;
+
+        // 小树接到大树下面，较平衡
+        if (size[rootP] > size[rootQ]) {
+            parent[rootQ] = rootP;
+            size[rootP] += size[rootQ];
+        } else {
+            parent[rootP] = rootQ;
+            size[rootQ] += size[rootP];
+        }
+        count--;
+        return true;
+    }
+    */
 
     public boolean connected(int p, int q) {
         int rootP = find(p);
@@ -320,11 +339,11 @@ Union-Find 算法的复杂度可以这样分析：构造函数初始化数据结
 分析
 
 - 依次对每个边的两个顶点进行并查集合并。
-    
+  
 - 当遇到一个边的两个顶点已经合并过，发现了环，返回这条边。
-    
+  
 - 输出参数只有 `edges` 而没有N。对于有 `N` 个节点的树，应该有 `N-1` 条边，再加上附加的一条边，得到N条边。因此 `edges` 的size即为N。
-    
+  
 
 代码
 
@@ -370,7 +389,7 @@ class Solution {
 
 ```
 
-标准答案：
+#### 标准答案：
 
 ```java
 class Solution {  
