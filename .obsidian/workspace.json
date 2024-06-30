@@ -4,19 +4,15 @@
     "type": "split",
     "children": [
       {
-        "id": "82d8fee0a3f775c0",
+        "id": "59930c5087488ae1",
         "type": "tabs",
         "children": [
           {
-            "id": "a58395c1297a7be7",
+            "id": "d2e3fe548fcf92ce",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/二叉树系列2.md",
-                "mode": "source",
-                "source": false
-              }
+              "type": "empty",
+              "state": {}
             }
           }
         ]
@@ -48,7 +44,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "还原二叉树",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -65,8 +61,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -86,7 +81,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/二叉树系列2.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +97,6 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/二叉树系列2.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,9 +118,7 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {
-                "file": "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/二叉树系列2.md"
-              }
+              "state": {}
             }
           }
         ],
@@ -148,8 +139,19 @@
       "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "a58395c1297a7be7",
+  "active": "a3356546e8e4288e",
   "lastOpenFiles": [
+    "算法与数据结构篇/代码随想录-github/problems/0300.最长上升子序列.md",
+    "算法与数据结构篇/代码随想录-github/problems/0376.摆动序列.md",
+    "面试篇/开源之夏.zip",
+    "MySQL篇/MySQL高级篇/第03章_用户与权限管理.pdf",
+    "MySQL篇/MySQL高级篇/第07章 InnoDB数据存储结构.md",
+    "MySQL篇/MySQL高级篇/第02章_MySQL的数据目录.pdf",
+    "MySQL篇/MySQL高级篇/第01章_Linux下MySQL的安装与使用.pdf",
+    "算法与数据结构篇/代码随想录-github/problems/0239.滑动窗口最大值.md",
+    "算法与数据结构篇/算法笔记~.md",
+    "算法与数据结构篇/assets/单调栈/239.滑动窗口最大值-2.gif",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/二叉树系列2.md",
     "面试篇/面试习题整理/智力测验题.md",
     "面试篇/面试习题整理/智力测验-大数据题目.md",
     "面试篇/面试习题整理/算法结构常用-面试整理.md",
@@ -173,7 +175,6 @@
     "面试篇/面试习题仓库/postmates外卖点单项目.md",
     "面试篇/面试习题仓库/算法常用面试题汇总.md",
     "面试篇/面试习题整理/操作系统-面试整理.md",
-    "算法与数据结构篇/算法笔记.md",
     "算法与数据结构篇/assets/前缀和算法/1719130890854-25e2bb70-67b8-4218-8cca-ca119e452fb9.gif",
     "算法与数据结构篇/assets/前缀和算法/1719130883856-9e6e85d8-b2cd-47cf-bf41-8a3e767a8569.png",
     "算法与数据结构篇/assets/前缀和算法/1719130883830-087c11bb-1119-48b2-b79f-6e9c70ba76f1.png",
@@ -181,20 +182,10 @@
     "算法与数据结构篇/assets/前缀和算法/1719130883971-c353cb72-2d54-4cf3-80b3-13b20052243f.png",
     "算法与数据结构篇/assets/前缀和算法/1719130883475-6f540528-185a-4005-b4d9-816414327b6d.png",
     "算法与数据结构篇/assets/前缀和算法/1719130883551-2e5a3fc8-51c3-4433-b724-5778e32046aa.png",
-    "算法与数据结构篇/assets/前缀和算法/1719130883829-663bb91f-89d5-470e-b6d8-0d075c1b89f0.png",
     "算法与数据结构篇/assets/前缀和算法",
     "算法与数据结构篇/assets",
-    "算法与数据结构篇/前缀和算法~.md",
-    "算法与数据结构篇/前缀和算法.md",
-    "算法与数据结构篇/代码随想录-github/problems/0028.实现strStr.md",
-    "算法与数据结构篇/labuladong算法笔记-github/算法思维系列/前缀和技巧.md",
-    "面试篇/面试习题仓库/JavaGuide面试习题仓库/high-performance/load-balancing.md",
     "面试篇/面试经历/深X服/.txt",
     "面试篇/面试经历/深X服/新建文本文档.txt",
-    "面试篇/面试经历/深X服",
-    "面试篇/面试经历/新建文件夹",
-    "面试篇/面试经历",
-    "面试篇/新建文件夹",
-    "算法与数据结构篇/特殊典型算法/assets/LFU缓存"
+    "面试篇/面试经历/深X服"
   ]
 }
