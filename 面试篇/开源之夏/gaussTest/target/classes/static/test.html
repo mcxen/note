@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--GPT Prompt：-->
+<!--GPT Prompt：
+Layui设计网页包含3部分，设置3个内容，改为侧边导航，点击了侧边导航栏之后页面内容要切换成对应的内容，而且页面内容要居中，不能遮挡导航栏，点击了侧边导航栏之后页面内容切换成对应的内容，其他部分的内容不要显示了，具体结果都用Thymeleaf 来渲染。
+
+1、第一部分是三权分立管理员扫描结果，包含三个子模块，第一个模块是安全管理员列表和权限安全隐患情况，第二个模块是系统管理员列表和权限安全隐患情况，第三个模块是审计管理员列表和权限安全隐患情况，
+
+2、第二部分是表格权限扫描，包含三个子模块，第一个模块是当前数据库下所有的表的根据用户和表名分类的权限列表和权限安全隐患情况，第二个模块是当前数据库下当前用户对表的权限列表和权限安全隐患情况，第三个模块是所有公开的表格，包括：所在数据库，所在schema，名字列表和权限安全隐患情况，
+
+3、第三部分是用户角色权限扫描，包含以“gs_role_”开头的用户/角色列表，
+
+最下面中间增加一个刷新当前页面的按钮。
+
+-->
+<head>
+  <meta charset="utf-8">
+  <title>权限扫描仪表盘</title>
+  <link rel="stylesheet" href="layui/css/layui.css">
+  <style>
+
+    .layui-container {
+      margin-top: 30px;
+    }
+    .image{
+      display: flex;
+      justify-content: center;
+    }
+    .layui-side {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 200px;
+      background-color: #fff;
+      border-right: 1px solid #e6e6e6;
+      z-index: 999;
+    }
+
+    .layui-body {
+      margin-left: 30px;
+      /*左侧边界的宽度定义*/
+      padding: 15px;
+    }
+
+    .layui-nav-tree .layui-nav-item>a {
+      font-size: 16px !important;
+    }
+
+    .layui-nav-tree .layui-nav-child {
+      background-color: #f9fafc;
+    }
+
+    .layui-nav-tree .layui-nav-child dd a {
+      font-size: 14px !important;
+    }
+
+    .layui-nav-tree .layui-this {
+      background-color: #f3f8ff !important;
+    }
+
+    .layui-nav-tree .layui-this a {
+      color: #000 !important;
+      font-weight: bold;
+    }
+
+    /* 新增样式 */
+    .content-section {
+      margin: auto;
+      max-width: 800px;
+    }
+
+    .content-item {
+      display: none;
+    }
+
+    .show {
+      display: block;
+    }
+
+  </style>
+  <script src="https://cdn.staticfile.org/layui/2.6.8/layui.min.js"></script>
+</head>
+
+<body>
+<div class="layui-layout layui-layout-admin">
+  <div class="layui-header">
+    <div class="layui-logo">权限扫描仪表盘</div>
+  </div>
+
+<!--  侧边导航栏-->
+  <div class="layui-side layui-bg-white">
+    <div class="layui-nav-tree">
+      <ul class="layui-nav layui-nav-tree" lay-filter="test">
+        <li class="layui-nav-item">
+          <a href="javascript:;">三权分立权限扫描</a>
+          <dl class="layui-nav-child">
+            <dd><a href="javascript:;" onclick="showContent('security-admin-1')">安全管理员列表和权限安全隐患情况</a></dd>
+            <dd><a href="javascript:;" onclick="showContent('security-admin-2')">系统管理员列表和权限安全隐患情况</a></dd>
+            <dd><a href="javascript:;" onclick="showContent('security-admin-3')">审计管理员列表和权限安全隐患情况</a></dd>
+          </dl>
+        </li>
+
+        <li class="layui-nav-item">
+          <a href="javascript:;">表格及数据库权限扫描</a>
+          <dl class="layui-nav-child">
+            <dd><a href="javascript:;" onclick="showContent('table-permissions-1')">各用户对各表权限</a></dd>
+            <dd><a href="javascript:;" onclick="showContent('table-permissions-2')">各用户对各数据库权限</a></dd>
+            <dd><a href="javascript:;" onclick="showContent('table-permissions-3')">所有公开的表格</a></dd>
+          </dl>
+        </li>
+
+        <li class="layui-nav-item">
+          <a href="javascript:;" onclick="showContent('user-roles')">用户角色权限</a>
+        </li>
+
+        <li class="layui-nav-item">
+          <a href="javascript:;" onclick="refreshPage()">展示所有数据</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+<!--主题内容-->
+  <div class="layui-body">
+
+    <div id="content-section" class="content-section">
+      <!--    安全管理员列表和权限安全隐患情况-->
+      <div id="security-admin-1" class="content-item">
+
+        <h1>1.1 安全管理员列表和权限安全隐患情况</h1><br>
+        <h2>安全管理员列表</h2>
+        <table id="createRoleAdminTable" class="layui-table">
+          <thead>
+          <tr>
+            <th>用户名</th>
+            <th>是否超级用户</th>
+            <th>是否具备创建角色权限</th>
+            <th>是否系统管理员</th>
+            <th>是否审计管理员</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <!--      <h3>安全信息: </h3>-->
+        <h2 id="creRolAdminErr"></h2>
+        <br><br><br><br>
+        <div class="image">
+          <img src="image/三权分立-安全.drawio.svg" width= 60%/>
+        </div>
+        <br>
+        通过三权分立角色模型实现权限的分派，且三个管理员角色独立行使权限，相互制约制衡。使得整个系统的权限不会因为权限集中而引入安全的风险。
+        <br><br><br><br>
+      </div>
+
+<!--      系统管理员列表和权限安全隐患情况-->
+      <div id="security-admin-2" class="content-item">
+        <h1>1.2 系统管理员列表和权限安全隐患情况</h1><br>
+        <h2>系统管理员列表</h2>
+        <table id="sysAdminTable" class="layui-table">
+          <thead>
+          <tr>
+            <th>用户名</th>
+            <th>是否超级用户</th>
+            <th>是否具备创建角色权限</th>
+            <th>是否系统管理员</th>
+            <th>是否审计管理员</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <h2 id="sysAdminErr"></h2>
+        <br>
+        <div class="image">
+          <img src="image/三权分立-系统.drawio.svg" width= 60%/>
+        </div>
+        <br>
+        通过三权分立角色模型实现权限的分派，且三个管理员角色独立行使权限，相互制约制衡。使得整个系统的权限不会因为权限集中而引入安全的风险。<br><br>
+        <br><br><br><br>
+      </div>
+
+<!--      审计管理员列表和权限安全隐患情况-->
+      <div id="security-admin-3" class="content-item">
+        <h1>1.3 审计管理员列表和权限安全隐患情况</h1><br>
+        <h2>审计管理员列表</h2>
+        <table id="auditAdminTable" class="layui-table">
+          <thead>
+          <tr>
+            <th>用户名</th>
+            <th>是否超级用户</th>
+            <th>是否具备创建角色权限</th>
+            <th>是否系统管理员</th>
+            <th>是否审计管理员</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <!--      <h3>安全信息: </h3>-->
+        <h2 id="auditAdminErr"></h2>
+        <br>
+        <div class="image">
+          <img src="image/三权分立-审计.drawio.svg" width= 60%/>
+        </div>
+        <br>
+        通过三权分立角色模型实现权限的分派，且三个管理员角色独立行使权限，相互制约制衡。使得整个系统的权限不会因为权限集中而引入安全的风险。
+        <br><br><br><br>
+      </div>
+
+      <div id="table-permissions-1" class="content-item">
+        <h1>2.1 各用户对各表权限</h1><br><br><!-- 当前数据库下所有表的根据用户和表名分类的权限列表和权限安全隐患情况的内容 -->
+        <table class="layui-table" id="rolTablePrivilegesTable">
+          <thead>
+          <tr>
+            <th>角色名称</th>
+            <th>表格名称</th>
+            <th>权限</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <br><br><br><br>
+      </div>
+
+      <div id="table-permissions-2" class="content-item">
+        <h1>2.2 各用户对各数据库权限</h1>
+        <table id="rol-dat-table"  class="layui-table">
+          <!-- 当前数据库下当前用户对表的权限列表和权限安全隐患情况的内容 -->
+        </table>
+        <br><br><br><br>
+      </div>
+
+      <div id="table-permissions-3" class="content-item">
+        <h1>2.3 所有公开的表格</h1>
+        <table class="layui-table">
+          <!-- 所有公开的表格的内容 -->
+        </table>
+      </div>
+
+      <div id="user-roles" class="content-item">
+        <h1>3 用户角色权限策略</h1><br><br>
+        <h2>所有用户信息表</h2>
+        <table id="pgUserTable" class="layui-table">
+<!--          所有用户信息-->
+
+        </table><br><br>
+
+
+        <br>
+        <h3>根据表格分析：</h3><br>
+        <h3>（1）管理员可以有多个，但是安全管理员只能有一个</h3>
+        <br>
+        如表格上所示，超级管理只有一个是正确的，符合权限要求。<br><br>
+        <br>
+        <h3>（2）禁止新建以“gs_role_”开头的用户/角色，也禁止将已有的用户/角色重命名为以“gs_role_”开头</h3>
+        <br>
+        如表格上所示，没有以“gs_role_”开头的用户/角色，符合权限要求。<br><br>
+        <h3>（3）用户帐户创建原则</h3><br><br>
+        非<a href="https://docs.opengauss.org/zh/docs/3.1.0/docs/Developerguide/三权分立.html">三权分立</a>下，openGauss用户帐户只能由系统管理员rolsystemadmin或拥有CREATEROLE属性的安全管理员创建和删除。
+        <br>
+        三权分立时，用户帐户只能由初始用户omm和安全管理员rolcreaterole创建。
+        <br>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.staticfile.org/jquery/3.5.1/jquery.min.js"></script>
+
+<!--//安全管理员信息脚本-->
+<script>
+  //安全管理员信息
+  $(document).ready(function() {
+    $.ajax({
+      url: "/creroladminerr",
+      dataType: "text",
+      success: function(creRolAdminErr) {
+        $("#creRolAdminErr").text(creRolAdminErr);
+      }
+    });
+  });
+<!--  创建安全管理员脚本-->
+  $(function () {
+    $.ajax({
+      url: '/creroladmin',
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) {
+        var createRoleAdminHtml = '';
+        for (var i in data) {
+          createRoleAdminHtml += '<tr>' +
+                  '<td>' + data[i].rolname + '</td>' +
+                  '<td>' + (data[i].rolsuper ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolcreaterole ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolsystemadmin ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolauditadmin ? '是' : '否') + '</td>' +
+                  '</tr>';
+        }
+        $('#createRoleAdminTable tbody').html(createRoleAdminHtml);
+        layui.use('table', function () {
+          layui.table.render({
+            elem: '#createRoleAdminTable',
+            page: true,
+            limit: 10
+          });
+        });
+      }
+    });
+  });
+</script>
+<!--系统管理员信息-->
+<script>
+  //系统管理员信息
+  $(document).ready(function() {
+    $.ajax({
+      url: "/sysadminerr",
+      dataType: "text",
+      success: function(sysAdminErr) {
+        $("#sysAdminErr").text(sysAdminErr);
+      }
+    });
+  });
+  <!--  创建系统管理员脚本-->
+  $(function () {
+    $.ajax({
+      url: '/sysadmin',
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) {
+        var sysAdminHtml = '';
+        for (var i in data) {
+          sysAdminHtml += '<tr>' +
+                  '<td>' + data[i].rolname + '</td>' +
+                  '<td>' + (data[i].rolsuper ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolcreaterole ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolsystemadmin ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolauditadmin ? '是' : '否') + '</td>' +
+                  '</tr>';
+        }
+        $('#sysAdminTable tbody').html(sysAdminHtml);
+        layui.use('table', function () {
+          layui.table.render({
+            elem: '#sysAdminTable',
+            page: true,
+            limit: 10
+          });
+        });
+      }
+    });
+  });
+</script>
+<!--//审计管理员信息-->
+<script>
+  //审计管理员信息
+  $(document).ready(function() {
+    $.ajax({
+      url: "/auditadminerr",
+      dataType: "text",
+      success: function(auditAdminErr) {
+        $("#auditAdminErr").text(auditAdminErr);
+      }
+    });
+  });
+  <!--  创建审计管理员脚本-->
+  $(function () {
+    $.ajax({
+      url: '/auditadmin',
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) {
+        var auditAdminHtml = '';
+        for (var i in data) {
+          auditAdminHtml += '<tr>' +
+                  '<td>' + data[i].rolname + '</td>' +
+                  '<td>' + (data[i].rolsuper ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolcreaterole ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolsystemadmin ? '是' : '否') + '</td>' +
+                  '<td>' + (data[i].rolauditadmin ? '是' : '否') + '</td>' +
+                  '</tr>';
+        }
+        $('#auditAdminTable tbody').html(auditAdminHtml);
+        layui.use('table', function () {
+          layui.table.render({
+            elem: '#auditAdminTable',
+            page: true,
+            limit: 10
+          });
+        });
+      }
+    });
+  });
+</script>
+
+<!--获取RolTablePrivilege，用户对每个表的权限-->
+<script>
+  <!--  创建获取RolTablePrivilege-->
+  $(function () {
+    $.ajax({
+      url: '/rolTablePrivileges',
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) {
+        var rolTablePrivileges = '';
+        for (var i in data) {
+          rolTablePrivileges += '<tr>' +
+                  '<td>' + data[i].rolName + '</td>' +
+                  '<td>' + data[i].tableName  + '</td>' +
+                  '<td>' + data[i].privileges  + '</td>' +
+                  '</tr>';
+        }
+        $('#rolTablePrivilegesTable tbody').html(rolTablePrivileges);
+        layui.use('table', function () {
+          layui.table.render({
+            elem: '#rolTablePrivilegesTable',
+            page: true,
+            limit: 10
+          });
+        });
+      }
+    });
+  });
+</script>
+
+<!--获取RolDatPrivilege,用户对每个数据库的权限-->
+<script>
+  layui.use(['table'], function () {
+    var table = layui.table;
+
+    // 使用Ajax请求数据
+    $.ajax({
+      url: '/rol-dat-privileges',
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) {
+        renderTable(data);
+      },
+      error: function () {
+        layer.msg('获取数据失败');
+      }
+    });
+
+    // 渲染表格
+    function renderTable(data) {
+      table.render({
+        elem: '#rol-dat-table',
+        data: data,
+
+        cols: [[
+          {field: 'rolname', title: '角色名'},
+          {field: 'datname', title: '数据库名'},
+          {field: 'privileges', title: '权限', templet: '#privilegesTpl'}
+        ]],
+        page: true // 开启分页功能
+      });
+    }
+
+    // 权限列的模板
+    layui.laytpl('{{#  layui.each(d.privileges, function(index, item){ }}{{ item }}&nbsp;&nbsp;{{#  }); }}').render(data, function(html){
+      $('#privilegesTpl').html(html);
+    });
+  });
+</script>
+
+
+<!--Pg用户全部数据-->
+<script>
+  layui.use('table', function () {
+    var table = layui.table;
+
+    // 渲染表格
+    table.render({
+      elem: '#pgUserTable',
+      url: '/pgusers',
+      method: 'get',
+      parseData: function(res) {
+        return {
+          "code": 0,
+          "msg": "",
+          "count": res.length,
+          "data": res
+        };
+      },
+      cols: [[
+        {field: 'usesysid', title: '用户ID'},
+        {field: 'usename', title: '用户名'},
+        {field: 'usesuper', title: '超级用户', templet: function (d) {
+            return d.usesuper ? '是' : '否';
+          }}
+      ]]
+    });
+  });
+</script>
+
+
+<!--页面调整脚本-->
+<script>
+  // 获取要显示的内容区域元素
+  var contentItems = document.getElementsByClassName("content-item");
+  function showContent(contentId) {
+    // 遍历所有内容区域元素
+    for (var i = 0; i < contentItems.length; i++) {
+      var contentItem = contentItems[i];
+
+      // 如果内容区域的 id 和传入的 contentId 匹配，则显示该内容区域，否则隐藏
+      if (contentItem.id === contentId) {
+        contentItem.classList.add("show");
+      } else {
+        contentItem.classList.remove("show");
+      }
+    }
+  }
+  function refreshPage() {
+    // 显示所有内容区域
+    for (var i = 0; i < contentItems.length; i++) {
+      contentItems[i].classList.add("show");
+    }
+  }
+</script>
+
+
+</body>
+
+</html>
