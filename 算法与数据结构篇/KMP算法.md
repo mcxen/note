@@ -1,5 +1,7 @@
 ## KMP算法
 
+### KMP代码
+
 ```java
 public class kmp {
     public static void main(String[] args) {
@@ -42,6 +44,8 @@ public class kmp {
 
 "部分匹配"的实质是，有时候，字符串头部和尾部会有重复。比如，"ABCDAB"之中有两个"AB"，那么它的"部分匹配值"就是2（"AB"的长度）。搜索词移动的时候，第一个"AB"向后移动4位（字符串长度-部分匹配值），就可以来到第二个"AB"的位置。
 
+
+
 ![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/alg-kpm-14.png)
 
 下面介绍《部分匹配表》是如何产生的。
@@ -71,52 +75,26 @@ public class kmp {
 ### 匹配流程
 
 
-
-
 ![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/alg-kpm-1-20240415185713673.png)
-
-
 
 首先，字符串 "BBC ABCDAB ABCDABCDABDE" 的第一个字符与搜索词 "ABCDABD" 的第一个字符，进行比较。因为 B 与 A 不匹配，所以搜索词后移一位。
 
-
-
 ![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/alg-kpm-2.png)
-
-
 
 因为 B 与 A 不匹配，搜索词再往后移。
 
 
 ![img](https://pdai.tech/images/alg/alg-kpm-3.png)
 
-
-
 就这样，直到字符串有一个字符，与搜索词的第一个字符相同为止。
-
-
-
-
 
 ![img](https://pdai.tech/images/alg/alg-kpm-4.png)
 
-
-
 接着比较字符串和搜索词的下一个字符，还是相同。
-
-
-
-
 
 ![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/alg-kpm-5.png)
 
-
-
 直到字符串有一个字符，与搜索词对应的字符不相同为止。
-
-
-
-
 
 ![img](https://pdai.tech/images/alg/alg-kpm-6.png)
 
@@ -124,93 +102,39 @@ public class kmp {
 
 这时，最自然的反应是，将搜索词整个后移一位，再从头逐个比较。这样做虽然可行，但是效率很差，因为你要把 "搜索位置" 移到已经比较过的位置，重比一遍。
 
-
-
-
-
 ![img](https://pdai.tech/images/alg/alg-kpm-7.png)
 
+一个基本事实是，当空格与 D 不匹配时，你其实知道前面六个字符是 "ABCDAB"。KMP 算法的想法是，**设法利用这个已知信息，不要把 "搜索位置" 移回已经比较过的位置**，继续把它向后移，这样就提高了效率。
 
+<img src="https://pdai.tech/images/alg/alg-kpm-8.png" alt="img" style="zoom:50%;" />
 
-一个基本事实是，当空格与 D 不匹配时，你其实知道前面六个字符是 "ABCDAB"。KMP 算法的想法是，设法利用这个已知信息，不要把 "搜索位置" 移回已经比较过的位置，继续把它向后移，这样就提高了效率。
+怎么做到这一点呢？可以针对搜索词，算出一张《部分匹配表》（Partial Match Table）。
 
-
-
-
-
-![img](https://pdai.tech/images/alg/alg-kpm-8.png)
-
-
-
-怎么做到这一点呢？可以针对搜索词，算出一张《部分匹配表》（Partial Match Table）。这张表是如何产生的，后面再介绍，这里只要会用就可以了。
-
-
-
-
-
-![img](https://pdai.tech/images/alg/alg-kpm-9.png)
-
-
+<img src="https://pdai.tech/images/alg/alg-kpm-9.png" alt="img" style="zoom:67%;" />
 
 已知空格与 D 不匹配时，前面六个字符 "ABCDAB" 是匹配的。查表可知，最后一个匹配字符 B 对应的 "部分匹配值" 为 2，因此按照下面的公式算出向后移动的位数：
 
-移动位数 = 已匹配的字符数 - 对应的部分匹配值
+**移动位数 = 已匹配的字符数 - 对应的部分匹配值**
 
 因为 6 - 2 等于 4，所以将搜索词向后移动 4 位。
 
----
-
-
-
-
-
 ![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/alg-kpm-10.png)
-
-
 
 因为空格与Ｃ不匹配，搜索词还要继续往后移。这时，已匹配的字符数为 2（"AB"），对应的 "部分匹配值" 为 0。所以，移动位数 = 2 - 0，结果为 2，于是将搜索词向后移 2 位。
 
----
-
-
-
-
-
 ![img](https://pdai.tech/images/alg/alg-kpm-11.png)
-
-
 
 因为空格与 A 不匹配，继续后移一位。
 
-
-
-
-
 ![img](https://fastly.jsdelivr.net/gh/52chen/imagebed2023@main/uPic/alg-kpm-12.png)
-
-
 
 逐位比较，直到发现 C 与 D 不匹配。于是，移动位数 = 6 - 2，继续将搜索词向后移动 4 位。
 
-
-
-
-
 ![img](https://pdai.tech/images/alg/alg-kpm-13.png)
 
-
-
-逐位比较，直到搜索词的最后一位，发现完全匹配，于是搜索完成。如果还要继续搜索（即找出全部匹配），移动位数 = 7 - 0，再将搜索词向后移动 7 位，这里就不再重复了。
-
-
-
-
+逐位比较，直到搜索词的最后一位，**发现完全匹配，于是搜索完成。**如果还要继续搜索（即找出全部匹配），移动位数 = 7 - 0，再将搜索词向后移动 7 位，这里就不再重复了。
 
 ![img](https://pdai.tech/images/alg/alg-kpm-14.png)
-
-
-
-
 
 ### 459.重复的子字符串
 
