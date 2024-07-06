@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "算法与数据结构篇/二叉树.md",
+                "file": "算法与数据结构篇/算法笔记.md",
                 "mode": "source",
                 "source": false
               }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "最近公共祖先",
+                "query": "单调栈",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -86,7 +86,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "算法与数据结构篇/二叉树.md",
+                "file": "算法与数据结构篇/算法笔记.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +103,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "算法与数据结构篇/二叉树.md",
+                "file": "算法与数据结构篇/算法笔记.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -126,7 +126,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "算法与数据结构篇/二叉树.md"
+                "file": "算法与数据结构篇/算法笔记.md"
               }
             }
           }
@@ -150,6 +150,13 @@
   },
   "active": "d2e3fe548fcf92ce",
   "lastOpenFiles": [
+    "算法与数据结构篇/assets/单调栈/IMG_4952 (1).jpg",
+    "算法与数据结构篇/assets/单调栈/image-20240706202026164.png",
+    "算法与数据结构篇/单调栈.md",
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/单调队列.md",
+    "算法与数据结构篇/代码随想录-github/problems/0739.每日温度.md",
+    "算法与数据结构篇/代码随想录-github/problems/0084.柱状图中最大的矩形.md",
+    "算法与数据结构篇/二叉树.md",
     "算法与数据结构篇/代码随想录-github/problems/周总结/20201017二叉树周末总结.md",
     "算法与数据结构篇/代码随想录-github/problems/0235.二叉搜索树的最近公共祖先.md",
     "算法与数据结构篇/代码随想录-github/problems/0236.二叉树的最近公共祖先.md",
@@ -178,19 +185,12 @@
     "面试篇/面试习题整理/手撕设计模式之「工厂模式」.md",
     "面试篇/面试习题仓库/进阶版面试题/1_消息队列的面试连环炮/README.md",
     "面试篇/面试习题整理/MySQL-面试整理--转为yuque.md",
-    "面试篇/面试习题整理/面经总结.md",
-    "面试篇/面试经历/华为机考.md",
-    "面试篇/面试习题仓库/BeanFactory.md",
-    "面试篇/面试习题仓库/Spring面试题汇总.md",
-    "面试篇/面试习题仓库/Spring中都用到了那些设计模式.md",
-    "面试篇/面试习题仓库/分布式框架面试题汇总.md",
     "算法与数据结构篇/assets/前缀和算法/1719130890854-25e2bb70-67b8-4218-8cca-ca119e452fb9.gif",
     "算法与数据结构篇/assets/前缀和算法/1719130883856-9e6e85d8-b2cd-47cf-bf41-8a3e767a8569.png",
     "算法与数据结构篇/assets/前缀和算法/1719130883830-087c11bb-1119-48b2-b79f-6e9c70ba76f1.png",
     "算法与数据结构篇/assets/前缀和算法/1719130883736-f2293d87-b3ec-4f58-8446-2a77f64b9c47.png",
     "算法与数据结构篇/assets/前缀和算法/1719130883971-c353cb72-2d54-4cf3-80b3-13b20052243f.png",
     "算法与数据结构篇/assets/前缀和算法/1719130883475-6f540528-185a-4005-b4d9-816414327b6d.png",
-    "算法与数据结构篇/assets/前缀和算法/1719130883551-2e5a3fc8-51c3-4433-b724-5778e32046aa.png",
     "算法与数据结构篇/assets/前缀和算法",
     "算法与数据结构篇/assets",
     "面试篇/面试经历/深X服/.txt",
