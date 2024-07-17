@@ -4,19 +4,15 @@
     "type": "split",
     "children": [
       {
-        "id": "59930c5087488ae1",
+        "id": "096cb41dfa3aa17f",
         "type": "tabs",
         "children": [
           {
-            "id": "d2e3fe548fcf92ce",
+            "id": "4369ae2fdf3a7b81",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "算法与数据结构篇/算法笔记.md",
-                "mode": "source",
-                "source": false
-              }
+              "type": "empty",
+              "state": {}
             }
           }
         ]
@@ -48,7 +44,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "单调栈",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -86,7 +82,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "算法与数据结构篇/算法笔记.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +98,6 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "算法与数据结构篇/算法笔记.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,9 +119,7 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {
-                "file": "算法与数据结构篇/算法笔记.md"
-              }
+              "state": {}
             }
           }
         ],
@@ -148,8 +140,9 @@
       "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "d2e3fe548fcf92ce",
+  "active": "4369ae2fdf3a7b81",
   "lastOpenFiles": [
+    "算法与数据结构篇/算法笔记.md",
     "算法与数据结构篇/assets/单调栈/IMG_4952 (1).jpg",
     "算法与数据结构篇/assets/单调栈/image-20240706202026164.png",
     "算法与数据结构篇/单调栈.md",
@@ -190,7 +183,6 @@
     "算法与数据结构篇/assets/前缀和算法/1719130883830-087c11bb-1119-48b2-b79f-6e9c70ba76f1.png",
     "算法与数据结构篇/assets/前缀和算法/1719130883736-f2293d87-b3ec-4f58-8446-2a77f64b9c47.png",
     "算法与数据结构篇/assets/前缀和算法/1719130883971-c353cb72-2d54-4cf3-80b3-13b20052243f.png",
-    "算法与数据结构篇/assets/前缀和算法/1719130883475-6f540528-185a-4005-b4d9-816414327b6d.png",
     "算法与数据结构篇/assets/前缀和算法",
     "算法与数据结构篇/assets",
     "面试篇/面试经历/深X服/.txt",
