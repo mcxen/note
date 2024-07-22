@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "096cb41dfa3aa17f",
+        "id": "055c5b004aef1563",
         "type": "tabs",
         "children": [
           {
-            "id": "4369ae2fdf3a7b81",
+            "id": "6252effd6c4db6fa",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -140,8 +140,9 @@
       "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "4369ae2fdf3a7b81",
+  "active": "6252effd6c4db6fa",
   "lastOpenFiles": [
+    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/二叉树总结.md",
     "算法与数据结构篇/算法笔记.md",
     "算法与数据结构篇/assets/单调栈/IMG_4952 (1).jpg",
     "算法与数据结构篇/assets/单调栈/image-20240706202026164.png",
@@ -177,7 +178,6 @@
     "面试篇/面试经历/深X服.md",
     "面试篇/面试习题整理/手撕设计模式之「工厂模式」.md",
     "面试篇/面试习题仓库/进阶版面试题/1_消息队列的面试连环炮/README.md",
-    "面试篇/面试习题整理/MySQL-面试整理--转为yuque.md",
     "算法与数据结构篇/assets/前缀和算法/1719130890854-25e2bb70-67b8-4218-8cca-ca119e452fb9.gif",
     "算法与数据结构篇/assets/前缀和算法/1719130883856-9e6e85d8-b2cd-47cf-bf41-8a3e767a8569.png",
     "算法与数据结构篇/assets/前缀和算法/1719130883830-087c11bb-1119-48b2-b79f-6e9c70ba76f1.png",
