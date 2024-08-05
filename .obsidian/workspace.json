@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "055c5b004aef1563",
+        "id": "1a17176efd1eb249",
         "type": "tabs",
         "children": [
           {
-            "id": "6252effd6c4db6fa",
+            "id": "d72ef700c6bcad5b",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -44,7 +44,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "线程 生命周期",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -140,7 +140,7 @@
       "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "6252effd6c4db6fa",
+  "active": "223d851b569744a8",
   "lastOpenFiles": [
     "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/二叉树总结.md",
     "算法与数据结构篇/算法笔记.md",
