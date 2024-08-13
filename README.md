@@ -65,3 +65,15 @@ git config --global i18n.logoutputencoding utf-8
 5. 设置控制台字体
 
 有时问题出在控制台的字体上，确保使用支持UTF-8的字体，比如Consolas。
+
+### Github CodeSpace配置
+
+更新apt安装包，安装onefetch：
+
+```bash
+sudo apt update && sudo apt upgrade
+apt install neofetch
+```
+
+
+
