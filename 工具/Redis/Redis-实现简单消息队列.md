@@ -206,6 +206,22 @@ Redis 通过 PUBLISH 、 SUBSCRIBE 、PSUBSCRIBE 等命令实现了**订阅与�
 **Redis 发布订阅 (pub/sub) 的缺点：**
      **消息无法持久化**，如果出现网络断开、Redis 宕机等，消息就会被丢弃。而**且也没有 Ack 机制来保证数据的可靠性，假设一个消费者都没有，那消息就直接被丢弃了。**
 
+#### 订阅机制实现原理
+
+Redis是使用C实现的，通过分析 Redis 源码里的 pubsub.c 文件，了解发布和订阅机制的底层实现，来加深对 Redis 的理解。
+
+Redis 通过 PUBLISH 、SUBSCRIBE 和 PSUBSCRIBE 等命令实现发布和订阅功能。
+
+通过 SUBSCRIBE 命令订阅某频道后，redis-server 里维护了一个字典，字典的键就是一个个 channel ，而字典的值则是一个链表，链表中保存了所有订阅这个 channel 的客户端。SUBSCRIBE 命令的关键，就是将客户端添加到给定 channel 的订阅链表中。
+
+通过 PUBLISH 命令向订阅者发送消息，`redis-server `会使用给定的频道作为键，在它所维护的 channel 字典中查找记录了订阅这个频道的所有客户端的链表，遍历这个链表，将消息发布给所有订阅者。
+
+Pub/Sub 从字面上理解就是发布（Publish）与订阅（Subscribe），在Redis中，你可以设定对某一个 key值进行消息发布及消息订阅，当一个key值上进行了消息发布后，所有订阅它的客户端都会收到相应的消息。这一功能最明显的用法就是用作实时消息系统，比如普通的即时聊天，群聊等功能。
+
+使用场景：
+
+Redis的Pub/Sub系统可以构建实时的消息系统，比如很多用Pub/Sub构建的实时聊天系统的例子。
+
 ### **三、 Stream**
 
 Redis 5.0 版本新增了一个更强大的数据结构—Stream。

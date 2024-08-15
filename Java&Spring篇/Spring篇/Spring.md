@@ -363,6 +363,8 @@ XmlWebApplicationContext：从web应用的根目录读取配置文件，需要�
   + session：应用在Web项目中，Spring创建这个类后，将这个类存入到session范围中。
   + globalsession：应用在Web项目中，必须在porlet环境下使用。但是如果没有这种环境，相当于session。
 
+Bean的作用域
+
 ## Spring的Bean管理配置
 
 ### Spring的Bean的实例化方式
