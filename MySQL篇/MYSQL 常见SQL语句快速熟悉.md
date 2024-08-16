@@ -1,5 +1,14 @@
 ## MYSQL 常见SQL语句快速熟悉
 
+### 取出各科成绩都不小于85分的学生
+
+```sql
+#取出各科成绩都不小于85分的学生
+#如果一个学生所有学科的分数中，最小的都>=85，则表示该学生每科成绩都不小于85
+SELECT stu_name FROM stu_score ss1
+GROUP BY stu_name HAVING MIN(score)>=85;
+```
+
 
 
 ### 取出各科成绩前三的学生
@@ -16,14 +25,7 @@ ORDER BY ss1.clazz,ss1.score desc;
 #对于每一行ss1，统计在与其同一个班级（clazz相同）且分数比它高的行的数量，如果这个数量小于3，则选择该行。
 ```
 
-
-
-```sql
-#取出各科成绩都不小于85分的学生
-#如果一个学生所有学科的分数中，最小的都>=85，则表示该学生每科成绩都不小于85
-SELECT stu_name FROM stu_score ss1
-GROUP BY stu_name HAVING MIN(score)>=85;
-```
+使用 `LIMIT` 来直接在 SQL 查询中获取每个组（例如每个班级）的前三名记录通常不那么直接，因为 `LIMIT` 通常适用于整个查询结果的限制，而不是按组分别限制。但是，可以通过结合使用窗口函数（如 `ROW_NUMBER()` 或 `RANK()`）来实拟实现每组的 `LIMIT` 功能。
 
 
 
@@ -38,6 +40,8 @@ WHERE rk<=3;
 ```
 
 这个查询首先按照学生的id分组，然后在每个分组内按照成绩降序进行排名。使用了DENSE_RANK()函数，以处理成绩相同时不跳过相同排名的情况，从而确保每名学生都能取到TOP3的课程和分数。
+
+
 
 
 
@@ -76,3 +80,29 @@ WHERE NOT EXISTS (
 5. 最终，主查询 `SELECT s.sid, s.sname, sc.cid, sc.score`：这个部分选择输出学生ID (`s.sid`), 学生名 (`s.sname`), 课程ID (`sc.cid`), 和对应的成绩 (`sc.score`)。
 
 总结来说，这个查询用于找出那些在课程 '02' 中有成绩但在课程 '01' 中无成绩的学生，并展示他们在课程 '02' 的成绩和一些基本信息。这可以用于识别只选择某些特定课程的学生情况。
+
+### 排名在第5到第10名的学生
+
+我们需要从 `student_score` 表中先计算每个学生的总分，然后按照总分降序排序，并且筛选出排名在第5到第10名的学生。这里有一个 SQL 查询示例来实现这个要求：
+
+```sql
+SELECT stu_id, SUM(score) AS total_score
+FROM student_score
+GROUP BY stu_id
+ORDER BY total_score DESC
+LIMIT 5 OFFSET 4;
+```
+
+解释：
+
+1. **聚合总分**：
+
+    * `SELECT stu_id, SUM(score) AS total_score`：这一句选择了学生ID (`stu_id`) 并计算了他们的总分。
+    * `FROM student_score`：指定了数据来源表为 `student_score`。
+    * `GROUP BY stu_id`：按学生ID分组，这样每个学生的成绩都会被累加起来计算总分。
+2. **排序和筛选**：
+
+    * `ORDER BY total_score DESC`：按照计算出的总分降序排列，这样总分最高的学生会排在最前面。
+    * `LIMIT 5 OFFSET 4`：这两个参数用于从结果集中获取特定范围的记录。`LIMIT 5` 表示选择5条记录，`OFFSET 4` 表示从结果的第五条记录开始获取（因为偏移量是从0开始计数的）。结合这两个参数，就可以选出总分排名第5到第10的学生。
+
+这个查询假设数据库使用的 SQL 方言支持 `LIMIT` 和 `OFFSET` 关键词，这在许多现代数据库系统（如 PostgreSQL, MySQL）中是有效的。如果你使用的是不支持这两个关键词的数据库系统（比如 SQL Server 或 Oracle），你需要使用相应的方言来调整查询语句。例如，在 SQL Server 中，你可以使用 `ROW_NUMBER()` 函数结合 `TOP` 和子查询来实现相同的功能。
