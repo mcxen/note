@@ -89,6 +89,21 @@ public class UserController {
 - `@Service` : 对应服务层，主要涉及一些复杂的逻辑，需要用到 Dao 层。
 - `@Controller` : 对应 Spring MVC 控制层，主要用于接受用户请求并调用 Service 层返回数据给前端页面。
 
+HTTP请求，请求Controller，然后调用Service里面的方法，然后调用Repository。
+
+> `Repository` 这个术语来源于设计模式中的 **Repository Pattern**。这个设计模式旨在将数据访问逻辑与业务逻辑分离，从而提供一个抽象层，隐藏数据存取的细节。
+>
+> * **分离关注点**：`Repository` 模式通过提供一个数据访问接口，屏蔽了底层数据存储的复杂性，允许业务逻辑层以一种简化的方式与数据交互。
+> * **统一接口**：它提供了一个统一的接口来访问不同的数据源（如数据库、API、文件等），使得代码更具可维护性和扩展性。
+>
+> `Controller` 的主要职责是接收用户的请求、处理这些请求，并返回响应结果。在传统的MVC（Model-View-Controller）架构中，`Controller` 层充当了控制器的角色，协调视图和模型之间的交互。它负责：
+>
+> * **接收和解析请求**：从用户输入中提取参数和数据。
+> * **处理业务逻辑**：调用服务层的业务逻辑，执行所需的操作。
+> * **返回响应**：将处理结果返回给用户，通常是通过视图（HTML、JSON、XML等）呈现结果。
+
+
+
 #### 2.3. `@RestController`
 
 `@RestController`注解是`@Controller`和`@ResponseBody`的合集,表示这是个控制器 bean,并且是将函数的返回值直接填入 HTTP 响应体中,是 REST 风格的控制器。
