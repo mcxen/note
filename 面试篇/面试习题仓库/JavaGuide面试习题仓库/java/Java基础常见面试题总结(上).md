@@ -1,19 +1,3 @@
----
-title: Java基础常见面试题总结(上)
-category: Java
-tag:
-  - Java基础
-head:
-  - - meta
-    - name: keywords
-      content: JVM,JDK,JRE,字节码详解,Java 基本数据类型,装箱和拆箱
-  - - meta
-    - name: description
-      content: 全网质量最高的Java基础常见知识点和面试题总结，希望对你有帮助！
----
-
-<!-- @include: @small-advertisement.snippet.md -->
-
 ## 基础概念与常识
 
 ### Java 语言有哪些特点?
@@ -1066,11 +1050,3 @@ public class VariableLengthArgument {
 }
 ```
 
-## 参考
-
-- What is the difference between JDK and JRE?：<https://stackoverflow.com/questions/1906445/what-is-the-difference-between-jdk-and-jre>
-- Oracle vs OpenJDK：<https://www.educba.com/oracle-vs-openjdk/>
-- Differences between Oracle JDK and OpenJDK：<https://stackoverflow.com/questions/22358071/differences-between-oracle-jdk-and-openjdk>
-- 彻底弄懂 Java 的移位操作符：<https://juejin.cn/post/6844904025880526861>
-
-<!-- @include: @article-footer.snippet.md -->

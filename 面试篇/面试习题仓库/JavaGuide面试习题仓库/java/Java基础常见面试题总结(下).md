@@ -1,19 +1,3 @@
----
-title: Java基础常见面试题总结(下)
-category: Java
-tag:
-  - Java基础
-head:
-  - - meta
-    - name: keywords
-      content: Java异常,泛型,反射,IO,注解
-  - - meta
-    - name: description
-      content: 全网质量最高的Java基础常见知识点和面试题总结，希望对你有帮助！
----
-
-<!-- @include: @article-header.snippet.md -->
-
 ## 异常
 
 **Java 异常类层次结构图概览**：
