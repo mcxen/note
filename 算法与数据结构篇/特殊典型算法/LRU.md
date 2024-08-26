@@ -191,6 +191,89 @@ public class Solution {
 
 > 增加了对 `tail` 是否为 `null` 的检查，以避免 `NullPointerException`。
 
+> 复刻了前文的cache变量等名字
+
+```java
+
+public class LRU {
+    int cap,size;
+    Map<Integer,Node> cache;
+    Node head,tail;
+    class Node{
+        int key,value;
+        Node prev,next;
+
+    public Node(int key, int value, Node prev, Node next) {
+        this.key = key;
+        this.value = value;
+        this.prev = prev;
+        this.next = next;
+    }
+}
+    public LRU(int cap){
+        this.cap = cap;
+        this.size = 0;
+        this.cache = new HashMap<>();
+    }
+    public int get(int key){
+        //查询key
+        if (!cache.containsKey(key)){
+            return -1;
+        }
+        makeRecently(key);
+        return cache.get(key).value;
+    }
+    public void put(int k,int v){
+        if (cache.containsKey(k)){
+            cache.get(k).value = v;
+            makeRecently(k);
+            return;
+        }
+        if (size>=cap){
+            cache.remove(tail.key);
+            if (tail.prev!=null){
+                tail = tail.prev;
+                tail.next = null;
+            }else {
+                head = null;
+                tail = null;
+            }
+            size--;
+        }
+        if (head==null){
+            head = new Node(k,v,null,null);
+        }else{
+            head.prev = new Node(k,v,null,head);
+            head = head.prev;
+        }
+        cache.put(k,head);
+        return;
+    }
+    public void makeRecently(int key){
+        //刷新使用度
+        Node node = cache.get(key);
+        if (node!=head){
+            //删除node
+            if (node==tail) {
+                //node就是tail的时候，删除tail/。
+                tail = tail.prev;
+                tail.next = null;//断开后面
+            }else{
+                //删除node
+                node.prev.next = node.next;
+                node.next.prev = node.prev;
+            }
+            //node更新为head
+            node.prev = null;
+            node.next = head;
+            head.prev = node;
+            head =node;
+        }
+    }
+}
+
+```
+
 ### 实现一个cache，包括LRU算法和在x秒后过期
 
 
