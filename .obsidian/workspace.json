@@ -4,15 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "e318a6418ec9d680",
+        "id": "513df79b867bb871",
         "type": "tabs",
         "children": [
           {
-            "id": "629250e1336e5a19",
+            "id": "9a5d83fdc68199d0",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {}
+              "type": "markdown",
+              "state": {
+                "file": "MySQL篇/Mysql简介版/MySQL-基础篇-第5篇-视图和Limit语句.md",
+                "mode": "source",
+                "source": false
+              }
             }
           }
         ]
@@ -44,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "接口",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -61,8 +65,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -82,6 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "MySQL篇/Mysql简介版/MySQL-基础篇-第5篇-视图和Limit语句.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -98,6 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "MySQL篇/Mysql简介版/MySQL-基础篇-第5篇-视图和Limit语句.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -119,7 +124,9 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {}
+              "state": {
+                "file": "MySQL篇/Mysql简介版/MySQL-基础篇-第5篇-视图和Limit语句.md"
+              }
             }
           }
         ],
@@ -140,8 +147,25 @@
       "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "629250e1336e5a19",
+  "active": "9a5d83fdc68199d0",
   "lastOpenFiles": [
+    "MySQL篇/Mysql简介版/MySQL-基础篇-第0篇-MySQL错误码对照.md",
+    "MySQL篇/Mysql简介版/MySQL-基础篇-第3篇-高级查询.md",
+    "MySQL篇/MySQL基础篇/第15章_存储过程与函数.md",
+    "MySQL篇/MySQL基础篇/第01章_数据库概述.md",
+    "Java&Spring篇/Spring篇/Spring-Jar包启动.md",
+    "Java&Spring篇/JAVA2_JVM_尚硅谷/JVM-第4篇-程序计数器.md",
+    "算法与数据结构篇/KMP算法.md",
+    "算法与数据结构篇/图论详解.md",
+    "算法与数据结构篇/算法笔记.md",
+    "算法与数据结构篇/排序算法.md",
+    "算法与数据结构篇/面试常用手撕题.md",
+    "算法与数据结构篇/labuladong算法笔记-github/算法思维系列/README.md",
+    "算法与数据结构篇/labuladong算法笔记-github/算法思维系列/二分查找详解.md",
+    "算法与数据结构篇/labuladong算法笔记-github/技术/session和cookie.md",
+    "算法与数据结构篇/labuladong算法笔记-github/技术/密码技术.md",
+    "算法与数据结构篇/labuladong算法笔记-github/多语言解法代码/solution_code.md",
+    "算法与数据结构篇/labuladong算法笔记-github/多语言解法代码/contribution-guide.md",
     "Java&Spring篇/JAVA1_基础知识/第08章_面向对象编程（高级）_抽象类_接口/尚硅谷_宋红康_第08章_面向对象编程（高级）.md",
     "面试篇/开源之夏/提交文件夹/结项报告.md",
     "算法与数据结构篇/代码随想录-github/problems/剑指Offer05.替换空格.md",
@@ -149,32 +173,15 @@
     "Java&Spring篇/JAVA1_基础知识/第07章_面向对象编程（进阶）_this_继承_重写_多态/第07章_面向对象编程（进阶）_this_继承_重写_多态.md",
     "算法与数据结构篇/代码随想录-github/problems/0225.用队列实现栈.md",
     "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/二叉树总结.md",
-    "算法与数据结构篇/算法笔记.md",
     "算法与数据结构篇/assets/单调栈/IMG_4952 (1).jpg",
     "算法与数据结构篇/assets/单调栈/image-20240706202026164.png",
     "算法与数据结构篇/单调栈.md",
     "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/单调队列.md",
-    "算法与数据结构篇/代码随想录-github/problems/0739.每日温度.md",
-    "算法与数据结构篇/代码随想录-github/problems/0084.柱状图中最大的矩形.md",
-    "算法与数据结构篇/二叉树.md",
-    "算法与数据结构篇/代码随想录-github/problems/周总结/20201017二叉树周末总结.md",
-    "算法与数据结构篇/代码随想录-github/problems/0235.二叉搜索树的最近公共祖先.md",
-    "算法与数据结构篇/代码随想录-github/problems/0236.二叉树的最近公共祖先.md",
-    "算法与数据结构篇/代码随想录-github/problems/0300.最长上升子序列.md",
-    "算法与数据结构篇/代码随想录-github/problems/0376.摆动序列.md",
     "面试篇/开源之夏.zip",
     "MySQL篇/MySQL高级篇/第03章_用户与权限管理.pdf",
-    "MySQL篇/MySQL高级篇/第07章 InnoDB数据存储结构.md",
     "MySQL篇/MySQL高级篇/第02章_MySQL的数据目录.pdf",
     "MySQL篇/MySQL高级篇/第01章_Linux下MySQL的安装与使用.pdf",
-    "算法与数据结构篇/代码随想录-github/problems/0239.滑动窗口最大值.md",
-    "算法与数据结构篇/算法笔记~.md",
     "算法与数据结构篇/assets/单调栈/239.滑动窗口最大值-2.gif",
-    "算法与数据结构篇/labuladong算法笔记-github/数据结构系列/二叉树系列2.md",
-    "面试篇/面试习题整理/智力测验题.md",
-    "面试篇/面试习题整理/智力测验-大数据题目.md",
-    "面试篇/面试习题整理/算法结构常用-面试整理.md",
-    "面试篇/面试习题整理/项目信息-面试整理.md",
     "算法与数据结构篇/assets/排序算法/image-20240328141137700.png",
     "算法与数据结构篇/assets/排序算法/1204111-20180418161828576-2022876788.png",
     "算法与数据结构篇/assets/排序算法",
