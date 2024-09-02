@@ -27,7 +27,7 @@ ORDER BY ss1.clazz,ss1.score desc;
 
 使用 `LIMIT` 来直接在 SQL 查询中获取每个组（例如每个班级）的前三名记录通常不那么直接，因为 `LIMIT` 通常适用于整个查询结果的限制，而不是按组分别限制。但是，可以通过结合使用窗口函数（如 `ROW_NUMBER()` 或 `RANK()`）来实拟实现每组的 `LIMIT` 功能。
 
-
+### 每名学生的TOP3的课程和分数
 
 ```sql
 SELECT stu_name,clazz,score
@@ -40,6 +40,20 @@ WHERE rk<=3;
 ```
 
 这个查询首先按照学生的id分组，然后在每个分组内按照成绩降序进行排名。使用了DENSE_RANK()函数，以处理成绩相同时不跳过相同排名的情况，从而确保每名学生都能取到TOP3的课程和分数。
+
+
+
+### 表中查找每门学科成绩最高的学生
+
+```sql
+SELECT student_name, subject_name, score
+FROM students_scores
+WHERE (subject_name, score) IN (
+    SELECT subject_name, MAX(score)
+    FROM students_scores
+    GROUP BY subject_name
+);
+```
 
 
 
