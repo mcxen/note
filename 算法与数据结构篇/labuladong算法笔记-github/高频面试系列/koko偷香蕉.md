@@ -1,9 +1,5 @@
 # 如何运用二分查找算法
 
-
-
-
-
 读完本文，你不仅学会了算法套路，还可以顺便去 LeetCode 上拿下如下题目：
 
 [875.爱吃香蕉的珂珂](https://leetcode-cn.com/problems/koko-eating-bananas)
