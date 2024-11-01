@@ -2,9 +2,7 @@
 
 ## Docker指令
 
-### 帮助命令
-
-
+### 安装命令
 
 ```sh
 docker version # 显示 Docker 版本信息。
@@ -20,7 +18,18 @@ docker --help # 帮助
 
 列出本地主机上的镜像
 
-![image-20210603161520609](https://gcore.jsdelivr.net/gh/oddfar/static/img/Docker.assets/06.Docker-常用命令.assets/image-20210603161520609.png)
+![image-20241101093227953](assets/Docker操作/image-20241101093227953.png)
+
+> 检查当前所有Docker下载的镜像
+
+```undefined
+docker images
+
+[root@localhost ~]# docker images
+REPOSITORY             TAG       IMAGE ID       CREATED      SIZE
+dockerpull.com/mysql   8.0       03a8d6b00bce   5 days ago   590MB
+
+```
 
 **解释：**
 
@@ -34,9 +43,13 @@ docker --help # 帮助
 
 - SIZE 镜像大小
 
-
-
 同一个仓库源可以有多个 TAG，代表这个仓库源的不同版本，我们使用 `REPOSITORY:TAG` 定义不同的镜像，如果你不定义镜像的标签版本，docker将默认使用 lastest 镜像！
+
+ **修改Repository名字**
+
+```bash
+docker tag 03a8d6b00bce  mysql:8.0
+```
 
 #### docker search
 
@@ -72,9 +85,7 @@ docker search mysql --filter=stars=1000
 
 
 
-#### docker pull
-
-下载镜像
+#### docker pull 下载镜像
 
 不写tag，默认是latest
 
@@ -87,6 +98,23 @@ docker pull mysql
 ```sh
 docker pull mysql:5.7
 ```
+
+这里无法正确拉去Mysql，直接使用代理：
+
+```bash
+docker pull dockerpull.com/mysql:8.0
+
+//使用镜像拉去mysql
+假如拉取原始镜像命令如下
+
+docker pull whyour/qinglong:latest
+
+仅需在原命令前缀加入加速镜像地址 例如：
+
+docker pull dockerpull.com/whyour/qinglong:latest
+```
+
+
 
 #### docker rmi
 
@@ -512,8 +540,7 @@ Options:
 ```sh
 mcxw@mcxAir ~ % docker search mysql
 NAME                            DESCRIPTION                                      STARS     OFFICIAL   AUTOMATED
-mysql                           MySQL is a widely used, open-source relation…   14168     [OK]       
-
+mysql                           MySQL is a widely used, open-source relation…   14168     [OK]  
 
 mcxw@mcxAir ~ % docker pull mysql:8.0.31
 8.0.31: Pulling from library/mysql

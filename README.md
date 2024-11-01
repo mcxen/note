@@ -1,7 +1,4 @@
-
-每日笔记
-
-### 笔记软件设置存档
+### Note仓库设置
 
 #### Obsidian设置
 
@@ -22,6 +19,22 @@
 ```
 
 ### Git 设置
+
+#### Windows拉去Git代理失效
+
+开启Clash后，设置两个代理
+
+```py
+git config --global http.proxy http://127.0.0.1:7890
+git config --global https.proxy http://127.0.0.1:7890
+```
+
+#### 用户设置
+
+```bash
+git config --global user.email "imsalt@icloud.com"
+git config --global user.name "mcxtx"
+```
 
 #### 一键Push
 
@@ -65,6 +78,23 @@ git config --global i18n.logoutputencoding utf-8
 5. 设置控制台字体
 
 有时问题出在控制台的字体上，确保使用支持UTF-8的字体，比如Consolas。
+
+#### Git拉取报错
+
+**“unable to create file ...: Invalid argument” 错误**：这个错误是因为文件名中包含特殊字符，Windows 系统不支持这些字符，导致文件无法创建。例如，文件名中的冒号 `:` 等字符在 Windows 文件系统中是非法字符。解决这个问题的方法是：
+
+- 可以在 Linux 或 macOS 环境中操作这些文件，或者
+- 如果一定要在 Windows 中恢复这些文件，建议在 Git 中设置自动转换非法字符的选项。
+
+你可以尝试如下命令来自动替换非法字符：
+
+```
+git config core.protectNTFS false
+```
+
+或者，使用工具脚本来批量重命名文件。
+
+> 我的办法是直接网站上找到对应得非法字符进行修改之后，再进行拉取
 
 ### Github CodeSpace配置
 
