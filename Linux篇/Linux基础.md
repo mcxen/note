@@ -2750,7 +2750,7 @@ rpm 执行安装包
 -f, --file            query/verify package(s) owning file
 ```
 
-### YUM
+### YUM-Centos
 
 #### yum常用命令
 
@@ -2771,7 +2771,7 @@ rpm 执行安装包
 
 使用 yum 安装软件时至少需要一个 yum 源。yum 源既可以使用网络 yum 源，也可以将本地光盘作为 yum 源。接下来就给大家介绍这两种 yum 源的搭建方式。
 
-**网络 yum 源搭建**
+#### **网络 yum 源搭建**
 
 一般情况下，只要你的主机网络正常，可以直接使用网络 yum 源，不需要对配置文件做任何修改，这里对 yum 源配置文件做一下简单介绍。
 
@@ -3140,12 +3140,12 @@ hello-world         latest              bf756fb1ae65        6 months ago        
 [root@ali-icanci bin]#
 ```
 
-### Mysql安装
+### Mysql 5.7安装
 
 ```sh
 rpm -Uvh  http://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm 安装
 
-yum -y install mysql-community-server --nogpgcheck   一键安装
+yum -y install mysql-community-server --nogpgcheck   一键安装5.7#更换完了网易云的网络元快多了
 
 systemctl status mysqld		查看mysql服务状态
 systemctl start mysqld		启动mysql服务
@@ -3157,6 +3157,7 @@ ps –ef | grep mysql			查看mysql进程
 
 grep 'temp' /var/log/mysqld.log
 s?r&po_8+pRw
+w!)f+#tBs9AW
 mysql -u root –p		登录mysql（使用临时密码登录）
 
 \#修改密码
@@ -3166,12 +3167,252 @@ set global validate_password_length=4;		设置密码长度最低位数
 set global validate_password_policy=LOW;		设置密码安全等级低，便于密码可以修改成root
 
 set password = password('root');		设置密码为root
-
+set password = password('Mysql2486');
 \#开启访问权限
 
 grant all on *.* to 'root'@'%' identified by 'root';
-
+grant all on *.* to 'root'@'%' identified by 'Mysql2486';
 flush privileges;
+```
+
+
+
+#### 卸载Mysql5.7
+
+1、关闭MySQL服务
+
+```csharp
+[root@VM_0_8_centos ~]# systemctl stop mysqld
+```
+
+2、使用 rpm 命令查看已安装的安装包
+
+```csharp
+[root@VM_0_8_centos ~]# rpm -qa|grep mysql
+mysql-community-libs-5.7.29-1.el7.x86_64
+mysql-community-common-5.7.29-1.el7.x86_64
+mysql-community-client-5.7.29-1.el7.x86_64
+mysql-community-server-5.7.29-1.el7.x86_64
+mysql57-community-release-el7-11.noarch
+```
+
+3、使用yum卸载安装的mysql
+
+```graphql
+[root@VM_0_8_centos ~]# yum remove  mysql mysql-server mysql-libs mysql-server
+```
+
+4、查询剩余的安装包
+
+```csharp
+[root@VM_0_8_centos ~]# rpm -qa|grep mysql
+mysql-community-common-5.7.29-1.el7.x86_64
+mysql57-community-release-el7-11.noarch
+    
+[root@localhost ~]# rpm -qa|grep mysql
+mysql-community-common-5.7.44-1.el7.x86_64
+mysql57-community-release-el7-9.noarch
+
+```
+
+5、移除掉这些安装包
+
+```csharp
+[root@VM_0_8_centos ~]# rpm -ev mysql-community-common-5.7.44-1.el7.x86_64
+软件包准备中...
+mysql-community-common-5.7.29-1.el7.x86_64
+[root@VM_0_8_centos ~]# rpm -ev mysql57-community-release-el7-9.noarch
+软件包准备中...
+mysql57-community-release-el7-11.noarch
+```
+
+6、检查残余安装包
+
+```sql
+[root@VM_0_8_centos ~]# ls
+mysql57-community-release-el7-11.noarch.rpm   Python-3.7.1.tar.xz.1  wget-log
+mysql80-community-release-el7-3.noarch.rpm    usr
+mysql80-community-release-el7-3.noarch.rpm.1  vim
+```
+
+7、删除残余的安装包
+
+```csharp
+[root@VM_0_8_centos ~]# rm -rf mysql*
+```
+
+8、继续查找是否还有残留文件
+
+```bash
+[root@VM_0_8_centos ~]# find / -name mysql
+/var/lib/mysql
+/var/lib/mysql/mysql
+/usr/share/mysql
+```
+
+9、移除这些残留文件
+
+```csharp
+[root@VM_0_8_centos ~]# rm -rf /var/lib/mysql
+[root@VM_0_8_centos ~]# rm -rf /var/lib/mysql/mysql
+[root@VM_0_8_centos ~]# rm -rf /usr/share/mysql
+```
+
+10、最后的检查
+
+```perl
+[root@VM_0_8_centos ~]# rpm -qa|grep mysql
+[root@VM_0_8_centos ~]# find / -name mysql
+[root@VM_0_8_centos ~]# ls
+Python-3.7.1.tar.xz.1  usr  vim  wget-log
+```
+
+
+
+### Mysql8.0安装
+
+1.下载mysql8到/opt目录
+
+```
+[root@wscyun ~]# cd /opt/
+[root@wscyun opt]# yum install wget -y && wget https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.33-1.el7.x86_64.rpm-bundle.tar
+```
+
+2.解压 mysql-8.0.33-1.el7.x86_64.rpm-bundle.tar
+
+```
+[root@wscyun opt]# tar -xvf mysql-8.0.33-1.el7.x86_64.rpm-bundle.tar 
+mysql-community-client-8.0.33-1.el7.x86_64.rpm
+mysql-community-client-plugins-8.0.33-1.el7.x86_64.rpm
+mysql-community-common-8.0.33-1.el7.x86_64.rpm
+mysql-community-debuginfo-8.0.33-1.el7.x86_64.rpm
+mysql-community-devel-8.0.33-1.el7.x86_64.rpm
+mysql-community-embedded-compat-8.0.33-1.el7.x86_64.rpm
+mysql-community-icu-data-files-8.0.33-1.el7.x86_64.rpm
+mysql-community-libs-8.0.33-1.el7.x86_64.rpm
+mysql-community-libs-compat-8.0.33-1.el7.x86_64.rpm
+mysql-community-server-8.0.33-1.el7.x86_64.rpm
+mysql-community-server-debug-8.0.33-1.el7.x86_64.rpm
+mysql-community-test-8.0.33-1.el7.x86_64.rpm
+```
+
+3.安装 community-common
+
+```
+[root@wscyun opt]# rpm -ivh --nodeps --force mysql-community-common-8.0.33-1.el7.x86_64.rpm
+警告：mysql-community-common-8.0.33-1.el7.x86_64.rpm: 头V4 RSA/SHA256 Signature, 密钥 ID 3a79bd29: NOKEY
+准备中...                          ################################# [100%]
+正在升级/安装...
+   1:mysql-community-common-8.0.33-1.e################################# [100%]
+```
+
+4.安装 community-libs
+
+```
+[root@wscyun opt]# rpm -ivh --nodeps --force mysql-community-libs-8.0.33-1.el7.x86_64.rpm 
+警告：mysql-community-libs-8.0.33-1.el7.x86_64.rpm: 头V4 RSA/SHA256 Signature, 密钥 ID 3a79bd29: NOKEY
+准备中...                          ################################# [100%]
+正在升级/安装...
+   1:mysql-community-libs-8.0.33-1.el7################################# [100%]
+```
+
+5.安装 community-client
+
+```
+[root@wscyun opt]# rpm -ivh --nodeps --force mysql-community-client-8.0.33-1.el7.x86_64.rpm 
+警告：mysql-community-client-8.0.33-1.el7.x86_64.rpm: 头V4 RSA/SHA256 Signature, 密钥 ID 3a79bd29: NOKEY
+准备中...                          ################################# [100%]
+正在升级/安装...
+   1:mysql-community-client-8.0.33-1.e################################# [100%]
+```
+
+6.安装 community-server
+
+```
+[root@wscyun opt]# rpm -ivh --nodeps --force mysql-community-server-8.0.33-1.el7.x86_64.rpm 
+警告：mysql-community-server-8.0.33-1.el7.x86_64.rpm: 头V4 RSA/SHA256 Signature, 密钥 ID 3a79bd29: NOKEY
+准备中...                          ################################# [100%]
+正在升级/安装...
+   1:mysql-community-server-8.0.33-1.e################################# [100%]
+```
+
+**初始化mysql8**
+
+1.初始化
+
+```
+[root@wscyun opt]# mysqld --initialize;
+[root@wscyun opt]# chown mysql:mysql /var/lib/mysql -R;
+[root@wscyun opt]# systemctl start mysqld
+[root@wscyun opt]# systemctl enable mysqld
+```
+
+2.查看mysql8默认密码
+
+```
+[root@wscyun opt]# cat /var/log/mysqld.log | grep password
+2023-07-12T09:42:25.399819Z 6 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: X9uGe7k=uYZu
+使用这条命令直接过滤到密码
+[root@wscyun opt]# cat /var/log/mysqld.log | grep password |awk -F ": " '{print $2}'
+X9uGe7k=uYZu
+
+
+uZOMv7S?hm2f
+```
+
+修改mysql默认密码
+
+```bash
+[root@localhost opt]# mysql -uroot -p
+Enter password: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 9
+Server version: 8.0.33
+
+Copyright (c) 2000, 2023, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> 
+
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'Mysql2486';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> exit
+Bye
+[root@wscyun opt]# 
+```
+
+设置远程访问授权
+
+```bash
+[root@wscyun opt]# mysql -uroot -pMysql2486
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 9
+Server version: 8.0.33 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2023, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+# 设置远程访问
+mysql> create user 'root'@'%' identified with mysql_native_password by 'Mysql2486';
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> grant all privileges on *.* to 'root'@'%' with grant option;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> flush privileges;
+Query OK, 0 rows affected (0.00 sec)
 ```
 
 

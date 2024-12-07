@@ -143,6 +143,22 @@ docker pull centos
 
 
 
+#### 容器启动失败
+
+
+
+```cmd
+Run 'docker image COMMAND --help' for more information on a command.
+[root@localhost ~]# docker ps
+Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+
+
+service docker start 
+
+```
+
+
+
 **容器启动**
 
 ```sh
@@ -818,4 +834,14 @@ master_log_pos=157;
 
 
 
+
+### Mysql从Centos启动
+
+```bash
+service start docker,启动docker
+docker images
+docker start mysql
+
+本地电脑连接ip
+```
 
