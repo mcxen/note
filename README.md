@@ -32,8 +32,8 @@ git config --global https.proxy http://127.0.0.1:7890
 #### 用户设置
 
 ```bash
-git config --global user.email "imsalt@icloud.com"
-git config --global user.name "mcxtx"
+git config --global user.email "imsal"
+git config --global user.name ""
 ```
 
 #### 一键Push
